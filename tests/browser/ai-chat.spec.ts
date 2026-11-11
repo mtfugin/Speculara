@@ -1,6 +1,7 @@
 import { test, expect } from "@playwright/test";
 
 test("AI answers are hidden unless the server enables them", async ({ page }) => {
+  await page.route("**/api/health", (route) => route.fulfill({ json: { status: "ok", ai: false } }));
   await page.goto("/");
   await page.getByRole("button", { name: "Open chat", exact: true }).click();
   await expect(page.getByRole("dialog").getByText("Use AI answers")).toHaveCount(0);

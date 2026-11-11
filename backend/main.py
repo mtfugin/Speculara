@@ -4,7 +4,23 @@ No external AI calls unless the server owner sets ENABLE_AI_CHAT=1 and GEMMA_API
 (see backend/ai_chat.py). Even then the browser only uses it when the person turns it on.
 """
 import os
+from pathlib import Path
 from pydantic import BaseModel, Field
+
+
+def _load_local_env():
+    """Read backend/.env (git-ignored) into the environment without overriding real settings."""
+    path = Path(__file__).with_name('.env')
+    if not path.is_file():
+        return
+    for line in path.read_text(encoding='utf-8-sig').splitlines():
+        line = line.strip()
+        if line and not line.startswith('#') and '=' in line:
+            key, _, value = line.partition('=')
+            os.environ.setdefault(key.strip(), value.strip().strip('"\''))
+
+
+_load_local_env()
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import Response

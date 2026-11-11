@@ -1306,7 +1306,7 @@ function Chat() {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ message: t, analysis: summary }),
-          signal: AbortSignal.timeout(45000),
+          signal: AbortSignal.timeout(130000),
         });
         if (!response.ok) throw new Error("ai");
         const { answer: aiAnswer } = await response.json();
@@ -1356,6 +1356,21 @@ function Chat() {
         >
           <div className="flex shrink-0 items-center justify-between px-3">
             <p className="font-display font-bold text-ink">Ask Speculara</p>
+            {aiAvailable && (
+              <label className="ml-auto mr-1 flex min-h-11 items-center gap-1.5 text-sm font-semibold text-ink">
+                <input
+                  type="checkbox"
+                  checked={aiOn}
+                  onChange={(e) => setAiOn(e.target.checked)}
+                  aria-describedby="ai-note"
+                  className="h-5 w-5 accent-[var(--color-ink)]"
+                />
+                Use AI answers
+                <span id="ai-note" className="sr-only">
+                  {aiOn ? "On: a summary of your results is sent to Google." : "Off: nothing leaves this app."}
+                </span>
+              </label>
+            )}
             <button
               onClick={close}
               aria-label="Close chat"
@@ -1385,23 +1400,10 @@ function Chat() {
               </div>
             )}
           </div>
-          {aiAvailable && (
-            <div className="mx-3 mt-2 shrink-0 text-sm">
-              <label className="flex min-h-11 items-center gap-2 font-semibold text-ink">
-                <input
-                  type="checkbox"
-                  checked={aiOn}
-                  onChange={(e) => setAiOn(e.target.checked)}
-                  className="h-5 w-5 accent-[var(--color-ink)]"
-                />
-                Use AI answers
-              </label>
-              <p className="text-slate-600">
-                {aiOn
-                  ? "A summary of your results (totals, relationships, forecasts) is sent to Google to write each answer. Your rows, post links and comments are not sent."
-                  : "Off: answers are built in and nothing leaves this app."}
-              </p>
-            </div>
+          {aiAvailable && aiOn && (
+            <p className="mx-3 mt-1 shrink-0 text-sm text-slate-600">
+              A summary of your results (totals, relationships, forecasts) is sent to Google to write each answer. Your rows, post links and comments are not sent.
+            </p>
           )}
           <div
             role="group"

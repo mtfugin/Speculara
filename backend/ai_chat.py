@@ -81,8 +81,11 @@ async def answer(message: str, analysis: dict) -> str:
     }
     url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent"
     try:
-        async with httpx.AsyncClient(timeout=40) as client:
-            response = await client.post(url, headers={"x-goog-api-key": os.environ["GEMMA_API_KEY"]}, json=body)
+        async with httpx.AsyncClient(timeout=60) as client:
+            for attempt in range(2):  # the service sometimes returns a one-off 5xx; retry once
+                response = await client.post(url, headers={"x-goog-api-key": os.environ["GEMMA_API_KEY"]}, json=body)
+                if response.status_code < 500:
+                    break
     except httpx.RequestError:
         raise AIUnavailable("Cannot reach the AI service. Try again.") from None
     if response.status_code in (401, 403):
