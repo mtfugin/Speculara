@@ -1,3 +1,11 @@
+/** Axis top that splits into four round steps (1, 2, 2.5, 5 x 10^n) and leaves a little headroom. */
+export function niceMax(value: number) {
+  const target = Math.max(value, Number.MIN_VALUE) * 1.05 / 4;
+  const power = 10 ** Math.floor(Math.log10(target));
+  const step = [1, 2, 2.5, 5, 10].map((m) => m * power).find((s) => s >= target)!;
+  return step * 4;
+}
+
 /** Display-only ticks: exact labels and every value stay with their bars and tables. */
 export function chartTicks(labels: string[], dates: boolean, width: number) {
   const count = Math.min(labels.length, Math.max(2, Math.floor(width / 64)));

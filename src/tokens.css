@@ -3,6 +3,7 @@
   --color-ink: #29348f;
   --color-mist: #f1f5f9;
   --color-sky: #38bdf8;
+  --color-sky-deep: #0284c7;
   --color-cream: #f9f5f1;
   --color-wine: #8f2934;
   --color-white: #ffffff;
@@ -31,7 +32,7 @@
   --color-focus: #29348f;
   --color-chart-grid: #cbd3dd;
   --color-chart-primary: #29348f;
-  --color-chart-secondary: #38bdf8;
+  --color-chart-secondary: #0284c7;
   --shadow-raised: 9px 9px 18px #cbd3dd, -9px -9px 18px #ffffff;
   --shadow-small: 5px 5px 10px #cbd3dd, -5px -5px 10px #ffffff;
   --shadow-inset: inset 5px 5px 10px #cbd3dd, inset -5px -5px 10px #ffffff;
@@ -45,5 +46,8 @@
   --motion-fast: 150ms;
   --motion-arrive: 420ms;
   --motion-select: 220ms;
+  --motion-exit: 160ms;
+  --motion-stagger: 30ms;
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
   --color-slate-600: var(--color-text-secondary);
 }

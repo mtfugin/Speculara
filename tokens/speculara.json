@@ -27,6 +27,15 @@
         }
       }
     },
+    "sky-deep": {
+      "$type": "color",
+      "$value": "#0284c7",
+      "$extensions": {
+        "speculara": {
+          "css": "--color-sky-deep"
+        }
+      }
+    },
     "cream": {
       "$type": "color",
       "$value": "#f9f5f1",
@@ -292,7 +301,7 @@
       },
       "secondary": {
         "$type": "color",
-        "$value": "{palette.sky}",
+        "$value": "{palette.sky-deep}",
         "$extensions": {
           "speculara": {
             "css": "--color-chart-secondary"
@@ -446,6 +455,39 @@
       "$extensions": {
         "speculara": {
           "css": "--motion-select"
+        }
+      }
+    },
+    "exit": {
+      "$type": "duration",
+      "$value": {
+        "value": 160,
+        "unit": "ms"
+      },
+      "$extensions": {
+        "speculara": {
+          "css": "--motion-exit"
+        }
+      }
+    },
+    "stagger": {
+      "$type": "duration",
+      "$value": {
+        "value": 30,
+        "unit": "ms"
+      },
+      "$extensions": {
+        "speculara": {
+          "css": "--motion-stagger"
+        }
+      }
+    },
+    "ease-out": {
+      "$type": "string",
+      "$value": "cubic-bezier(0.22, 1, 0.36, 1)",
+      "$extensions": {
+        "speculara": {
+          "css": "--ease-out"
         }
       }
     }

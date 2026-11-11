@@ -63,16 +63,60 @@
   to { opacity: 1; transform: translateY(0); }
 }
 
+/* No overshoot: everyday UI settles instead of bouncing. */
 @keyframes selection-pop {
   0% { transform: scale(0.98); }
-  60% { transform: scale(1.02); }
   100% { transform: scale(1); }
+}
+@keyframes popover-in {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+@keyframes popover-out {
+  from { opacity: 1; transform: scale(1); }
+  to { opacity: 0; transform: scale(0.95); }
+}
+@keyframes bar-grow {
+  from { transform: scaleY(0); }
+  to { transform: scaleY(1); }
+}
+@keyframes skeleton-pulse {
+  0%, 100% { opacity: 0.55; }
+  50% { opacity: 1; }
 }
 
 @layer components {
-  .result-arrive { animation: result-arrive var(--motion-arrive) ease-out both; }
-  .selection-pop { animation: selection-pop var(--motion-select) ease-out both; }
+  .result-arrive { animation: result-arrive var(--motion-arrive) var(--ease-out) both; }
+  .selection-pop { animation: selection-pop var(--motion-select) var(--ease-out) both; }
+  /* Rows reveal ~30ms apart; the index is capped so long lists never feel slow. */
+  .stagger-in {
+    animation: result-arrive var(--motion-arrive) var(--ease-out) both;
+    animation-delay: calc(min(var(--i, 0), 8) * var(--motion-stagger));
+  }
+  /* Bars grow from the baseline with transform only (no layout animation). */
+  .bar-grow {
+    transform-origin: bottom;
+    animation: bar-grow var(--motion-arrive) var(--ease-out) both;
+    animation-delay: calc(min(var(--i, 0), 12) * var(--motion-stagger));
+  }
+  /* Chat opens from, and closes toward, its launcher at the bottom right. */
+  .popover-in {
+    transform-origin: bottom right;
+    animation: popover-in var(--motion-select) var(--ease-out) both;
+  }
+  .popover-out {
+    transform-origin: bottom right;
+    animation: popover-out var(--motion-exit) var(--ease-out) both;
+  }
+  .skeleton-pulse { animation: skeleton-pulse 1.4s ease-in-out infinite; }
+  .skeleton-bar { border-radius: 0.5rem; background: var(--color-track); }
+  .neu-sm {
+    transition: transform var(--motion-fast) var(--ease-out), box-shadow var(--motion-fast) var(--ease-out);
+  }
+  .neu-sm:active:not(:disabled) { transform: scale(0.97); }
+  .tabular { font-variant-numeric: tabular-nums; }
 }
+h1, h2, h3 { text-wrap: balance; }
 @layer components {
   .neu-scroll {
     scrollbar-width: thin;
@@ -115,6 +159,7 @@
   th,
   td {
     padding-inline-end: 12px;
+    font-variant-numeric: tabular-nums;
   }
   .skip-link {
     position: fixed;

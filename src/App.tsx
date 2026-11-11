@@ -18,7 +18,7 @@ import {
   type Metric,
 } from "./analysis";
 
-import { chartTicks } from "./chart-presentation";
+import { chartTicks, niceMax } from "./chart-presentation";
 
 import { moduleInfo, updatedLabel, priorityLabel, type ModuleKey } from "./polish";
 
@@ -183,7 +183,7 @@ const Well = ({ children, className = "" }: { children: ReactNode; className?: s
 const H = ({ children, sub }: { children: ReactNode; sub?: string }) => (
   <div className="mb-3">
     <h3 className="font-display text-lg font-bold text-ink">{children}</h3>
-    {sub && <p className="text-xs text-slate-600">{sub}</p>}
+    {sub && <p className="text-sm text-slate-600">{sub}</p>}
   </div>
 );
 
@@ -197,7 +197,7 @@ function Pills<T extends string>({
   onChange: (v: T) => void;
 }) {
   return (
-    <div className="-mx-1 flex flex-wrap gap-3 p-2" role="group" aria-label="Analysis options">
+    <div className="-mx-1 flex flex-wrap gap-2 p-2 sm:gap-3" role="group" aria-label="Analysis options">
       {items.map((i) => (
         <button
           key={i}
@@ -327,6 +327,7 @@ function BarChart({
     <div
       role="img"
       aria-label={`${label}. Highest ${labels[values.indexOf(top)]}: ${fmt(top)}. ${labels.map((l, i) => `${l}: ${values[i]}`).join("; ")}`}
+      className="tabular"
       style={{ fontSize: "var(--font-size-chart-label)" }}
     >
       <div className="flex gap-2">
@@ -355,8 +356,9 @@ function BarChart({
                   <span className="mb-1 font-semibold text-ink">{fmt(v)}</span>
                 )}
                 <div
-                  className="w-full rounded-t-lg transition-all duration-500"
+                  className="bar-grow w-full rounded-t-lg"
                   style={{
+                    ["--i" as string]: i,
                     height: `${(v / max) * 100}%`,
                     background:
                       v === top
@@ -442,7 +444,7 @@ function Predict() {
               values={f.points.map((p) => p.value)}
               labels={f.points.map((p) => p.label)}
               dateLabels
-              max={Math.max(1, ...f.points.map((p) => p.value)) * 1.2}
+              max={niceMax(Math.max(1, ...f.points.map((p) => p.value)))}
               fmt={(v) =>
                 new Intl.NumberFormat(undefined, {
                   notation: "compact",
@@ -608,7 +610,7 @@ function Recommend() {
     <Card label="Recommendations results">
       <H sub="Small steps you can test, based on your data.">Your next decisions</H>
       <ModuleBrief module="recommend" />
-      <p className="mb-3 text-xs text-slate-600">Suggested order to try, not predicted impact.</p>
+      <p className="mb-3 text-sm text-slate-600">Suggested order to try, not predicted impact.</p>
       <ol className="space-y-4">
         {a.recommend.slice(0, 3).map((item, index) => (
           <RecommendationItem key={item.title} item={item} index={index} />
@@ -762,7 +764,7 @@ function Charts() {
                     values={shown.map((r) => r[metric]!)}
                     labels={shown.map((r) => r.label)}
                     dateLabels={group === "date"}
-                    max={Math.max(1, ...shown.map((r) => r[metric]!)) * 1.2}
+                    max={niceMax(Math.max(1, ...shown.map((r) => r[metric]!)))}
                     fmt={(v) =>
                       new Intl.NumberFormat(undefined, {
                         notation: "compact",
@@ -771,7 +773,7 @@ function Charts() {
                     }
                     label={`${metric} by ${group}`}
                   />
-                  <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+                  <div className="mt-4 flex flex-wrap items-center justify-between gap-3 pr-16">
                     <button
                       className="neu-sm min-h-11 rounded-xl px-4"
                       disabled={page === 0}
@@ -779,7 +781,7 @@ function Charts() {
                     >
                       Previous
                     </button>
-                    <span className="text-xs">
+                    <span className="text-sm">
                       Page {page + 1} of {Math.max(1, Math.ceil(rows.length / pageSize))}
                     </span>
                     <button
@@ -836,6 +838,52 @@ function Charts() {
     </Card>
   );
 }
+/* Strength meter (0 to 3 steps) and direction icon; always paired with words, never color alone. */
+const DIRECTION_TEXT: Record<string, string> = {
+  "Move together": "Rise and fall together",
+  "Move in opposite directions": "One rises as the other falls",
+  "No clear pattern": "No link found",
+};
+function strengthSteps(r: number) {
+  const m = Math.abs(r);
+  return m < 0.3 ? 0 : m < 0.5 ? 1 : m < 0.7 ? 2 : 3;
+}
+function StrengthMeter({ steps, label }: { steps: number; label: string }) {
+  return (
+    <span className="inline-flex items-center gap-2">
+      <span role="img" aria-label={`Strength ${steps} of 3`} className="inline-flex gap-1">
+        {[1, 2, 3].map((i) => (
+          <span
+            key={i}
+            className="h-2.5 w-6 rounded-full border border-ink/40"
+            style={{ background: i <= steps ? "var(--color-ink)" : "transparent" }}
+          />
+        ))}
+      </span>
+      <span className="text-sm font-semibold text-slate-700">{label}</span>
+    </span>
+  );
+}
+function DirectionIcon({ r }: { r: number }) {
+  const flat = Math.abs(r) < 0.3;
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      {flat ? (
+        <path d="M5 12h14" />
+      ) : r < 0 ? (
+        <>
+          <path d="M7 7l10 10" />
+          <path d="M17 8v9H8" />
+        </>
+      ) : (
+        <>
+          <path d="M7 17L17 7" />
+          <path d="M8 7h9v9" />
+        </>
+      )}
+    </svg>
+  );
+}
 function Correlation() {
   const a = useAnalysis();
   const [mode, setMode] = useState("All connections");
@@ -844,21 +892,26 @@ function Correlation() {
       mode === "All connections" ||
       (mode === "Strong connections" ? Math.abs(p.r) >= 0.7 : p.r <= -0.3),
   );
-  const renderPair = (p: Analysis["correlation"][number]) => {
+  const renderPair = (p: Analysis["correlation"][number], index: number) => {
     const summary = relationshipSummary(p);
     return (
-      <li key={p.a + p.b} className="neu-in rounded-2xl p-4">
-        <div className="flex flex-wrap justify-between gap-2">
-          <b className="text-ink">
-            {calculationLabel(p.a)} and {p.b}
-          </b>
-          <span className="text-sm text-slate-600">{summary.strength}</span>
+      <li key={p.a + p.b} className="neu-in stagger-in tabular rounded-2xl p-4" style={{ ["--i" as string]: index }}>
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <span className="inline-flex items-center gap-2 text-sm font-semibold text-ink">
+            <DirectionIcon r={p.r} />
+            {DIRECTION_TEXT[summary.direction] ?? summary.direction}
+          </span>
+          <StrengthMeter steps={strengthSteps(p.r)} label={summary.strength} />
         </div>
-        {summary.direction !== summary.strength && (
-          <p className="mt-2 font-semibold text-ink">{summary.direction}</p>
+        <p className="mt-3 font-display text-base font-semibold text-ink">{summary.finding}</p>
+        <p className="mt-1 text-sm text-slate-600">
+          {calculationLabel(p.a)} and {p.b}
+        </p>
+        {p.n < 10 && (
+          <p className="mt-2 inline-block rounded-full bg-ink/10 px-3 py-1 text-sm font-semibold text-ink">
+            {summary.note}
+          </p>
         )}
-        <p className="mt-2 text-sm text-slate-700">{summary.finding}</p>
-        {p.n < 10 && <p className="mt-2 text-sm text-slate-600">{summary.note}</p>}
         {p.r <= -0.3 && (
           <p className="mt-2 text-sm text-slate-600">Opposite movement is not automatically bad.</p>
         )}
@@ -886,13 +939,13 @@ function Correlation() {
       />
       {pairs.length ? (
         <>
-          <ul className="space-y-3">{pairs.slice(0, 3).map(renderPair)}</ul>
+          <ul className="space-y-3">{pairs.slice(0, 3).map((p, i) => renderPair(p, i))}</ul>
           {pairs.length > 3 && (
             <details className="mt-4 text-sm">
               <summary className="min-h-[var(--size-target)] content-center rounded-lg py-2 font-semibold text-ink">
                 More connections
               </summary>
-              <ul className="mt-3 space-y-3">{pairs.slice(3).map(renderPair)}</ul>
+              <ul className="mt-3 space-y-3">{pairs.slice(3).map((p, i) => renderPair(p, i))}</ul>
             </details>
           )}
         </>
@@ -1046,18 +1099,26 @@ function Chat() {
   const messages = useRef<HTMLDivElement>(null);
   const input = useRef<HTMLInputElement>(null);
   const launcher = useRef<HTMLButtonElement>(null);
+  const [closing, setClosing] = useState(false);
+  const closeTimer = useRef<number>(0);
+  /* Exit is shorter than entry (160ms vs 220ms) and heads back toward the launcher. */
   const close = () => {
-    setOpen(false);
     launcher.current?.focus({ preventScroll: true });
+    setClosing(true);
+    window.clearTimeout(closeTimer.current);
+    closeTimer.current = window.setTimeout(() => {
+      setOpen(false);
+      setClosing(false);
+    }, 160);
   };
+  useEffect(() => () => window.clearTimeout(closeTimer.current), []);
   useEffect(() => {
     if (!open) return;
     input.current?.focus({ preventScroll: true });
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
         event.preventDefault();
-        setOpen(false);
-        launcher.current?.focus({ preventScroll: true });
+        close();
       }
     };
     document.addEventListener("keydown", onKeyDown);
@@ -1100,7 +1161,7 @@ function Chat() {
         <div
           role="dialog"
           aria-label="Ask about your analysis"
-          className="neu flex h-[min(30rem,calc(100dvh-6rem))] w-[calc(100vw-2rem)] flex-col overflow-hidden rounded-3xl sm:w-96"
+          className={`neu flex h-[min(30rem,calc(100dvh-6rem))] w-[calc(100vw-2rem)] flex-col overflow-hidden rounded-3xl sm:w-96 ${closing ? "popover-out" : "popover-in"}`}
         >
           <div className="flex shrink-0 items-center justify-between px-3">
             <p className="font-display font-bold text-ink">Ask Speculara</p>
@@ -1162,7 +1223,14 @@ function Chat() {
       )}
       <button
         ref={launcher}
-        onClick={() => (open ? close() : setOpen(true))}
+        onClick={() => {
+          if (open) close();
+          else {
+            window.clearTimeout(closeTimer.current);
+            setClosing(false);
+            setOpen(true);
+          }
+        }}
         aria-label={open ? "Close chat" : "Open chat"}
         aria-expanded={open}
         className="neu-btn grid h-14 w-14 place-items-center rounded-full text-white"
@@ -1364,10 +1432,7 @@ export default function App() {
         <main id="main" className="mx-auto max-w-5xl px-4 sm:px-5">
           <section className="grid items-center gap-8 py-8 md:grid-cols-[1fr_1.1fr] md:py-10">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-widest text-wine">
-                Ad performance, in focus
-              </p>
-              <h1 className="mt-2 font-display text-3xl font-bold leading-tight text-ink md:text-4xl">
+              <h1 className="font-display text-3xl font-bold leading-tight text-ink md:text-4xl">
                 Turn views, saves, and sales into the next decision.
               </h1>
               <p className="mt-3 max-w-md text-slate-700">
@@ -1398,7 +1463,7 @@ export default function App() {
                   tabIndex={0}
                 >
                   {ORDER.map((k, i) => (
-                    <li key={k} className="snap-center">
+                    <li key={k} className="stagger-in snap-center" style={{ ["--i" as string]: i }}>
                       <button
                         disabled={locked}
                         aria-pressed={picked === k}
@@ -1442,7 +1507,7 @@ export default function App() {
                   }}
                   className="neu-in block min-h-11 min-w-0 w-full rounded-xl p-3 text-sm file:mr-3 file:rounded-lg file:border-0 file:bg-ink file:px-3 file:py-2 file:text-white"
                 />
-                <p id="upload-help" className="mt-2 text-xs text-slate-600">
+                <p id="upload-help" className="mt-2 text-sm text-slate-600">
                   CSV (UTF-8) or XLSX first sheet. Up to 5 MB, 20,000 rows, 50 columns. No account
                   connection required.
                 </p>
@@ -1610,6 +1675,17 @@ export default function App() {
             </div>
           </section>
 
+          {busy && !analysis && (
+            <div aria-hidden="true" className="neu skeleton-pulse mb-6 space-y-3 rounded-3xl p-5">
+              <div className="skeleton-bar h-5 w-2/3" />
+              <div className="skeleton-bar h-4 w-1/2" />
+              <div className="grid grid-cols-3 gap-3">
+                <div className="skeleton-bar h-16" />
+                <div className="skeleton-bar h-16" />
+                <div className="skeleton-bar h-16" />
+              </div>
+            </div>
+          )}
           {analysis && (
             <section
               key={`summary-${revision}-${viewRevision}`}

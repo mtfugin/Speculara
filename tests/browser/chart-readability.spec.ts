@@ -14,6 +14,8 @@ test('phone chart labels, full values and comfortable wrapped controls', async (
     for (const scale of width < 400 ? [1, 1.25] : [1]) {
       await page.evaluate(scale => document.documentElement.style.fontSize = `${16 * scale}px`, scale);
       await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+      // Bounding boxes include transforms, so wait for entrance animations to finish.
+      await page.evaluate(() => Promise.all(document.getAnimations().map(a => a.finished)));
       for (const group of await page.getByRole('group', { name: 'Analysis options', exact: true }).all()) {
         expect(await group.evaluate(el => el.scrollWidth <= el.clientWidth)).toBe(true);
         for (const button of await group.getByRole('button').all()) {

@@ -25,7 +25,7 @@ test("plain findings hide statistics and explain opposite movement in chat", asy
   await page.getByRole("button", { name: "What do you want to get correlation of?" }).click();
   const region = page.getByRole("region", { name: "Correlation results" });
   await expect(
-    region.getByText("Move in opposite directions", { exact: true }).first(),
+    region.getByText("One rises as the other falls", { exact: true }).first(),
   ).toBeVisible();
   await expect(region.getByText(/When views were higher, sales tended to be lower/)).toBeVisible();
   await expect(region.getByText(/Pearson r/).first()).toBeHidden();
