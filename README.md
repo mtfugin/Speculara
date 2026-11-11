@@ -62,7 +62,17 @@ The chat uses fixed rules and sends nothing anywhere. A server owner can add AI-
 
 Only a summary goes to Google: totals, relationships, forecast, counts and recommendations. Uploaded rows, the preview table, post links and comment text are never sent (`backend/ai_chat.py`, covered by `backend/tests/test_ai_chat.py`). If the AI call fails, the chat falls back to the built-in answer. Without the two settings the tick box does not appear and `/api/ai/chat` returns 403.
 
-The larger Gemma backend with the profile collector and Supabase from the imported `backend/app` is separate, is not started by default, and is not connected to this front end. See `backend/README.md` and `backend/requirements-extras.txt`.
+## Optional profile link analysis (off by default, this computer only)
+
+An owner can analyze an Instagram, Facebook or TikTok profile instead of uploading a file. It drives a browser on the same computer, so it is meant for a local run, and it must respect each platform's rules and the account owner's consent.
+
+1. One-time setup: `npm run collector:setup`, then `npm run collector:browser` if Chrome is not installed.
+2. Start the backend with `ENABLE_PROFILE_COLLECTOR=1`. Requests from other computers are refused.
+3. In the app, open **Analyze a profile link**, tick the permission box, sign in inside the browser window that opens (Instagram and Facebook), click **Done signing in**, paste the profile link and analyze.
+
+Collected posts become the same table an upload produces (one row per post, one row per comment with only its text, unknown metrics left blank), so every module, chart, report and the chat work unchanged. Nothing is saved by Speculara, and the sign-in lives in a browser profile under `backend/.socialmonitor`, which is git-ignored. Tests fake the collector; the live collectors have not been exercised in this repository's tests.
+
+The imported `backend/app` API (its own Gemma research, Supabase history and its own endpoints) is still separate and is not started by default; only its collector is reused above. See `backend/README.md` and `backend/requirements-extras.txt`.
 
 ## Verify
 

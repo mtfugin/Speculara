@@ -1,0 +1,95 @@
+import os
+import unittest
+from datetime import datetime, timezone
+from unittest.mock import patch
+
+from fastapi.testclient import TestClient
+
+from backend import profile_import
+from backend.analysis import analyze
+from backend.app import collector
+from backend.app.schemas import CommentEvidence, Post, ProfileInfo
+from backend.main import app
+
+client = TestClient(app)
+
+
+def make_posts(days=16):
+    posts = []
+    for d in range(1, days + 1):
+        posts.append(Post(
+            id=f"p{d}", type="Video" if d % 2 else "Photo",
+            posted_at=datetime(2026, 9, d, 10, tzinfo=timezone.utc),
+            likes=10 + d, comments=2, views=100 + d * 5, url=f"https://www.instagram.com/p/p{d}/",
+            unavailable_metrics=["saves", "sales"],
+            comment_evidence=[CommentEvidence(text="love it, how much?", source_kind="post")],
+        ))
+    return posts
+
+
+class ProfileFrameTests(unittest.TestCase):
+    def test_counts_are_not_repeated_on_comment_rows(self):
+        frame = profile_import.posts_to_frame(make_posts())
+        result = analyze(frame)
+        self.assertEqual(result["totals"]["likes"], sum(10 + d for d in range(1, 17)))
+        self.assertNotIn("sales", result["totals"])  # unknown stays unknown, not zero
+        self.assertNotIn("saves", result["totals"])
+        self.assertEqual(result["sentiment"]["n"], 16)
+
+    def test_unavailable_metric_is_blank(self):
+        post = make_posts(1)[0]
+        post.unavailable_metrics = ["views", "saves", "sales"]
+        frame = profile_import.posts_to_frame([post])
+        self.assertNotIn("views", frame.columns)
+
+    def test_no_posts_is_an_error(self):
+        with self.assertRaises(ValueError):
+            profile_import.posts_to_frame([])
+
+    def test_local_only_rule(self):
+        origins = ["http://localhost:8443"]
+        self.assertTrue(profile_import.is_local_request("127.0.0.1", "http://localhost:8443", origins))
+        self.assertTrue(profile_import.is_local_request("::1", None, origins))
+        self.assertFalse(profile_import.is_local_request("203.0.113.9", None, origins))
+        self.assertFalse(profile_import.is_local_request("127.0.0.1", "https://evil.example", origins))
+
+
+class ProfileRouteTests(unittest.TestCase):
+    def test_off_by_default(self):
+        with patch.dict(os.environ, {}, clear=False):
+            os.environ.pop("ENABLE_PROFILE_COLLECTOR", None)
+            self.assertFalse(client.get("/api/health").json()["profile"])
+            r = client.post("/api/profile/analyze", json={"url": "https://www.instagram.com/someone"})
+            self.assertEqual(r.status_code, 403)
+            self.assertEqual(client.get("/api/profile/status").status_code, 403)
+
+    def test_rejects_non_profile_links_and_other_hosts(self):
+        with patch.dict(os.environ, {"ENABLE_PROFILE_COLLECTOR": "1"}):
+            for bad in ("https://example.com/x", "https://www.instagram.com/p/abc/", "ftp://instagram.com/a"):
+                self.assertEqual(client.post("/api/profile/analyze", json={"url": bad}).status_code, 422, bad)
+
+    def test_enabled_flow_returns_normal_analysis(self):
+        async def fake_collect(url):
+            return ProfileInfo(platform="Instagram", handle="someone", notes="Collected 16 posts."), make_posts()
+
+        with patch.dict(os.environ, {"ENABLE_PROFILE_COLLECTOR": "1"}), \
+             patch.object(collector, "collect_profile", fake_collect):
+            r = client.post("/api/profile/analyze", json={"url": "https://www.instagram.com/someone"})
+        self.assertEqual(r.status_code, 200)
+        data = r.json()
+        self.assertEqual(data["schema_version"], 2)
+        self.assertEqual(data["rows"], 32)
+        self.assertIn("public Instagram profile", data["warnings"][0])
+
+    def test_collector_failure_is_a_clear_error(self):
+        async def boom(url):
+            raise collector.CollectorError("Sign in first.", 401)
+
+        with patch.dict(os.environ, {"ENABLE_PROFILE_COLLECTOR": "1"}), patch.object(collector, "collect_profile", boom):
+            r = client.post("/api/profile/analyze", json={"url": "https://www.instagram.com/someone"})
+        self.assertEqual(r.status_code, 401)
+        self.assertIn("Sign in", r.json()["detail"])
+
+
+if __name__ == "__main__":
+    unittest.main()

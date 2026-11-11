@@ -1085,6 +1085,148 @@ const VIEWS: Record<Key, () => ReactNode> = {
   demand: Demand,
 };
 
+/* ---------- Optional profile link (off unless the server enables it; this computer only) ---------- */
+function ProfileLink({
+  disabled,
+  onAnalyzed,
+}: {
+  disabled: boolean;
+  onAnalyzed: (data: Analysis, label: string) => void;
+}) {
+  const base = (import.meta.env.VITE_API_BASE_URL ?? "").replace(/\/$/, "");
+  const [enabled, setEnabled] = useState(false);
+  const [url, setUrl] = useState("");
+  const [allowed, setAllowed] = useState(false);
+  const [working, setWorking] = useState(false);
+  const [signingIn, setSigningIn] = useState(false);
+  const [msg, setMsg] = useState("");
+  useEffect(() => {
+    let alive = true;
+    fetch(`${base}/api/health`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((h) => alive && setEnabled(h?.profile === true))
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
+  }, [base]);
+  if (!enabled) return null;
+  const call = async (path: string, body?: unknown, timeout = 30000) => {
+    const response = await fetch(`${base}/api/profile/${path}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: body ? JSON.stringify(body) : undefined,
+      signal: AbortSignal.timeout(timeout),
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(typeof data.detail === "string" ? data.detail : "That did not work.");
+    return data;
+  };
+  const run = async (task: () => Promise<void>) => {
+    setWorking(true);
+    setMsg("");
+    try {
+      await task();
+    } catch (e) {
+      setMsg(e instanceof Error && e.name !== "TimeoutError" ? e.message : "That took too long. Try again.");
+    } finally {
+      setWorking(false);
+    }
+  };
+  const busy = disabled || working;
+  return (
+    <details className="mt-3 text-sm">
+      <summary className="min-h-[var(--size-target)] content-center rounded-lg py-2 font-semibold text-ink">
+        Analyze a profile link (this computer only)
+      </summary>
+      <div className="space-y-3 pb-2">
+        <p className="text-slate-600">
+          Reads public post counts and comments from an Instagram, Facebook or TikTok profile
+          through a browser on this computer. You sign in inside the window that opens, not inside
+          Speculara. Nothing is saved.
+        </p>
+        <label className="flex min-h-11 items-start gap-2 text-ink">
+          <input
+            type="checkbox"
+            checked={allowed}
+            onChange={(e) => setAllowed(e.target.checked)}
+            className="mt-1 h-5 w-5 accent-[var(--color-ink)]"
+          />
+          I own this profile or have permission to analyze it, and I will follow the platform’s rules.
+        </label>
+        <div className="flex flex-wrap gap-2">
+          {(["instagram", "facebook"] as const).map((n) => (
+            <button
+              key={n}
+              type="button"
+              disabled={busy || signingIn || !allowed}
+              onClick={() =>
+                run(async () => {
+                  const r = await call("login", { network: n });
+                  setSigningIn(true);
+                  setMsg(r.message ?? "Sign in in the browser window, then click Done signing in.");
+                })
+              }
+              className="neu-sm min-h-11 rounded-xl px-3 font-semibold text-ink"
+            >
+              Sign in to {n === "instagram" ? "Instagram" : "Facebook"}
+            </button>
+          ))}
+          {signingIn && (
+            <button
+              type="button"
+              disabled={working}
+              onClick={() =>
+                run(async () => {
+                  await call("login/finish");
+                  setSigningIn(false);
+                  setMsg("Signed in. Now paste a profile link and analyze.");
+                })
+              }
+              className="neu-btn min-h-11 rounded-xl px-3 font-semibold text-white"
+            >
+              Done signing in
+            </button>
+          )}
+        </div>
+        <label className="block font-semibold text-ink" htmlFor="profile-url">
+          Profile link
+        </label>
+        <input
+          id="profile-url"
+          value={url}
+          onChange={(e) => setUrl(e.target.value)}
+          placeholder="https://www.instagram.com/yourprofile"
+          inputMode="url"
+          autoComplete="off"
+          className="neu-in block min-h-11 w-full min-w-0 rounded-xl bg-transparent px-3 text-sm"
+        />
+        <button
+          type="button"
+          disabled={busy || signingIn || !allowed || url.trim().length < 3}
+          onClick={() =>
+            run(async () => {
+              setMsg("Collecting posts. This can take a minute or two…");
+              const data = await call("analyze", { url: url.trim() }, 240000);
+              if (data.schema_version !== 2) throw new Error("Unsupported analysis schema; version 2 required.");
+              setMsg("");
+              onAnalyzed(data, url.trim().replace(/^https?:\/\/(www\.)?/, ""));
+            })
+          }
+          className="neu-btn min-h-11 w-full rounded-xl px-4 font-semibold text-white"
+        >
+          Analyze this profile
+        </button>
+        {msg && (
+          <p role="status" className="text-slate-700">
+            {msg}
+          </p>
+        )}
+      </div>
+    </details>
+  );
+}
+
 /* ---------- Chatbot ---------- */
 function Chat() {
   const analysis = useContext(Results);
@@ -1629,6 +1771,14 @@ export default function App() {
                   Demo records are fictional, not real campaign results. Uploads are processed in
                   server memory and never saved.
                 </p>
+                <ProfileLink
+                  disabled={busy}
+                  onAnalyzed={(data, label) => {
+                    setErr("");
+                    setNotice("");
+                    setCandidate({ data, label });
+                  }}
+                />
               </div>
               {candidate && (
                 <section
