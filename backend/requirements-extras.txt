@@ -1,0 +1,12 @@
+# Extra dependencies for the optional backend/app API (Gemma chat, profile collector, Supabase).
+# The default Speculara backend (backend/main.py) does not need these.
+-r requirements.txt
+httpx>=0.27
+python-multipart>=0.0.9
+python-dotenv>=1.0
+scikit-learn>=1.5
+statsmodels>=0.14
+vaderSentiment>=3.3.2
+xlrd>=2.0
+supabase>=2.34.1
+pytest>=8

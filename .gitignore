@@ -33,3 +33,8 @@ playwright-report/
 .figma/
 AGENTS.md
 CLAUDE.md
+
+backend/.env
+backend/.socialmonitor/
+.pytest_cache/
+integrations/socialmonitor/node_modules/
