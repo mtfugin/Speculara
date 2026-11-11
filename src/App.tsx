@@ -1274,6 +1274,7 @@ function Chat() {
   const [aiAvailable, setAiAvailable] = useState(false);
   const [aiOn, setAiOn] = useState(false);
   const [thinking, setThinking] = useState(false);
+  const [slow, setSlow] = useState(false);
   const apiBase = (import.meta.env.VITE_API_BASE_URL ?? "").replace(/\/$/, "");
   useEffect(() => {
     let alive = true;
@@ -1301,6 +1302,8 @@ function Chat() {
     }
     if (aiOn && aiAvailable) {
       setThinking(true);
+      setSlow(false);
+      const slowTimer = window.setTimeout(() => setSlow(true), 8000);
       try {
         const { preview: _preview, post_references: _refs, ...summary } = analysis;
         const response = await fetch(`${apiBase}/api/ai/chat`, {
@@ -1321,7 +1324,9 @@ function Chat() {
           },
         ]);
       } finally {
+        window.clearTimeout(slowTimer);
         setThinking(false);
+        setSlow(false);
       }
       return;
     }
@@ -1397,7 +1402,7 @@ function Chat() {
             ))}
             {thinking && (
               <div role="status" className="skeleton-pulse max-w-[85%] rounded-2xl bg-white/70 px-3 py-2 text-slate-700">
-                Writing an answer…
+                {slow ? "Still working. AI answers can take up to a minute." : "Writing an answer…"}
               </div>
             )}
           </div>
