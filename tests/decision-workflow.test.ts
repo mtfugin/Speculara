@@ -87,7 +87,7 @@ test("default measurement answers return one metric; more experiments are explic
   const multiple = { ...a, recommend: [a.recommend[0], { title: "Second", evidence: "Observed saves", action: "Second action" }, { title: "Third", evidence: "Observed questions", action: "Third action" }] };
   for (const question of ["How do I measure success?", "What success metric should I use?", "How do I measure a test?"]) {
     assert.equal(answer(question, multiple), decisionBrief(multiple).measure);
-    assert.doesNotMatch(answer(question, multiple), /Test one offer|Second action|Third action/);
+    assert.doesNotMatch(answer(question, multiple), /test one offer|second action|third action/i);
   }
-  assert.match(answer("Show three experiments", multiple), /Third action/);
+  assert.match(answer("Show three experiments", multiple), /third action/i);
 });

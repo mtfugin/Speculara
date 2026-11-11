@@ -200,6 +200,6 @@ test('distinct sales and saves fixtures preserve intent routing', () => {
   assert.match(answer('saves per views',fixture),/19 saves/);
   assert.match(answer('best post saves per view',fixture),/SavedPost/);
   assert.doesNotMatch(answer('sales per views',{...fixture,ratios:{saves_per_view:fixture.ratios.saves_per_view}}),/19 saves/);
-  assert.match(answer('next-day forecast',fixture),/Next-day estimate: 7 sales/);
+  assert.match(answer('next-day forecast',fixture),/about 7 sales/);
   assert.match(answer('What should I change next?',fixture),/Firstrec/);
 });

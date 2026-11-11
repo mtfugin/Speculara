@@ -33,7 +33,7 @@ class PlainLanguageTests(unittest.TestCase):
     def test_zero_previous_period(self):
         text = period_summary('sales', dict(available=True,current_total=7, previous_total=0,absolute_change=7))
         self.assertIn('up 7', text)
-        self.assertIn('No percentage comparison: the previous week had no sales.', text)
+        self.assertIn('There is no percentage change because the previous week had no sales.', text)
 
     def test_saves_answers_keep_their_metric(self):
         result = analyze(pd.DataFrame({'post_id':list('abc'), 'views':[100,200,300], 'saves':[3,4,5]}))
@@ -73,7 +73,7 @@ class PlainLanguageTests(unittest.TestCase):
         self.assertIn('shipping',answer('top words',result))
         self.assertIn('2 mentions',answer('top words',result))
         self.assertIn(result['recommend'][0]['title'],answer('What should I change next?',result))
-        self.assertIn('Latest week in your data',period_summary('sales',dict(available=True,current_total=2,previous_total=1,absolute_change=1)))
+        self.assertIn('In the latest week of your data',period_summary('sales',dict(available=True,current_total=2,previous_total=1,absolute_change=1)))
 
     def test_distinct_metrics_and_next_day_routing(self):
         result=analyze(pd.DataFrame({'date':pd.date_range('2026-01-01',periods=14),'views':[100]*14,'sales':range(1,15),'saves':[19]*14,'post_id':[f'p{i}' for i in range(14)]}))

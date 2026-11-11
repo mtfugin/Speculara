@@ -497,7 +497,7 @@ def period_summary(metric, period):
     if not period['available']: return friendly_unavailable('period', period['reason'])
     delta = period['absolute_change'] or 0
     movement = 'the same as the previous week' if delta == 0 else f"{'up' if delta > 0 else 'down'} {_count(abs(delta))} from the previous week"
-    return f"Latest week in your data: {_count(period['current_total'])} {metric}, {movement}." + (f" No percentage comparison: the previous week had no {metric}." if period['previous_total'] == 0 else '')
+    return f"In the latest week of your data there were {_count(period['current_total'])} {metric}, {movement}." + (f" There is no percentage change because the previous week had no {metric}." if period['previous_total'] == 0 else '')
 
 
 def demand_summary(result):

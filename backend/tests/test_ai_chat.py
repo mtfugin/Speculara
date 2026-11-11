@@ -85,3 +85,16 @@ class AIChatTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class PlainTextTests(unittest.TestCase):
+    def test_markdown_and_label_openers_are_removed(self):
+        raw = "**Changed:** In the latest week there were 131 sales.\n**Matters:** 678 sales.\n- Try one change\n## Note"
+        out = ai_chat.plain_text(raw)
+        for bad in ("**", "##", "Changed:", "Matters:"):
+            self.assertNotIn(bad, out)
+        self.assertIn("131 sales", out)
+
+    def test_prompt_asks_for_plain_words(self):
+        self.assertIn("No asterisks", ai_chat.SYSTEM)
+        self.assertIn("Do not start lines with labels", ai_chat.SYSTEM)

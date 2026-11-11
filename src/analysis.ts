@@ -118,10 +118,45 @@ function briefText(a: Analysis) {
   const b = decisionBrief(a);
   return `What changed: ${b.changed}\nWhy it matters: ${b.matters}\nTry next: ${b.try_next}\nHow to measure: ${b.measure}`;
 }
+const lowerFirst = (t: string) => (t ? t[0].toLowerCase() + t.slice(1) : t);
+const endSentence = (t: string) => (/[.!?]$/.test(t.trim()) ? t.trim() : `${t.trim()}.`);
+/** Chat version of the brief: plain sentences, no labels. The report keeps its labelled layout. */
+function briefChat(a: Analysis) {
+  const b = decisionBrief(a);
+  return [
+    "Here is the short version.",
+    endSentence(b.changed),
+    endSentence(b.matters),
+    `A good next step is to ${lowerFirst(endSentence(b.try_next))}`,
+    `To see if it worked, ${lowerFirst(endSentence(b.measure))}`,
+  ].join(" ");
+}
+/** Make any chat reply read like a person wrote it: no markdown marks, no "Label:" openers. */
+export function plainChat(text: string): string {
+  return text
+    .replace(/\*\*|__|`/g, "")
+    .replace(/^\s{0,3}#{1,6}\s+/gm, "")
+    .replace(/^\s*[-*•]\s+/gm, "")
+    .replace(/^\s*(?:what changed|why it matters|changed|matters|try next|try this next|next step|measure|how to measure|summary|answer|note)\s*:\s*/gim, "")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+}
 function funnelText(a: Analysis) {
   return `${funnelStages(a)
     .map((s) => `${s.label}: ${s.value == null ? "Not supplied" : count(s.value)}. ${s.note}`)
     .join("\n")}\n${FUNNEL_NOTE}${a.funnel?.note ? ` ${a.funnel.note}` : ""}`;
+}
+/** Chat wording for a suggested test: plain sentences instead of Evidence/Test/Measure labels. */
+function experimentChat(r: Recommendation) {
+  const url = safePostUrl(r.post_url);
+  return `${endSentence(r.title)} ${endSentence(r.evidence)} To try it, ${lowerFirst(endSentence(r.action))} To check how it went, ${lowerFirst(endSentence(experimentMetric(r)))}${r.post_id ? ` This is about post ${r.post_id}.` : ""}${url ? ` You can open the post here ${url}` : ""}`;
+}
+/** Chat wording for the separate counts. */
+function funnelChat(a: Analysis) {
+  const parts = funnelStages(a)
+    .filter((s) => s.value != null)
+    .map((s) => (s.key === "questions" ? `${count(s.value!)} entries with a question` : `${count(s.value!)} ${s.label.toLowerCase()}`));
+  return `${parts.length ? `You had ${parts.join(", ")}.` : "No counts were supplied."} ${FUNNEL_NOTE}`;
 }
 function experimentText(r: Recommendation) {
   const url = safePostUrl(r.post_url);
@@ -360,8 +395,8 @@ export function periodSummary(metric: string, p: Period): string {
       ? "the same as the previous week"
       : `${delta > 0 ? "up" : "down"} ${count(Math.abs(delta))} from the previous week`;
   return (
-    `Latest week in your data: ${count(p.current_total)} ${metric}, ${movement}.` +
-    (p.previous_total === 0 ? ` No percentage comparison: the previous week had no ${metric}.` : "")
+    `In the latest week of your data there were ${count(p.current_total)} ${metric}, ${movement}.` +
+    (p.previous_total === 0 ? ` There is no percentage change because the previous week had no ${metric}.` : "")
   );
 }
 
@@ -385,11 +420,11 @@ export function answer(question: string, a: Analysis): string {
     )
   )
     return technicalAnswer(question, a);
-  if (/decision brief|\bbrief\b|what it means|why.*matter/.test(q)) return briefText(a);
-  if (/funnel|independent count|customer journey|drop.off/.test(q)) return funnelText(a);
+  if (/decision brief|\bbrief\b|what it means|why.*matter/.test(q)) return briefChat(a);
+  if (/funnel|independent count|customer journey|drop.off/.test(q)) return funnelChat(a);
   if (/measur|success metric|experiment/.test(q))
     return /more|all|another|three|\b3\b/.test(q)
-      ? a.recommend.slice(0, 3).map(experimentText).join("\n\n") || decisionBrief(a).measure
+      ? a.recommend.slice(0, 3).map(experimentChat).join("\n\n") || decisionBrief(a).measure
       : decisionBrief(a).measure;
   if (/negative|correl|relat|link/.test(q) && !/comment|review|sentiment|feedback/.test(q)) {
     const negative = a.correlation.find((p) => p.r < 0);
@@ -408,7 +443,7 @@ export function answer(question: string, a: Analysis): string {
     return (
       a.recommend
         .slice(0, /more|all|another|three|3/.test(q) ? 3 : 1)
-        .map(experimentText)
+        .map(experimentChat)
         .join("\n\n") || friendlyUnavailable("recommendation")
     );
   if (/growth|period|week|change|increase|decrease/.test(q)) {
@@ -440,7 +475,7 @@ export function answer(question: string, a: Analysis): string {
   }
   if (/forecast|predict|accuracy|trend|last|long/.test(q))
     return a.predict.available
-      ? `Next-day estimate: ${count(a.predict.points[0].value)} ${a.predict.metric}. Compare it with the actual count tomorrow; this is an estimate, not a promise.`
+      ? `Tomorrow you can expect about ${count(a.predict.points[0].value)} ${a.predict.metric}. Compare it with the real count tomorrow. This is a rough estimate, not a promise.`
       : friendlyUnavailable("forecast", a.predict.reason);
   if (/sentiment|keyword|feel|comment|word|review|feedback/.test(q)) {
     const s = a.sentiment;

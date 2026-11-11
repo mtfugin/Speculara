@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useRef, useState, type ReactNode 
 
 import {
   answer,
+  plainChat,
   analysisReport,
   download,
   ratioText,
@@ -1310,13 +1311,13 @@ function Chat() {
         });
         if (!response.ok) throw new Error("ai");
         const { answer: aiAnswer } = await response.json();
-        setMsgs((m) => [...m, { me: false, t: `${aiAnswer}\n\nAI answer. Check it against your numbers.` }]);
+        setMsgs((m) => [...m, { me: false, t: plainChat(String(aiAnswer)) }]);
       } catch {
         setMsgs((m) => [
           ...m,
           {
             me: false,
-            t: `The AI answer did not work, so here is the built-in answer instead.\n\n${answer(t, analysis)}`,
+            t: `That did not load, so here is the standard answer instead. ${plainChat(answer(t, analysis))}`,
           },
         ]);
       } finally {
@@ -1324,7 +1325,7 @@ function Chat() {
       }
       return;
     }
-    setMsgs((m) => [...m, { me: false, t: answer(t, analysis) }]);
+    setMsgs((m) => [...m, { me: false, t: plainChat(answer(t, analysis)) }]);
   };
   const quickQuestions = analysis
     ? [

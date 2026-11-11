@@ -57,5 +57,5 @@ test("a failed AI answer falls back to the built-in answer", async ({ page }) =>
   await dialog.getByRole("checkbox", { name: "Use AI answers" }).check();
   await dialog.getByRole("textbox", { name: "Your question" }).fill("Summarize totals");
   await dialog.getByRole("button", { name: "Send", exact: true }).click();
-  await expect(dialog).toContainText("built-in answer instead");
+  await expect(dialog).toContainText("standard answer instead");
 });
