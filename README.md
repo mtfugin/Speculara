@@ -53,6 +53,17 @@ Never repeat full post totals for each individual comment. Use the separate text
 
 Ask Speculara routes supported questions to the current result using fixed rules. Unsupported questions return a scope explanation. Changing or clearing data resets chat. Reports download as Markdown, including findings, limitations and full results; JSON export is also available.
 
+## Optional AI answers (off by default)
+
+The chat uses fixed rules and sends nothing anywhere. A server owner can add AI-written answers, but both steps are required:
+
+1. On the backend set `ENABLE_AI_CHAT=1` and `GEMMA_API_KEY=<your Google AI Studio key>` (optionally `GEMMA_MODEL`). Keep the key in the backend environment only, never in the front end or in git.
+2. In the chat, the person ticks **Use AI answers**. It starts off every time, and the chat says what is sent.
+
+Only a summary goes to Google: totals, relationships, forecast, counts and recommendations. Uploaded rows, the preview table, post links and comment text are never sent (`backend/ai_chat.py`, covered by `backend/tests/test_ai_chat.py`). If the AI call fails, the chat falls back to the built-in answer. Without the two settings the tick box does not appear and `/api/ai/chat` returns 403.
+
+The larger Gemma backend with the profile collector and Supabase from the imported `backend/app` is separate, is not started by default, and is not connected to this front end. See `backend/README.md` and `backend/requirements-extras.txt`.
+
 ## Verify
 
 ```powershell
@@ -80,7 +91,7 @@ Configuration is supplied; nothing is deployed automatically.
 4. Check backend health and browser CORS preflight. Upload both demo formats, inspect all modules, ask chat and download a report. Verify a malformed file fails clearly.
 5. Free Render services can sleep. Warm the health endpoint before presenting. The UI times out after 60 seconds and permits retry.
 
-Do not ship the frontend without a working production API URL. The local Vite proxy does not exist in the production static bundle. Uploaded bodies are parsed only in server memory; there is no application disk persistence, server-side history or external AI call. The response includes up to five bounded sample rows for browser preview. Hosting platform access logs still exist. This MVP has no authentication or distributed rate limiting and is intended for a bounded hackathon demonstration.
+Do not ship the frontend without a working production API URL. The local Vite proxy does not exist in the production static bundle. Uploaded bodies are parsed only in server memory; there is no application disk persistence or server-side history, and no external AI call unless AI answers are switched on (see Optional AI answers). The response includes up to five bounded sample rows for browser preview. Hosting platform access logs still exist. This MVP has no authentication or distributed rate limiting and is intended for a bounded hackathon demonstration.
 
 See `docs/architecture.md`, `docs/mvp-scope.md`, `docs/team-workflow.md`, and `docs/demo-script.md`.
 

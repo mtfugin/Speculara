@@ -1,9 +1,15 @@
-"""Bounded in-memory API. No upload persistence, database or external AI calls."""
+"""Bounded in-memory API. No upload persistence or database.
+
+No external AI calls unless the server owner sets ENABLE_AI_CHAT=1 and GEMMA_API_KEY
+(see backend/ai_chat.py). Even then the browser only uses it when the person turns it on.
+"""
 import os
+from pydantic import BaseModel, Field
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import Response
 from starlette.concurrency import run_in_threadpool
+from backend import ai_chat
 from backend.analysis import MAX_BYTES, analyze, parse_file
 
 app = FastAPI(title='Speculara', version='1.0.0')
@@ -19,7 +25,24 @@ async def no_cache(request: Request, call_next):
 
 @app.get('/api/health')
 def health():
-    return {'status':'ok','storage':'none'}
+    return {'status':'ok','storage':'none','ai':ai_chat.ai_enabled()}
+
+
+class AIChat(BaseModel):
+    message: str = Field(min_length=1, max_length=1000)
+    analysis: dict
+
+
+@app.post('/api/ai/chat')
+async def ai_chat_endpoint(body: AIChat):
+    if not ai_chat.ai_enabled():
+        raise HTTPException(403,'AI answers are not enabled on this server.')
+    try:
+        return {'answer': await ai_chat.answer(body.message, body.analysis)}
+    except ValueError as exc:
+        raise HTTPException(422,str(exc)) from exc
+    except ai_chat.AIUnavailable as exc:
+        raise HTTPException(503,str(exc)) from exc
 
 @app.post('/api/analyze')
 async def upload(request: Request):

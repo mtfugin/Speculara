@@ -1127,13 +1127,62 @@ function Chat() {
   useEffect(() => {
     if (messages.current) messages.current.scrollTop = messages.current.scrollHeight;
   }, [msgs, open]);
-  const send = (t: string) => {
-    if (!t.trim()) return;
-    const reply = analysis
-      ? answer(t, analysis)
-      : "Upload a dataset or load the labeled synthetic demo first. No social account is connected.";
-    setMsgs((m) => [...m, { me: true, t }, { me: false, t: reply }]);
+  /* Optional AI answers: shown only when the server enables them, and off until the person turns them on. */
+  const [aiAvailable, setAiAvailable] = useState(false);
+  const [aiOn, setAiOn] = useState(false);
+  const [thinking, setThinking] = useState(false);
+  const apiBase = (import.meta.env.VITE_API_BASE_URL ?? "").replace(/\/$/, "");
+  useEffect(() => {
+    let alive = true;
+    fetch(`${apiBase}/api/health`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((h) => alive && setAiAvailable(h?.ai === true))
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
+  }, [apiBase]);
+  const send = async (t: string) => {
+    if (!t.trim() || thinking) return;
     setText("");
+    setMsgs((m) => [...m, { me: true, t }]);
+    if (!analysis) {
+      setMsgs((m) => [
+        ...m,
+        {
+          me: false,
+          t: "Upload a dataset or load the labeled synthetic demo first. No social account is connected.",
+        },
+      ]);
+      return;
+    }
+    if (aiOn && aiAvailable) {
+      setThinking(true);
+      try {
+        const { preview: _preview, post_references: _refs, ...summary } = analysis;
+        const response = await fetch(`${apiBase}/api/ai/chat`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ message: t, analysis: summary }),
+          signal: AbortSignal.timeout(45000),
+        });
+        if (!response.ok) throw new Error("ai");
+        const { answer: aiAnswer } = await response.json();
+        setMsgs((m) => [...m, { me: false, t: `${aiAnswer}\n\nAI answer. Check it against your numbers.` }]);
+      } catch {
+        setMsgs((m) => [
+          ...m,
+          {
+            me: false,
+            t: `The AI answer did not work, so here is the built-in answer instead.\n\n${answer(t, analysis)}`,
+          },
+        ]);
+      } finally {
+        setThinking(false);
+      }
+      return;
+    }
+    setMsgs((m) => [...m, { me: false, t: answer(t, analysis) }]);
   };
   const quickQuestions = analysis
     ? [
@@ -1170,7 +1219,9 @@ function Chat() {
               aria-label="Close chat"
               className="neu-sm grid h-11 w-11 place-items-center rounded-full text-ink"
             >
-              &times;
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" aria-hidden="true">
+                <path d="M6 6l12 12M18 6L6 18" />
+              </svg>
             </button>
           </div>
           <div
@@ -1186,7 +1237,30 @@ function Chat() {
                 {m.t}
               </div>
             ))}
+            {thinking && (
+              <div role="status" className="skeleton-pulse max-w-[85%] rounded-2xl bg-white/70 px-3 py-2 text-slate-700">
+                Writing an answer…
+              </div>
+            )}
           </div>
+          {aiAvailable && (
+            <div className="mx-3 mt-2 shrink-0 text-sm">
+              <label className="flex min-h-11 items-center gap-2 font-semibold text-ink">
+                <input
+                  type="checkbox"
+                  checked={aiOn}
+                  onChange={(e) => setAiOn(e.target.checked)}
+                  className="h-5 w-5 accent-[var(--color-ink)]"
+                />
+                Use AI answers
+              </label>
+              <p className="text-slate-600">
+                {aiOn
+                  ? "A summary of your results (totals, relationships, forecasts) is sent to Google to write each answer. Your rows, post links and comments are not sent."
+                  : "Off: answers are built in and nothing leaves this app."}
+              </p>
+            </div>
+          )}
           <div
             role="group"
             aria-label="Suggested questions"
@@ -1238,6 +1312,7 @@ function Chat() {
         <svg
           width="26"
           height="26"
+          style={{ transform: "translate(-0.6px, -0.3px)" }} /* optical centre: the bubble's tail pulls the shape down and to the left */
           viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"
