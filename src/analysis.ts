@@ -131,6 +131,24 @@ function briefChat(a: Analysis) {
     `To see if it worked, ${lowerFirst(endSentence(b.measure))}`,
   ].join(" ");
 }
+/** "What does my data tell me?" in everyday words: totals, the latest week, one link, tomorrow, one next step. */
+function overviewChat(a: Analysis) {
+  const totals = Object.entries(a.totals)
+    .filter(([, v]) => v != null)
+    .map(([k, v]) => `${count(v as number)} ${k}`);
+  const metric = (["sales", "views", "saves", "likes", "comments"] as const).find((m) => a.periods?.[m]?.available);
+  const strong = a.correlation.find((p) => Math.abs(p.r) >= 0.3);
+  const parts = [
+    totals.length ? `You have ${totals.length > 1 ? `${totals.slice(0, -1).join(", ")} and ${totals[totals.length - 1]}` : totals[0]} across ${count(a.rows)} entries.` : `Your file has ${count(a.rows)} entries.`,
+    metric ? periodSummary(metric, a.periods[metric]!) : "",
+    strong ? relationshipSummary(strong).finding : "",
+    a.predict.available
+      ? `Tomorrow you can expect about ${count(a.predict.points[0].value)} ${a.predict.metric}, as a rough estimate.`
+      : "",
+    a.recommend[0] ? `A good next step is to ${lowerFirst(endSentence(a.recommend[0].action))}` : "",
+  ];
+  return parts.filter(Boolean).join(" ");
+}
 /** Make any chat reply read like a person wrote it: no markdown marks, no "Label:" openers. */
 export function plainChat(text: string): string {
   return text
@@ -446,6 +464,12 @@ export function answer(question: string, a: Analysis): string {
         .map(experimentChat)
         .join("\n\n") || friendlyUnavailable("recommendation")
     );
+  if (
+    /overview|insight|tell me about|(data|numbers|results?|findings?).*(tell|say|show|mean)|(tell|say|show).*(data|numbers|results?)|how (am i|are we|is it|is my \w+) doing|going on|happening|so far|what.*learn/.test(
+      q,
+    )
+  )
+    return overviewChat(a);
   if (/growth|period|week|change|increase|decrease/.test(q)) {
     const metric =
       a.metrics.find((m) => q.includes(m)) ?? (a.periods.sales ? "sales" : a.metrics[0]);
@@ -503,7 +527,7 @@ export function answer(question: string, a: Analysis): string {
       : demandSummary(a);
   }
   if (!/recommend|action|next|strategy|should|more|another/.test(q))
-    return "Ask about this dataset totals, forecasts, relationships, comments, demand, or next actions. I cannot fetch accounts or infer causes.";
+    return "I did not quite get that. You can ask things like: what does my data tell me, how many sales did I get, what will tomorrow look like, which numbers go together, what are people saying in the comments, or what should I try next. I cannot fetch accounts or work out why something happened.";
   return (
     a.recommend
       .slice(0, /more|all|another|three|3/.test(q) ? 3 : 1)
