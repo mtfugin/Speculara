@@ -1654,6 +1654,16 @@ export default function App() {
         if (alive && res.ok && data.schema_version === 2) {
           setPreview({ data, label: "Synthetic demo" });
           setPreviewState("ready");
+          /* Open populated: Data, Questions and About read the demo too, without moving focus or scrolling. */
+          setAnalysis((current) => {
+            if (current) return current;
+            setUpdatedAt(Date.now());
+            setSource({ label: "speculara-synthetic.csv", demo: true });
+            setRevision((v) => v + 1);
+            setPicked("recommend");
+            setTab("charts");
+            return data;
+          });
         } else if (alive) setPreviewState("idle");
       } catch {
         if (alive) setPreviewState("idle");
