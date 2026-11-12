@@ -79,7 +79,7 @@ test("while collecting: live progress, Cancel, then a neutral cancelled message"
   await expect(page.getByRole("button", { name: "Try again" })).toHaveCount(0); // a cancel is not a failure
 });
 
-test("a timeout offers Try again and Try with fewer posts, which asks for 10", async ({ page }) => {
+test("a timeout offers Try again and Try with fewer posts, which asks for 5", async ({ page }) => {
   const limits: number[] = [];
   await page.route("**/api/profile/status", (route) => route.fulfill({ json: { progress: "Loading posts…" } }));
   await page.route("**/api/profile/analyze", (route) => {
@@ -90,8 +90,8 @@ test("a timeout offers Try again and Try with fewer posts, which asks for 10", a
   await page.getByRole("button", { name: "Analyze this profile" }).click();
   await expect(page.getByRole("status").filter({ hasText: "took too long" })).toBeVisible();
   await expect(page.getByRole("button", { name: "Try again" })).toBeVisible();
-  await page.getByRole("button", { name: "Try with fewer posts (10)" }).click();
-  await expect.poll(() => limits).toEqual([20, 10]);
+  await page.getByRole("button", { name: "Try with fewer posts (5)" }).click();
+  await expect.poll(() => limits).toEqual([10, 5]);
 });
 
 test("a profile that was not found shows the message without a retry button", async ({ page }) => {

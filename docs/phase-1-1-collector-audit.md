@@ -108,3 +108,20 @@ Still untested: private profile, expired Instagram sign-in, rate limiting, TikTo
 - Checked live: real TikTok collection from the screen, progress text shown, Cancel worked end to end.
 - Partial results are not possible yet: the worker returns posts only when it finishes, so a cancelled or timed out run keeps nothing. Fewer posts is the way to a result sooner. Streaming partial posts would need a worker change; decide in 1.7 or leave for later.
 - Tests: 120 backend, 23 unit, 59 browser (3 new for progress and Cancel, timeout retry, not-found with no retry).
+
+## Phase 1.7: Stage 1 exit gate
+Real end-to-end run from the app (TikTok company page, signed out): Analyze this profile, then Use this dataset. 10 posts in 51 seconds became 90 rows (10 post rows and 80 kept comment rows), 3 metrics, all six modules open with no horizontal overflow. Totals 6,098,200 views, 132,151 likes, 31,206 comments. Weekly comparison and forecast correctly say they need two full weeks of dated posts, because the posts are not daily.
+
+Changes made during the gate:
+- The app now collects 10 posts by default (the server default is still 20) because 20-post runs took from 90 seconds to over four minutes on the same day. The smaller retry is 5 posts.
+- The tests for this changed with it (limits 10 then 5).
+
+Known issues carried forward (not blockers for Stage 2 planning):
+1. A 20-post run once ran well past the 210-second limit the server sets, so the timeout may not always stop a slow run. Needs a reproduction and a forced stop of the browser tree.
+2. The summary line says "Uploaded dataset: tiktok.com/@tiktok" for collected data. It should say it was collected, with the time and method from the provenance block, and the "Collected from a public TikTok profile" note is not visible without opening About this data.
+3. No partial results: a cancelled or timed out run keeps nothing.
+4. Instagram and Facebook collectors have not been run live; private versus missing profiles cannot be told apart signed out; raw page parsing and a layout change have no recorded fixtures.
+5. The `backend/app` suite is run by hand (needs the extras), not by `npm run check`.
+6. Kept comments are capped at 8 per post while the page returns about 40. Revisit for friction mining in Stage 2.
+
+Decision on the `backend/app` suite: leave it out of the default check (it needs scikit-learn, statsmodels and supabase) and document the command in the README. Revisit if that API is kept.

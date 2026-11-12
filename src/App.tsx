@@ -1110,11 +1110,11 @@ function ProfileLink({
         setMsg("Cancelled. Nothing was kept.");
       } else if (e instanceof Error && e.name === "TimeoutError") {
         setMsg("That took too long.");
-        setRetry({ limit, smaller: limit > 10 });
+        setRetry({ limit, smaller: limit > 5 });
       } else {
         setMsg(e instanceof Error ? e.message : "That did not work.");
         // A wrong link or a sign-in problem will not fix itself; other failures are worth another try.
-        if (status !== 422 && status !== 401 && status !== 404) setRetry({ limit, smaller: status === 504 && limit > 10 });
+        if (status !== 422 && status !== 401 && status !== 404) setRetry({ limit, smaller: status === 504 && limit > 5 });
       }
     } finally {
       setWorking(false);
@@ -1212,7 +1212,7 @@ function ProfileLink({
         <button
           type="button"
           disabled={busy || signingIn || !allowed || url.trim().length < 3}
-          onClick={() => analyze(20)}
+          onClick={() => analyze(10)}
           className="btn-primary min-h-11 w-full rounded-xl px-4 font-semibold"
         >
           Analyze this profile
@@ -1243,8 +1243,8 @@ function ProfileLink({
               Try again
             </button>
             {retry.smaller && (
-              <button type="button" onClick={() => analyze(10)} className="ctl min-h-11 rounded-xl px-3 font-semibold text-ink">
-                Try with fewer posts (10)
+              <button type="button" onClick={() => analyze(5)} className="ctl min-h-11 rounded-xl px-3 font-semibold text-ink">
+                Try with fewer posts (5)
               </button>
             )}
           </div>
@@ -1256,22 +1256,22 @@ function ProfileLink({
 
 /* While the AI writes, the notice cycles through playful action words so waiting feels alive. */
 const THINKING_PHRASES = [
-  "Untangling your numbers",
-  "Reading between the bars",
-  "Chasing the trend line",
-  "Weighing the evidence",
-  "Connecting the dots",
-  "Sifting the signal from the noise",
-  "Squinting at your totals",
-  "Sharpening the insight",
-  "Counting twice, answering once",
-  "Distilling it into plain words",
+  "Untangling numbers",
+  "Reading the bars",
+  "Chasing the trend",
+  "Weighing evidence",
+  "Connecting dots",
+  "Sifting the signal",
+  "Squinting at totals",
+  "Sharpening insight",
+  "Counting twice",
+  "Distilling facts",
   "Tuning the forecast",
-  "Following the buying clues",
-  "Dusting off the charts",
-  "Stitching a clear answer together",
-  "Hunting for the why behind it",
-  "Polishing the final sentence",
+  "Following clues",
+  "Dusting off charts",
+  "Stitching it together",
+  "Hunting the why",
+  "Polishing the answer",
 ];
 function ThinkingPhrase() {
   const [i, setI] = useState(() => Math.floor(Math.random() * THINKING_PHRASES.length));

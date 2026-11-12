@@ -74,6 +74,10 @@ Collected posts become the same table an upload produces (one row per post, one 
 
 The imported `backend/app` API (its own Gemma research, Supabase history and its own endpoints) is still separate and is not started by default; only its collector is reused above. See `backend/README.md` and `backend/requirements-extras.txt`.
 
+What to expect while it runs: the panel shows what the collector is doing and a Cancel button. The app reads the latest 10 posts (the server accepts 5 to 40). A cancel keeps nothing. A failed run explains why in plain words, and a timeout also offers a smaller run of 5 posts. Counts the page does not show stay blank, never zero, and the analysis includes a `provenance` block (source, time, method, which counts were observed, comments read and kept). Comment rows that hold only text are left out of the metric checks. A profile with posts on fewer than 14 consecutive days gets no weekly comparison or forecast, and says so.
+
+Checking the collector without a profile: `npm run collector:test` (Node), `python -m unittest discover -s backend/tests` (fixtures, no network). A live check that you run yourself: `SPECULARA_LIVE_URL=<profile you may analyze> npm run collector:live`. The second backend (`backend/app`) has its own suite: from `backend`, `python -m pytest app/tests` in an environment with `requirements-extras.txt`.
+
 ## Brand and design system
 
 Logo family, tokens, components, icons, patterns, illustrations and the motion specification are documented in [docs/brand](docs/brand/README.md). Run the app and open `/?brand` for the live brand sheet. Colors are never changed by brand work.
