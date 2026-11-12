@@ -24,7 +24,7 @@ Goal: one complete workflow, for one industry in one city, that ends in an evide
 
 | Phase | Name | Done when |
 | --- | --- | --- |
-| 2.1 | Scope and data decision | Industry and city chosen (proposed: coffee shops, Tacurong City). Data sources agreed and permitted. Data labeled real or illustrative. |
+| 2.1 | Scope and data decision (in progress, see `phase-2-1-scope-and-data.md`) | Industry and city chosen (decided: coffee shops, all of Makati City). Data sources agreed and permitted, including a check against NPC Advisory No. 2026-01 on scraping public personal data. Data labeled real or illustrative. |
 | 2.2 | Evidence model | Observations carry demand or supply type, location, source, confidence and provenance. Observed and model-inferred are stored apart. |
 | 2.3 | Friction mining | Comments classified into discovery, affordability, availability, accessibility, trust, quality, experience and compatibility, in English and Filipino languages, each with its original quote. |
 | 2.4 | Supply side | Business listings, menus, hours and prices loaded, each with its own confidence. A missing listing is never treated as proof of no supply. |
