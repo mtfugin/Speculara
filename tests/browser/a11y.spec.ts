@@ -32,3 +32,10 @@ test("chat panel and brand sheet have no serious accessibility violations", asyn
   await page.waitForTimeout(800);
   expect(await scan(page)).toEqual([]);
 });
+
+test("the live dashboard (with data) has no serious accessibility violations", async ({ page }) => {
+  await page.goto("/?preview=1");
+  await expect(page.locator("[data-dashboard]")).toContainText("Synthetic demo", { timeout: 30000 });
+  await page.waitForTimeout(800);
+  expect(await scan(page)).toEqual([]);
+});

@@ -8,8 +8,8 @@ for (const [width, height] of [[1440, 810], [1280, 720], [1024, 768]] as const) 
     const hero = (await page.locator("#top").boundingBox())!;
     expect(Math.round(hero.height)).toBe(height);
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
-    // headline, both actions and the upload card are all inside the first screen
-    for (const locator of [page.locator("h1"), page.getByRole("button", { name: "Try the demo" }).last(), page.locator("#start")]) {
+    // headline, the action and the live dashboard are all inside the first screen
+    for (const locator of [page.locator("h1"), page.getByRole("button", { name: "Try the demo" }).last(), page.locator("[data-dashboard]")]) {
       const box = (await locator.boundingBox())!;
       expect(box.y + box.height, `inside the first screen at ${width}x${height}`).toBeLessThanOrEqual(height + 1);
     }
@@ -47,4 +47,31 @@ test("chat looks like a message sheet: outgoing bubble right, reply left, arrow 
   expect(mineBox.x + mineBox.width / 2).toBeGreaterThan(dialogBox.x + dialogBox.width / 2);
   await expect(dialog.locator("svg.lucide-arrow-up")).toHaveCount(1);
   await expect(dialog.getByRole("group", { name: "Suggested questions" })).toBeVisible();
+});
+
+test("the hero is a live dashboard: real totals, weekly change, a trend chart with hover values, a forecast", async ({ page }) => {
+  await page.goto("/?preview=1");
+  const dash = page.locator("[data-dashboard]");
+  await expect(dash).toContainText("Synthetic demo", { timeout: 30000 });
+  await expect(dash).toContainText("42 rows");
+  await expect(dash.getByText("79,455", { exact: true })).toBeVisible();
+  await expect(dash.getByText("3,111", { exact: true })).toBeVisible();
+  await expect(dash.getByText("678", { exact: true })).toBeVisible();
+  await expect(dash.getByText("vs last week")).toHaveCount(3);
+  await expect(dash.getByText("Views by day")).toBeVisible();
+  const chart = dash.getByRole("img", { name: /views by day/i });
+  await expect(chart).toBeVisible();
+  const before = await dash.getByText(/^Oct|^Sep/).first().innerText();
+  const box = (await chart.boundingBox())!;
+  await page.mouse.move(box.x + box.width * 0.1, box.y + box.height / 2);
+  await expect(dash).toContainText("Sep");
+  await expect(dash).toContainText("Next day:");
+  expect(before.length).toBeGreaterThan(3);
+});
+
+test("the headline mirrors both words of the last phrase", async ({ page }) => {
+  await page.goto("/");
+  const reflected = page.locator("h1 span");
+  await expect(reflected).toHaveText("next decision.");
+  expect(await reflected.evaluate((el) => (getComputedStyle(el) as any).webkitBoxReflect ?? getComputedStyle(el).getPropertyValue("-webkit-box-reflect"))).not.toBe("none");
 });

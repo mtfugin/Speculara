@@ -86,20 +86,21 @@ function MirrorBackdrop() {
 const ResponsiveHeroBanner: React.FC<ResponsiveHeroBannerProps> = ({
     navLinks = [
         { label: "Home", href: "#top", isActive: true },
+        { label: "Data", href: "#data" },
         { label: "Questions", href: "#questions" },
         { label: "About", href: "#docs" }
     ],
     ctaButtonText = "Try the demo",
-    ctaButtonHref = "#start",
+    ctaButtonHref = "#data",
     onCtaClick,
-    title = "Turn views, saves, and sales into the next",
-    emphasis = "decision.",
+    title = "Turn views, saves, and sales into the",
+    emphasis = "next decision.",
     description = "Upload your CSV or Excel export. Get measured findings, clear limits, and a next action grounded in views, saves and sales.",
     primaryButtonText = "Try the demo",
-    primaryButtonHref = "#start",
+    primaryButtonHref = "#data",
     onPrimaryClick,
     secondaryButtonText = "Upload a file",
-    secondaryButtonHref = "#start",
+    secondaryButtonHref = "#data",
     onSecondaryClick,
     aside
 }) => {
@@ -203,12 +204,12 @@ const ResponsiveHeroBanner: React.FC<ResponsiveHeroBannerProps> = ({
             </header>
 
             <div className="relative z-10 flex flex-1 items-center">
-                <div className="mx-auto grid w-full max-w-[var(--layout-app)] items-center gap-12 px-[var(--layout-gutter)] pb-10 pt-2 lg:grid-cols-[1.12fr_1fr] lg:gap-16">
+                <div className="mx-auto grid w-full max-w-[var(--layout-app)] items-center gap-12 px-[var(--layout-gutter)] pb-10 pt-2 lg:grid-cols-[1fr_1.08fr] lg:gap-14">
                     <div className="min-w-0">
                         <h1 className="stagger-in font-display text-[2.6rem] font-extrabold leading-[1.02] tracking-[-0.04em] text-white sm:text-6xl lg:text-[4.4rem]" style={{ ["--i" as string]: 0 }}>
                             {title}{" "}
                             <span
-                                className="inline-block text-white"
+                                className="inline-block whitespace-nowrap text-white"
                                 style={{ WebkitBoxReflect: "below -0.14em linear-gradient(transparent 52%, rgba(255,255,255,0.2))" } as React.CSSProperties}
                             >
                                 {emphasis}

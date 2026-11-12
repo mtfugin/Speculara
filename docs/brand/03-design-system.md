@@ -102,10 +102,10 @@ The hero (`src/components/ui/responsive-hero-banner.tsx`) started from the suppl
 | Full-screen Unsplash photo | No photo and no third-party image request. A fading dot grid, one soft blue light, and the logo's bars drawn as a blueprint outline |
 | Badge, partner row | Removed |
 | Instrument Serif headline | Bricolage Grotesque 800, with the last word reflected |
-| Centered text over a photo | Two columns that fit one viewport: headline and actions, then the upload card (glass) |
+| Centered text over a photo | Two columns that fit one viewport: headline and actions, then a live dashboard (`src/components/dashboard-preview.tsx`) built from a real analysis. It measures the synthetic demo until a dataset is loaded; it is skipped in automated browsers (`?preview=1` forces it) |
 | Mobile toggle with no menu | A real menu (Escape and link choice close it) |
 | Link-only actions | Link or button (`onCtaClick`, `onPrimaryClick`, `onSecondaryClick`); the page starts the demo or focuses the upload box |
 
-`aside` takes the content beside the headline. `tests/browser/landing.spec.ts` checks that the first screen fits at 1440x810, 1280x720 and 1024x768.
+`aside` takes the content beside the headline (the dashboard). The upload card is its own section (`#data`) below the hero. `tests/browser/landing.spec.ts` checks that the first screen fits at 1440x810, 1280x720 and 1024x768.
 
 Chat styles `.ios-sheet` and `.typing-dot` are in `src/index.css`.

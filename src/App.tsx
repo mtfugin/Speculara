@@ -27,6 +27,7 @@ import { Splash } from "./design-system/Splash";
 import { AnalysisLoader } from "./design-system/AnalysisLoader";
 import { Card, Fact, H, KeyNumber, Numbers, Pills, Well } from "./design-system/ui";
 import ResponsiveHeroBanner from "./components/ui/responsive-hero-banner";
+import DashboardPreview from "./components/dashboard-preview";
 import { ArrowUp } from "lucide-react";
 
 import { moduleInfo, updatedLabel, priorityLabel, type ModuleKey } from "./polish";
@@ -1440,6 +1441,39 @@ export default function App() {
   const [tab, setTab] = useState<Key | null>(null);
   const [err, setErr] = useState("");
   const [analysis, setAnalysis] = useState<Analysis | null>(null);
+  /* The hero dashboard measures the synthetic demo until a dataset is loaded. It is separate from the dataset
+     the modules use, never replaces it, and is skipped in automated browsers (add ?preview=1 to force it). */
+  const [preview, setPreview] = useState<{ data: Analysis; label: string } | null>(null);
+  const [previewState, setPreviewState] = useState<"idle" | "loading" | "ready">("idle");
+  useEffect(() => {
+    const forced = new URLSearchParams(window.location.search).get("preview") === "1";
+    if (navigator.webdriver && !forced) return;
+    let alive = true;
+    setPreviewState("loading");
+    (async () => {
+      try {
+        const base = (import.meta.env.VITE_API_BASE_URL ?? "").replace(/\/$/, "");
+        const csv = await fetch("/demo/speculara-synthetic.csv");
+        if (!csv.ok) throw new Error("demo");
+        const res = await fetch(`${base}/api/analyze`, {
+          method: "POST",
+          headers: { "Content-Type": "application/octet-stream", "X-Filename": "upload.csv" },
+          body: await csv.blob(),
+          signal: AbortSignal.timeout(60000),
+        });
+        const data = await res.json();
+        if (alive && res.ok && data.schema_version === 2) {
+          setPreview({ data, label: "Synthetic demo" });
+          setPreviewState("ready");
+        } else if (alive) setPreviewState("idle");
+      } catch {
+        if (alive) setPreviewState("idle");
+      }
+    })();
+    return () => {
+      alive = false;
+    };
+  }, []);
   const [source, setSource] = useState<{ label: string; demo: boolean } | null>(null);
   const [busy, setBusy] = useState(false);
   const [nudge, setNudge] = useState(false);
@@ -1606,97 +1640,105 @@ export default function App() {
               document.getElementById("upload")?.focus({ preventScroll: true });
             }}
             aside={
-      <div ref={listRef} id="start" className="overlay min-w-0 scroll-mt-6 rounded-3xl p-5 sm:p-7">
-        <h2 className="font-display text-3xl font-extrabold tracking-[-0.03em] text-ink">Start with your data</h2>
-                <div className="mt-3" aria-busy={busy}>
-          <label htmlFor="upload" className="sr-only">
-            Upload your dataset
-          </label>
-          <div
-            onDragOver={(e) => {
-              e.preventDefault();
-              if (!busy) setDragging(true);
-            }}
-            onDragLeave={() => setDragging(false)}
-            onDrop={(e) => {
-              e.preventDefault();
-              setDragging(false);
-              const file = e.dataTransfer.files?.[0];
-              if (file && !busy) void analyzeFile(file);
-            }}
-            className={`rounded-2xl border-2 border-dashed p-3.5 text-center transition-colors ${dragging ? "border-ink bg-ink/5" : "border-border-default"}`}
-          >
-            <p className="text-sm text-slate-700">Drop a CSV or XLSX file here, or choose one</p>
-            <input
-              id="upload"
-              type="file"
-              accept=".csv,.xlsx"
-              disabled={busy}
-              aria-describedby="upload-help upload-msg"
-              onChange={(e) => {
-                const file = e.target.files?.[0];
-                if (file) void analyzeFile(file);
-                e.target.value = "";
-              }}
-              className="mt-3 block min-h-11 w-full min-w-0 rounded-xl text-sm file:mr-3 file:min-h-11 file:rounded-xl file:border-0 file:bg-white file:px-4 file:py-2 file:font-semibold file:text-neutral-900"
-            />
-          </div>
-          <p id="upload-help" className="mt-2 text-xs leading-relaxed text-slate-600">
-            CSV (UTF-8) or XLSX first sheet. Up to 5 MB, 20,000 rows, 50 columns. Processed in server
-            memory and never saved.
-          </p>
-          <p id="upload-msg" className="mt-2 text-sm text-wine" role="alert">
-            {err}
-          </p>
-          {busy && (
-            <p role="status" className="mt-2 text-sm font-semibold text-ink">
-              {loadingMessage}
-            </p>
-          )}
-          <button
-            type="button"
-            disabled={busy}
-            onClick={() => void loadDemo()}
-            className="ctl mt-2 min-h-11 w-full rounded-xl text-sm font-semibold text-ink"
-          >
-            Try synthetic demo data
-          </button>
-          <div className="mt-1 flex flex-wrap gap-x-4 text-xs">
-            <a
-              href="/demo/speculara-synthetic.csv"
-              download
-              className="inline-flex min-h-12 min-w-[var(--size-target)] items-center rounded-lg px-1 text-slate-700 underline hover:text-ink"
-            >
-              Demo CSV
-            </a>
-            <a
-              href="/demo/speculara-synthetic.xlsx"
-              download
-              className="inline-flex min-h-12 min-w-[var(--size-target)] items-center rounded-lg px-1 text-slate-700 underline hover:text-ink"
-            >
-              Demo XLSX
-            </a>
-            <a
-              href="/demo/speculara-text-synthetic.csv"
-              download
-              className="inline-flex min-h-12 min-w-[var(--size-target)] items-center rounded-lg px-1 text-slate-700 underline hover:text-ink"
-            >
-              Text-only demo
-            </a>
-          </div>
-          <ProfileLink
-            disabled={busy}
-            onAnalyzed={(data, label) => {
-              setErr("");
-              setNotice("");
-              setCandidate({ data, label });
-            }}
-          />
-        </div>
-      </div>
+              <DashboardPreview
+                analysis={analysis ?? preview?.data ?? null}
+                sourceLabel={analysis ? (source?.label ?? "Your data") : (preview?.label ?? "")}
+                state={analysis || preview ? "ready" : previewState}
+              />
             }
           />
           <div className="mx-auto max-w-[var(--layout-app)] px-[var(--layout-gutter)]">
+          <section id="data" aria-label="Add your data" className="scroll-mt-6 pt-14">
+        <div ref={listRef} id="start" className="overlay mx-auto min-w-0 max-w-3xl scroll-mt-6 rounded-3xl p-5 sm:p-7">
+          <h2 className="font-display text-3xl font-extrabold tracking-[-0.03em] text-ink">Start with your data</h2>
+                  <div className="mt-3" aria-busy={busy}>
+            <label htmlFor="upload" className="sr-only">
+              Upload your dataset
+            </label>
+            <div
+              onDragOver={(e) => {
+                e.preventDefault();
+                if (!busy) setDragging(true);
+              }}
+              onDragLeave={() => setDragging(false)}
+              onDrop={(e) => {
+                e.preventDefault();
+                setDragging(false);
+                const file = e.dataTransfer.files?.[0];
+                if (file && !busy) void analyzeFile(file);
+              }}
+              className={`rounded-2xl border-2 border-dashed p-3.5 text-center transition-colors ${dragging ? "border-ink bg-ink/5" : "border-border-default"}`}
+            >
+              <p className="text-sm text-slate-700">Drop a CSV or XLSX file here, or choose one</p>
+              <input
+                id="upload"
+                type="file"
+                accept=".csv,.xlsx"
+                disabled={busy}
+                aria-describedby="upload-help upload-msg"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) void analyzeFile(file);
+                  e.target.value = "";
+                }}
+                className="mt-3 block min-h-11 w-full min-w-0 rounded-xl text-sm file:mr-3 file:min-h-11 file:rounded-xl file:border-0 file:bg-white file:px-4 file:py-2 file:font-semibold file:text-neutral-900"
+              />
+            </div>
+            <p id="upload-help" className="mt-2 text-xs leading-relaxed text-slate-600">
+              CSV (UTF-8) or XLSX first sheet. Up to 5 MB, 20,000 rows, 50 columns. Processed in server
+              memory and never saved.
+            </p>
+            <p id="upload-msg" className="mt-2 text-sm text-wine" role="alert">
+              {err}
+            </p>
+            {busy && (
+              <p role="status" className="mt-2 text-sm font-semibold text-ink">
+                {loadingMessage}
+              </p>
+            )}
+            <button
+              type="button"
+              disabled={busy}
+              onClick={() => void loadDemo()}
+              className="ctl mt-2 min-h-11 w-full rounded-xl text-sm font-semibold text-ink"
+            >
+              Try synthetic demo data
+            </button>
+            <div className="mt-1 flex flex-wrap gap-x-4 text-xs">
+              <a
+                href="/demo/speculara-synthetic.csv"
+                download
+                className="inline-flex min-h-12 min-w-[var(--size-target)] items-center rounded-lg px-1 text-slate-700 underline hover:text-ink"
+              >
+                Demo CSV
+              </a>
+              <a
+                href="/demo/speculara-synthetic.xlsx"
+                download
+                className="inline-flex min-h-12 min-w-[var(--size-target)] items-center rounded-lg px-1 text-slate-700 underline hover:text-ink"
+              >
+                Demo XLSX
+              </a>
+              <a
+                href="/demo/speculara-text-synthetic.csv"
+                download
+                className="inline-flex min-h-12 min-w-[var(--size-target)] items-center rounded-lg px-1 text-slate-700 underline hover:text-ink"
+              >
+                Text-only demo
+              </a>
+            </div>
+            <ProfileLink
+              disabled={busy}
+              onAnalyzed={(data, label) => {
+                setErr("");
+                setNotice("");
+                setCandidate({ data, label });
+              }}
+            />
+          </div>
+        </div>
+          </section>
+
 
           {candidate && (
             <section
