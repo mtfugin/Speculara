@@ -54,7 +54,7 @@ export function moduleInfo(key: ModuleKey, a: Analysis | null): ModuleInfo {
       return a.recommend.some(
         (r) => !/^Add more useful data$/i.test(r.title) && !!r.evidence && !!r.action,
       )
-        ? { status: "Ready", finding: `Start with: ${a.recommend[0].title}.`, why: hints[key] }
+        ? { status: "Ready", finding: `Your best first step is to ${a.recommend[0].title.charAt(0).toLowerCase()}${a.recommend[0].title.slice(1).replace(/\.$/, "")}.`, why: hints[key] }
         : missing;
     case "charts": {
       const metrics = (["views", "saves", "sales"] as const).filter((m) => a.totals[m] != null);

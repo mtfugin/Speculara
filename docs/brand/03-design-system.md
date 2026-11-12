@@ -7,7 +7,7 @@
 | `tokens/speculara.json` | Source of truth for every token. Run `npm run tokens:build` after editing |
 | `src/tokens.css` | Generated Tailwind theme. Never edit by hand (a test checks it is current) |
 | `src/index.css` | Surfaces, controls, motion classes and keyframes, all built only from tokens |
-| `src/design-system/` | `Logo`, `Icon`, `patterns`, `illustrations`, `AnimatedMark`, `Splash`, `AnalysisLoader`, `motion`, `BrandSheet` |
+| `src/design-system/` | `ui` (Card, Well, H, Fact, KeyNumber, Numbers, Pills), `Logo`, `Icon`, `patterns`, `illustrations`, `AnimatedMark`, `Splash`, `AnalysisLoader`, `motion`, `BrandSheet` |
 | `src/assets/branding/logos/` | Static logo family (SVG) |
 | `docs/brand/` | This documentation |
 
@@ -38,7 +38,10 @@ Circle and soft rectangle only. Controls 10px, cards 16px, chips and avatars ful
 
 | Piece | Class or component | Notes |
 | --- | --- | --- |
-| Card | `.surface` | White, 1px line, xs shadow |
+| Card | `.surface` or `<Card>` | White, 1px line, xs shadow |
+| Nested group | `.panel` or `<Well>` | Hairline only, no fill. Rule: line, not box |
+| Labelled fact | `<Fact label>` | Small muted label above a plain sentence. Replaces "Label: text" runs |
+| Key number | `<KeyNumber>` and `Stat` | Large tabular figure, quiet note |
 | Inset group | `.well` | Mist fill, 1px line |
 | Overlay | `.overlay` | Chat panel, menus |
 | Secondary control, pill, tab | `.ctl` (+ `.is-selected` or `aria-pressed="true"`) | |
@@ -71,7 +74,7 @@ Mobile first. Breakpoints use Tailwind's `sm` 640, `md` 768, `lg` 1024. The home
 
 ## Accessibility
 
-Contrast is tested in the browser (primary button label 7:1 or better, focus ring 3:1). Decorative icons and illustrations are `aria-hidden`. Color never carries meaning alone (strength meter, direction arrows and status badges all have text). Reduced motion is honored centrally (see 05). Skip link, landmarks and labelled regions are kept.
+Automated axe-core scans (WCAG 2 A and AA) run on the home screen, all six module results, the chat panel and the brand sheet, and must show no serious or critical violations (`tests/browser/a11y.spec.ts`). Contrast is also tested in the browser (primary button label 7:1 or better, focus ring 3:1). Decorative icons and illustrations are `aria-hidden`. Color never carries meaning alone (strength meter, direction arrows and status badges all have text). Reduced motion is honored centrally (see 05). Skip link, landmarks and labelled regions are kept.
 
 ## Implementing something new
 

@@ -48,6 +48,7 @@ test('first focusable control has a visible composited focus ring and the locked
  await page.goto('/', {waitUntil:'domcontentloaded'});
  const list=page.getByRole('list',{name:'Questions'});
  const target=page.locator('#upload');
+ await page.evaluate(()=>Promise.all(document.getAnimations().map(a=>a.finished))); // entrance animations change opacity
  await page.keyboard.press('Tab');
  await target.focus();
  const sample=await target.evaluate(el=>{

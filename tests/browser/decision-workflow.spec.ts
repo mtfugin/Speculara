@@ -52,8 +52,8 @@ test("decision overview, safe references and measured experiments work on mobile
   await counts.getByText("Post references", { exact: true }).click();
   await expect(counts.getByRole("link")).toHaveCount(1);
   await expect(counts.getByRole("link")).toHaveAttribute("rel", "noopener noreferrer");
-  await expect(page.getByRole("region", { name: "Recommendations results" })).toContainText(
-    "How to measure: Compare sales with comparable exposure",
-  );
+  const recommendations = page.getByRole("region", { name: "Recommendations results" });
+  await expect(recommendations).toContainText("How to measure");
+  await expect(recommendations).toContainText("Compare sales with comparable exposure");
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
 });

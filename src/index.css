@@ -66,6 +66,9 @@
     background: var(--color-surface-page);
     border: var(--border-width) solid var(--color-border-default);
   }
+  .panel {
+    border: var(--border-width) solid var(--color-border-default);
+  }
   .overlay {
     background: var(--color-surface-highlight);
     border: var(--border-width) solid var(--color-border-default);

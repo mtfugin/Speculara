@@ -26,6 +26,7 @@ import { Illustration } from "./design-system/illustrations";
 import { RingsPattern } from "./design-system/patterns";
 import { Splash } from "./design-system/Splash";
 import { AnalysisLoader } from "./design-system/AnalysisLoader";
+import { Card, Fact, H, KeyNumber, Numbers, Pills, Well } from "./design-system/ui";
 
 import { moduleInfo, updatedLabel, priorityLabel, type ModuleKey } from "./polish";
 
@@ -139,66 +140,6 @@ function UpdatedAt({ at }: { at: number }) {
 
 /* ---------- primitives ---------- */
 
-function Card({
-  children,
-  className = "",
-  label,
-}: {
-  children: ReactNode;
-  className?: string;
-  label?: string;
-}) {
-  return (
-    <section aria-label={label} className={`surface rounded-3xl p-4 sm:p-6 ${className}`}>
-      {children}
-    </section>
-  );
-}
-function Numbers({ children }: { children: ReactNode }) {
-  return (
-    <details className="mt-4 text-sm">
-      <summary className="min-h-[var(--size-target)] content-center rounded-lg py-2 font-semibold text-ink">
-        See the numbers
-      </summary>
-      <div className="mt-3 space-y-3 text-slate-700">{children}</div>
-    </details>
-  );
-}
-const Well = ({ children, className = "" }: { children: ReactNode; className?: string }) => (
-  <div className={`well rounded-2xl p-3 sm:p-4 ${className}`}>{children}</div>
-);
-const H = ({ children, sub }: { children: ReactNode; sub?: string }) => (
-  <div className="mb-3">
-    <h3 className="font-display text-lg font-bold text-ink">{children}</h3>
-    {sub && <p className="text-sm text-slate-600">{sub}</p>}
-  </div>
-);
-
-function Pills<T extends string>({
-  items,
-  value,
-  onChange,
-}: {
-  items: T[];
-  value: T;
-  onChange: (v: T) => void;
-}) {
-  return (
-    <div className="-mx-1 flex flex-wrap gap-2 p-2 sm:gap-3" role="group" aria-label="Analysis options">
-      {items.map((i) => (
-        <button
-          key={i}
-          aria-pressed={i === value}
-          onClick={() => onChange(i)}
-          className={`min-h-[var(--size-target)] min-w-[var(--size-target)] max-w-full rounded-full px-4 py-2 text-sm transition focus-visible:outline-2 focus-visible:outline-sky ${i === value ? "ctl is-selected font-semibold text-ink" : "ctl text-slate-600 hover:text-ink"}`}
-        >
-          {i === "post_id" ? "Post" : calculationLabel(i)}
-        </button>
-      ))}
-    </div>
-  );
-}
-
 function Query({
   label,
   value,
@@ -240,14 +181,11 @@ const Explain = ({ children }: { children: ReactNode }) => (
 );
 
 const Stat = ({ l, v, c = INK }: { l: string; v: string | number; c?: string }) => (
-  <div className="well rounded-2xl p-3 text-center">
-    <p
-      className="font-display text-lg font-bold [overflow-wrap:anywhere] sm:text-xl"
-      style={{ color: c }}
-    >
+  <div className="panel tabular rounded-2xl p-4">
+    <p className="font-display text-3xl font-bold leading-tight [overflow-wrap:anywhere]" style={{ color: c }}>
       {v}
     </p>
-    <p className="text-xs text-slate-600">{l}</p>
+    <p className="mt-1 text-sm text-slate-600">{l}</p>
   </div>
 );
 
@@ -496,37 +434,31 @@ function DecisionOverview() {
     <div className="mb-8 space-y-6">
       <Card label="Decision brief">
         <H sub="Start with the evidence, then choose one small test.">Your decision brief</H>
-        <dl className="grid gap-4 sm:grid-cols-2">
-          {[
-            ["What changed", brief.changed],
-            ["Why it matters", brief.matters],
-            ["Try next", brief.try_next],
-            ["How to measure", brief.measure],
-          ].map(([label, value]) => (
-            <div key={label} className="min-w-0 rounded-2xl well p-4">
-              <dt className="font-semibold text-ink">{label}</dt>
-              <dd className="mt-2 break-words text-sm leading-6 text-slate-700">{value}</dd>
-            </div>
-          ))}
+        <p className="text-xs font-semibold uppercase tracking-wide text-slate-600">What changed</p>
+        <p className="mt-1 break-words font-display text-xl font-semibold leading-snug text-ink sm:text-2xl">
+          {brief.changed}
+        </p>
+        <dl className="mt-6 grid gap-x-8 gap-y-5 border-t border-border-default pt-5 sm:grid-cols-3">
+          <Fact label="Why it matters">{brief.matters}</Fact>
+          <Fact label="Try next">{brief.try_next}</Fact>
+          <Fact label="How to measure">{brief.measure}</Fact>
         </dl>
       </Card>
       <Card label="Independent counts">
         <H sub="Attention, interest, questions and purchases recorded in this file.">
           Independent counts
         </H>
-        <p className="mb-4 text-sm text-slate-700">{FUNNEL_NOTE}</p>
-        <dl className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <dl className="grid gap-x-8 gap-y-5 sm:grid-cols-2 lg:grid-cols-4">
           {funnelStages(a).map((stage) => (
-            <div key={stage.key} className="min-w-0 rounded-2xl well p-4">
-              <dt className="font-semibold text-ink">{stage.label}</dt>
-              <dd className="mt-2 break-words text-xl font-semibold text-ink">
-                {stage.value == null ? "Not supplied" : stage.value.toLocaleString()}
-              </dd>
-              <dd className="mt-2 text-sm text-slate-700">{stage.note}</dd>
-            </div>
+            <KeyNumber
+              key={stage.key}
+              label={stage.label}
+              value={stage.value == null ? "Not supplied" : stage.value.toLocaleString()}
+              note={stage.note}
+            />
           ))}
         </dl>
-        {a.funnel?.note && <p className="mt-4 text-sm text-slate-700">{a.funnel.note}</p>}
+        <p className="mt-5 text-sm text-slate-600">{a.funnel?.note ?? FUNNEL_NOTE}</p>
         {references.length > 0 && (
           <details className="mt-4 text-sm">
             <summary className="min-h-[var(--size-target)] content-center rounded-lg py-2 font-semibold text-ink">
@@ -564,22 +496,23 @@ function RecommendationItem({
   index: number;
 }) {
   return (
-    <li className="well rounded-2xl p-4">
-      <p className="mb-2 text-xs font-semibold text-wine">{priorityLabel(index)}</p>
-      <p className="font-display font-semibold text-ink">
-        {index + 1}. {item.title}
-      </p>
-      <p className="mt-2 text-sm text-slate-700">
-        <b>Evidence:</b> {item.evidence}
-      </p>
-      <p className="mt-2 text-sm text-slate-700">
-        <b>Test:</b> {item.action}
-      </p>
-      <p className="mt-2 text-sm text-slate-700">
-        <b>How to measure:</b> {experimentMetric(item)}
-      </p>
+    <li className="panel rounded-2xl p-5">
+      <div className="flex items-start gap-3">
+        <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-ink text-sm font-bold text-white" aria-hidden="true">
+          {index + 1}
+        </span>
+        <div className="min-w-0 flex-1">
+          <p className="chip inline-block px-2.5 py-0.5 text-xs">{priorityLabel(index)}</p>
+          <h4 className="mt-1 font-display text-lg font-semibold leading-snug text-ink">{item.title}</h4>
+          <dl className="mt-3 space-y-3">
+            <Fact label="Evidence">{item.evidence}</Fact>
+            <Fact label="Try this">{item.action}</Fact>
+            <Fact label="How to measure">{experimentMetric(item)}</Fact>
+          </dl>
+        </div>
+      </div>
       {item.post_id && (
-        <p className="mt-2 break-all text-sm text-slate-700">Post ID: {item.post_id}</p>
+        <p className="mt-3 break-all text-sm text-slate-700">Post ID {item.post_id}</p>
       )}
       {safePostUrl(item.post_url) && (
         <a
@@ -1484,6 +1417,7 @@ export default function App() {
   const [source, setSource] = useState<{ label: string; demo: boolean } | null>(null);
   const [busy, setBusy] = useState(false);
   const [nudge, setNudge] = useState(false);
+  const [dragging, setDragging] = useState(false);
   const [updatedAt, setUpdatedAt] = useState<number | null>(null);
   const [viewRevision, setViewRevision] = useState(0);
   const [notice, setNotice] = useState("");
@@ -1648,14 +1582,14 @@ export default function App() {
               <RingsPattern />
             </div>
             <div className="min-w-0">
-              <h1 className="font-display text-4xl font-bold leading-[1.1] text-ink md:text-5xl">
+              <h1 className="stagger-in font-display text-4xl font-bold leading-[1.1] text-ink md:text-5xl" style={{ ["--i" as string]: 0 }}>
                 Turn views, saves, and sales into the next decision.
               </h1>
-              <p className="mt-4 max-w-lg text-lg text-slate-700">
+              <p className="stagger-in mt-4 max-w-lg text-lg text-slate-700" style={{ ["--i" as string]: 1 }}>
                 Upload your CSV or Excel export. Get measured findings, clear limits, and a next
                 action grounded in views, saves and sales.
               </p>
-              <ul className="mt-6 flex flex-wrap gap-x-5 gap-y-2 text-sm font-medium text-ink">
+              <ul className="stagger-in mt-6 flex flex-wrap gap-x-5 gap-y-2 text-sm font-medium text-ink" style={{ ["--i" as string]: 2 }}>
                 {["Plain-English answers", "Nothing is saved", "No account needed"].map((t) => (
                   <li key={t} className="inline-flex items-center gap-1.5">
                     <Icon name="check" size="sm" />
@@ -1665,26 +1599,43 @@ export default function App() {
               </ul>
             </div>
 
-            <div ref={listRef} className="surface min-w-0 rounded-2xl p-5 sm:p-6">
+            <div ref={listRef} className="surface stagger-in min-w-0 rounded-2xl p-5 sm:p-6" style={{ ["--i" as string]: 3 }}>
               <h2 className="font-display text-xl font-bold text-ink">Start with your data</h2>
               <p className="mt-1 text-sm text-slate-600">Upload a file, or try the demo first.</p>
               <div className="mt-4" aria-busy={busy}>
                 <label htmlFor="upload" className="mb-2 block text-sm font-semibold text-ink">
                   Upload your dataset
                 </label>
-                <input
-                  id="upload"
-                  type="file"
-                  accept=".csv,.xlsx"
-                  disabled={busy}
-                  aria-describedby="upload-help upload-msg"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) void analyzeFile(file);
-                    e.target.value = "";
+                <div
+                  onDragOver={(e) => {
+                    e.preventDefault();
+                    if (!busy) setDragging(true);
                   }}
-                  className="well block min-h-11 min-w-0 w-full rounded-xl p-3 text-sm file:mr-3 file:rounded-lg file:border-0 file:bg-ink file:px-3 file:py-2 file:text-white"
-                />
+                  onDragLeave={() => setDragging(false)}
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    setDragging(false);
+                    const file = e.dataTransfer.files?.[0];
+                    if (file && !busy) void analyzeFile(file);
+                  }}
+                  className={`rounded-2xl border-2 border-dashed p-4 text-center transition-colors ${dragging ? "border-ink bg-ink/5" : "border-border-default"}`}
+                >
+                  <Illustration name="upload" className="mx-auto h-20 w-auto" />
+                  <p className="mt-1 text-sm text-slate-700">Drop a CSV or XLSX file here, or choose one</p>
+                  <input
+                    id="upload"
+                    type="file"
+                    accept=".csv,.xlsx"
+                    disabled={busy}
+                    aria-describedby="upload-help upload-msg"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) void analyzeFile(file);
+                      e.target.value = "";
+                    }}
+                    className="mt-3 block min-h-11 w-full min-w-0 rounded-xl text-sm file:mr-3 file:min-h-11 file:rounded-xl file:border-0 file:bg-ink file:px-4 file:py-2 file:font-semibold file:text-white"
+                  />
+                </div>
                 <p id="upload-help" className="mt-2 text-sm text-slate-600">
                   CSV (UTF-8) or XLSX first sheet. Up to 5 MB, 20,000 rows, 50 columns. No account
                   connection required.
@@ -1998,12 +1949,7 @@ export default function App() {
             {analysis && <DecisionOverview key={`overview-${revision}`} />}
             {Primary ? (
               <>
-                <div className="mb-4 flex flex-wrap items-baseline justify-between gap-2">
-                  <h2 className="font-display text-2xl font-bold text-ink sm:text-3xl">
-                    {META[picked!].title}
-                  </h2>
-                  <span className="text-xs text-slate-600">Source: {source?.label}</span>
-                </div>
+                <h2 className="sr-only">{META[picked!].title}</h2>
                 <div className="result-arrive">
                   <Primary key={`primary-${revision}-${viewRevision}-${picked}`} />
                 </div>
