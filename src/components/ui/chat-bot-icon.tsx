@@ -1,3 +1,4 @@
+import "./chat-bot-icon.css";
 import { useId } from "react";
 
 /* The chat launcher mascot: an orange blob with two slanted eyes and a floating dot.

@@ -1668,17 +1668,22 @@ export default function App() {
   const [nudge, setNudge] = useState(false);
   /* The rail follows the module card on screen: which one is crossing the middle of the window, or none. */
   const [inView, setInView] = useState<Key | null>(null);
+  /* Only modules that have a card on the page get an icon, in page order. */
+  const [present, setPresent] = useState<Key[]>([]);
   useEffect(() => {
     let raf = 0;
     const find = () => {
       raf = 0;
       const mid = window.innerHeight * 0.45;
       let hit: Key | null = null;
+      const here: Key[] = [];
       for (const el of document.querySelectorAll<HTMLElement>("[data-module]")) {
+        here.push(el.dataset.module as Key);
         const r = el.getBoundingClientRect();
         if (r.top <= mid && r.bottom >= mid) hit = el.dataset.module as Key;
       }
       setInView((prev) => (prev === hit ? prev : hit));
+      setPresent((prev) => (prev.join() === here.join() ? prev : here));
     };
     const onMove = () => {
       if (!raf) raf = requestAnimationFrame(find);
@@ -2110,13 +2115,20 @@ export default function App() {
           </section>
 
           {analysis && inView && (() => {
-            const items = ORDER.filter((k) => moduleInfo(k, analysis).status !== "Needs more data");
+            const items = present.filter((k) => moduleInfo(k, analysis).status !== "Needs more data");
             const index = items.indexOf(inView);
             if (!items.length) return null;
             return (
-              <nav aria-label="Modules" className="module-rail" style={{ ["--n" as string]: items.length, ["--i" as string]: Math.max(0, index) }}>
+              <nav aria-label="Modules" className="module-rail" style={{ ["--i" as string]: Math.max(0, index) }}>
+                <svg aria-hidden="true" focusable="false" width="0" height="0" style={{ position: "absolute" }}>
+                  <filter id="rail-goo" colorInterpolationFilters="sRGB">
+                    <feGaussianBlur in="SourceGraphic" stdDeviation="5" result="blur" />
+                    <feColorMatrix in="blur" type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 22 -10" />
+                  </filter>
+                </svg>
                 <span className="module-rail__drop" data-on={index >= 0 || undefined} aria-hidden="true">
-                  <span key={inView} className="module-rail__blob" />
+                  <span className="module-rail__tail" />
+                  <span className="module-rail__head" />
                 </span>
                 {items.map((k) => (
                   <button
@@ -2127,12 +2139,7 @@ export default function App() {
                     title={META[k].tab}
                     onClick={() => {
                       const card = document.querySelector<HTMLElement>(`[data-module="${k}"]`);
-                      if (card) card.scrollIntoView({ behavior: "smooth", block: "start" });
-                      else {
-                        setPicked(k);
-                        setTab(null);
-                        setTimeout(() => document.getElementById("result")?.scrollIntoView({ behavior: "smooth" }), 50);
-                      }
+                      card?.scrollIntoView({ behavior: "smooth", block: "start" });
                     }}
                     className={`module-rail__btn ${inView === k ? "is-active" : ""}`}
                   >

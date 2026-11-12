@@ -1,0 +1,70 @@
+/* 3D chat launcher mascot. Kept in its own file so edits to index.css cannot drop it. */
+.bot3d-launcher {
+  --tx: 0;
+  --ty: 0;
+  perspective: 260px;
+  background: transparent;
+  transition: transform 150ms ease-out;
+  filter: drop-shadow(0 10px 16px rgba(234, 88, 12, 0.45)) drop-shadow(0 0 1px rgba(255, 220, 160, 0.5));
+}
+.bot3d { overflow: visible; transform-style: preserve-3d; }
+.bot3d-body,
+.bot3d-eyes,
+.bot3d-shadow { transform-box: fill-box; transform-origin: center; }
+.bot3d-body { transition: transform 220ms cubic-bezier(0.2, 0.8, 0.2, 1); }
+.bot3d-eyes { transition: transform 140ms ease-out; }
+.bot3d-shadow { transition: transform 220ms ease-out, opacity 220ms ease-out; }
+.bot3d-dot { transform-box: view-box; transform-origin: 72px 32px; transition: transform 260ms cubic-bezier(0.3, 1.5, 0.5, 1); }
+.bot3d-eye { transform-box: fill-box; transform-origin: center; }
+
+/* Alive when idle: the body breathes, the dot floats, the eyes drift and blink. */
+.bot3d-body { animation: bot3d-breathe 4.2s ease-in-out infinite; }
+.bot3d-dot { animation: bot3d-float 3.4s ease-in-out infinite; }
+.bot3d-eyes { animation: bot3d-wander 7s ease-in-out infinite; }
+.bot3d-eye { animation: bot3d-blink 4.6s ease-in-out infinite; }
+.bot3d-eye + .bot3d-eye { animation-delay: 0.04s; }
+
+/* Alert (pointer within 300px, or keyboard focus): faces you, eyes lock on, the circle wags like a tail. */
+.bot3d-launcher[data-alert] .bot3d-body,
+.bot3d-launcher:focus-visible .bot3d-body {
+  transform: translateY(-2px) rotateY(calc(var(--tx) * 12deg)) rotateX(calc(var(--ty) * -10deg)) scale(1.06);
+  animation-duration: 2.6s;
+}
+.bot3d-launcher[data-alert] .bot3d-eyes,
+.bot3d-launcher:focus-visible .bot3d-eyes {
+  animation: none;
+  transform: translate(calc(var(--tx) * 7px), calc(var(--ty) * 5px)) scale(1.1);
+}
+.bot3d-launcher[data-alert] .bot3d-eye,
+.bot3d-launcher:focus-visible .bot3d-eye { animation-duration: 3.2s; }
+.bot3d-launcher[data-alert] .bot3d-dot,
+.bot3d-launcher:focus-visible .bot3d-dot { animation: bot3d-wag 0.32s ease-in-out infinite; }
+.bot3d-launcher[data-alert] .bot3d-shadow { transform: scale(0.85); opacity: 0.22; }
+
+@keyframes bot3d-breathe {
+  0%, 100% { scale: 1 1; translate: 0 0; rotate: 0deg; }
+  50% { scale: 1.025 0.975; translate: 0 0.8px; rotate: 0.6deg; }
+}
+@keyframes bot3d-float {
+  0%, 100% { translate: 0 0; }
+  50% { translate: 0 -2.5px; }
+}
+@keyframes bot3d-wander {
+  0%, 12% { translate: 0 0; }
+  20%, 34% { translate: -3px 1px; }
+  42%, 58% { translate: 3px -1.5px; }
+  66%, 80% { translate: 1px 2px; }
+  90%, 100% { translate: 0 0; }
+}
+@keyframes bot3d-blink {
+  0%, 90%, 100% { scale: 1 1; }
+  93% { scale: 1 0.1; }
+  96% { scale: 1 1; }
+}
+@keyframes bot3d-wag {
+  0%, 100% { rotate: -24deg; }
+  50% { rotate: 24deg; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .bot3d-body, .bot3d-dot, .bot3d-eyes, .bot3d-eye { animation: none !important; }
+}

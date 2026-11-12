@@ -102,12 +102,12 @@ test("module rail: only modules with data, follows the card on screen, droplet m
   await page.evaluate(() => document.querySelector('[data-module="charts"]')!.scrollIntoView({ block: "center" }));
   const rail = page.getByRole("navigation", { name: "Modules" });
   await expect(rail).toBeVisible();
-  // only the five modules that have data
-  await expect(rail.getByRole("button")).toHaveCount(5);
-  await expect(rail.getByRole("button", { name: "Go to Sentiment" })).toHaveCount(0);
+  // only modules that have a card on the page (the chosen one and the one under "Explore the others")
+  await expect(rail.getByRole("button")).toHaveCount(2);
+  for (const missing of ["Correlation", "Demand", "Sentiment"]) await expect(rail.getByRole("button", { name: `Go to ${missing}` })).toHaveCount(0);
   await expect(rail.getByRole("button", { name: "Go to Charts" })).toHaveAttribute("aria-pressed", "true");
-  const drop = rail.locator(".module-rail__drop");
-  await expect(drop).toHaveAttribute("data-on", "true");
+  const drop = rail.locator(".module-rail__head");
+  await expect(rail.locator(".module-rail__drop")).toHaveAttribute("data-on", "true");
   const y1 = await drop.evaluate((el) => new DOMMatrix(getComputedStyle(el).transform).m42);
   // scroll to the second card: the highlight and the droplet move to it
   const other = await page.evaluate(() => [...document.querySelectorAll("[data-module]")].map((e) => (e as HTMLElement).dataset.module));
@@ -116,8 +116,13 @@ test("module rail: only modules with data, follows the card on screen, droplet m
   await expect(rail.locator(".module-rail__btn.is-active")).toHaveCount(1);
   await expect(rail.locator(".module-rail__btn.is-active")).not.toHaveAttribute("title", "Charts");
   await expect.poll(() => drop.evaluate((el) => new DOMMatrix(getComputedStyle(el).transform).m42)).not.toBe(y1);
-  // the droplet is plain orange
-  expect(await rail.locator(".module-rail__blob").evaluate((el) => getComputedStyle(el).backgroundImage)).toBe("none");
+  // the droplet is plain orange: a head, a trailing bubble, joined by a goo filter, with no overshoot in its easing
+  expect(await rail.locator(".module-rail__head").evaluate((el) => getComputedStyle(el).backgroundImage)).toBe("none");
+  await expect(rail.locator(".module-rail__tail")).toHaveCount(1);
+  expect(await rail.locator(".module-rail__drop").evaluate((el) => getComputedStyle(el).filter)).toContain("rail-goo");
+  const easing = await rail.locator(".module-rail__head").evaluate((el) => getComputedStyle(el).transitionTimingFunction);
+  expect(easing).not.toMatch(/-?\d\.\d*[1-9]\)?$/); // cubic-bezier(0.4, 0, 0.2, 1): every control value within 0 to 1
+  expect(easing).toBe("cubic-bezier(0.4, 0, 0.2, 1)");
   // and the rail leaves when no module card is on screen
   await page.evaluate(() => window.scrollTo(0, 0));
   await expect(page.getByRole("navigation", { name: "Modules" })).toHaveCount(0);
