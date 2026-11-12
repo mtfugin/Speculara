@@ -17,9 +17,12 @@ type Opportunity = {
   uncertainty: string[]
   validation_test: string
   labels: string[]
+  summary: string
+  summary_mode: string
 }
 type Tile = { barangay: string; demand: number; shops: number; gaps: number; has_data: boolean }
-type Step = { agent: string; job: string; received: number; produced: number; note: string }
+type Step = { agent: string; job: string; received: number; produced: number; note: string; mode: string; decision: string }
+type Agents = { planner: string; model_requested: boolean; model_name: string; model_steps: string[]; model_note: string; issues: string[]; fixes: string[] }
 type Payload = {
   label: string
   notice: string
@@ -27,6 +30,7 @@ type Payload = {
   opportunities: Opportunity[]
   insufficient_evidence: Opportunity[]
   trace: Step[]
+  agents: Agents
   map: Tile[]
   map_note: string
 }
@@ -67,8 +71,11 @@ export default function Explorer() {
 
   useEffect(() => {
     // /sense.html?size=large shows the bigger invented dataset
-    const size = new URLSearchParams(window.location.search).get('size') === 'large' ? 'large' : 'small'
-    api<Payload>(`/api/sense/demo?size=${size}`)
+    const params = new URLSearchParams(window.location.search)
+    const size = params.get('size') === 'large' ? 'large' : 'small'
+    // ?model=on asks for the model agents; they only run if a model is configured on the server
+    const model = params.get('model') === 'on'
+    api<Payload>(`/api/sense/demo?size=${size}&model=${model}`)
       .then(setData)
       .catch((e: Error) => setError(e.message || 'The explorer could not load.'))
   }, [])
@@ -203,16 +210,30 @@ export default function Explorer() {
               <summary id="trace-title" className="min-h-11 cursor-pointer py-2 text-xl font-semibold">
                 How this was made
               </summary>
+              <p className="mt-3">
+                <strong>Orchestrator:</strong> {data.agents.planner === 'model' ? 'a model chose the order of the steps' : 'a fixed order chose the steps'}.{' '}
+                {data.agents.model_note}
+              </p>
+              <p className="mt-1 text-sm text-[var(--color-mute)]">
+                Checked by plain code at the end: {data.agents.issues.length === 0 ? 'no problems found' : `${data.agents.issues.length} problem(s): ${data.agents.issues.join('; ')}`}
+                {data.agents.fixes.length > 0 ? `. ${data.agents.fixes.length} model answer(s) were rejected or replaced.` : '.'}
+              </p>
               <ol className="mt-3 grid gap-3">
                 {data.trace.map((s, i) => (
                   <li key={s.agent} className="rounded-xl border border-[var(--color-line)] bg-[var(--color-card)] p-4">
-                    <p className="font-semibold">
-                      {i + 1}. {s.agent}
+                    <p className="flex flex-wrap items-center gap-2 font-semibold">
+                      <span>
+                        {i + 1}. {s.agent}
+                      </span>
+                      <span className="rounded-full border border-[var(--color-line-strong)] px-2 py-0.5 text-xs font-semibold">
+                        {s.mode === 'model' ? 'Used a model' : s.note.startsWith('skipped') ? 'Skipped' : 'Plain code'}
+                      </span>
                     </p>
                     <p className="text-[var(--color-mute)]">{s.job}</p>
                     <p className="mt-1 tabular-nums">
                       {s.received} in, {s.produced} out. {s.note}
                     </p>
+                    {s.decision && <p className="mt-1 text-sm text-[var(--color-mute)]">Why now: {s.decision}</p>}
                   </li>
                 ))}
               </ol>
@@ -239,6 +260,12 @@ function OpportunityCard({ o }: { o: Opportunity }) {
           {v.text}
         </span>
       </div>
+      {o.summary && (
+        <p className="mt-3 text-[var(--color-fog)]">
+          {o.summary}
+          {o.summary_mode === 'model' && <span className="ml-2 text-xs font-semibold uppercase text-[var(--color-mute)]">Written by a model, checked</span>}
+        </p>
+      )}
       <dl className="mt-3 grid grid-cols-3 gap-3 text-sm">
         <div>
           <dt className="text-[var(--color-mute)]">Score</dt>

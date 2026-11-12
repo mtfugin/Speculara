@@ -41,3 +41,4 @@ integrations/socialmonitor/node_modules/
 
 # Real collected data stays on this computer, never in the repository (SENSE privacy plan)
 backend/data/real/
+/backend/.collector-test/

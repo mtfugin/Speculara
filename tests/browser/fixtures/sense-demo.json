@@ -25,7 +25,9 @@
       "validation_test": "Ask 20 nearby coffee drinkers if they would switch for this option. Then offer it at one shop for two weeks and count orders.",
       "labels": [
         "illustrative"
-      ]
+      ],
+      "summary": "People in Poblacion ask about dietary or drink needs, and we did not see a listed shop that answers it. Demand confidence is medium and supply confidence is low.",
+      "summary_mode": "template"
     },
     {
       "rank": 2,
@@ -49,7 +51,9 @@
       "validation_test": "Offer one entry-priced drink at one shop for two weeks. Compare orders with the usual menu.",
       "labels": [
         "illustrative"
-      ]
+      ],
+      "summary": "People in Bel-Air ask about price, and we did not see a listed shop that answers it. Demand confidence is medium and supply confidence is low.",
+      "summary_mode": "template"
     },
     {
       "rank": 3,
@@ -74,31 +78,9 @@
       "validation_test": "Ask 10 customers what would make them trust a new shop. Compare with what the shops already show.",
       "labels": [
         "illustrative"
-      ]
-    },
-    {
-      "rank": 4,
-      "barangay": "Poblacion",
-      "theme": "availability",
-      "score": 61.63,
-      "verdict": "covered",
-      "demand_confidence": "medium",
-      "supply_confidence": "medium",
-      "supply_status": "covered",
-      "evidence": [
-        "meron bang oat milk?",
-        "sana may oat milk dito",
-        "walang decaf dito, sana meron"
       ],
-      "uncertainty": [
-        "At least one listed shop answers this need.",
-        "Largest contribution: supply. 1 of 3 supply observations in this barangay cover this theme; less coverage means more opportunity.",
-        "Part or all of this rests on illustrative data, not real observations, so treat it as a demonstration only."
-      ],
-      "validation_test": "Check opening hours against the times people ask about. Trial one extended day at one shop and count walk-ins.",
-      "labels": [
-        "illustrative"
-      ]
+      "summary": "People in Guadalupe Nuevo mention trust and hygiene. Shop listings cannot show whether it is met, so supply was not assessed.",
+      "summary_mode": "template"
     }
   ],
   "insufficient_evidence": [
@@ -125,7 +107,9 @@
       "validation_test": "Check opening hours against the times people ask about. Trial one extended day at one shop and count walk-ins.",
       "labels": [
         "illustrative"
-      ]
+      ],
+      "summary": "There is not enough evidence about availability in San Lorenzo to say anything yet.",
+      "summary_mode": "template"
     }
   ],
   "trace": [
@@ -133,38 +117,84 @@
       "agent": "friction miner",
       "job": "sort comments into the eight frictions, keep the original quote",
       "received": 27,
-      "produced": 35,
-      "note": "0 comment(s) matched no friction and were left unsorted"
+      "produced": 27,
+      "note": "0 comment(s) matched no friction and were left unsorted",
+      "mode": "rules",
+      "decision": "rules planner, chose mine from ['mine', 'supply']: fixed order"
     },
     {
       "agent": "supply loader",
       "job": "turn shop and menu rows into supply evidence",
       "received": 8,
       "produced": 8,
-      "note": "0 warning(s) on the shop files"
+      "note": "0 warning(s) on the shop files",
+      "mode": "rules",
+      "decision": "rules planner, chose supply from ['supply', 'read']: fixed order"
+    },
+    {
+      "agent": "model reader",
+      "job": "model second opinion on comments the word list could not sort",
+      "received": 0,
+      "produced": 0,
+      "note": "skipped: no model configured",
+      "mode": "rules",
+      "decision": "rules planner, chose read from ['read', 'ghosts']: fixed order"
     },
     {
       "agent": "ghost finder",
       "job": "match demand against supply, keeping their confidence apart",
-      "received": 35,
-      "produced": 5,
-      "note": "2 candidate gap(s) saved as inferred evidence"
+      "received": 27,
+      "produced": 4,
+      "note": "2 candidate gap(s) saved as inferred evidence",
+      "mode": "rules",
+      "decision": "rules planner, chose ghosts from ['ghosts']: fixed order"
     },
     {
       "agent": "scorer",
       "job": "explainable score per barangay and need, or insufficient evidence",
-      "received": 5,
-      "produced": 5,
-      "note": "4 scored, 1 with insufficient evidence"
+      "received": 4,
+      "produced": 4,
+      "note": "3 scored, 1 with insufficient evidence",
+      "mode": "rules",
+      "decision": "rules planner, chose score from ['score']: fixed order"
     },
     {
       "agent": "dossier writer",
       "job": "rank, attach quotes and doubts, suggest one validation test",
-      "received": 5,
-      "produced": 5,
-      "note": "2 candidate gap(s). Strongest: compatibility in Poblacion (score 68, demand confidence medium, supply confidence low). Built on illustrative data, so these are not findings about real shops or people."
+      "received": 4,
+      "produced": 4,
+      "note": "2 candidate gap(s). Strongest: compatibility in Poblacion (score 68, demand confidence medium, supply confidence low). Built on illustrative data, so these are not findings about real shops or people.",
+      "mode": "rules",
+      "decision": "rules planner, chose dossier from ['dossier']: fixed order"
+    },
+    {
+      "agent": "model narrator",
+      "job": "model summary of each ranked opportunity, checked against the facts",
+      "received": 0,
+      "produced": 0,
+      "note": "skipped: no model configured",
+      "mode": "rules",
+      "decision": "rules planner, chose narrate from ['narrate']: fixed order"
+    },
+    {
+      "agent": "critic",
+      "job": "check quotes, labels, honesty rules and every model summary with plain code",
+      "received": 4,
+      "produced": 0,
+      "note": "0 issue(s) found",
+      "mode": "rules",
+      "decision": "rules planner, chose critic from ['critic']: fixed order"
     }
   ],
+  "agents": {
+    "planner": "rules",
+    "model_requested": false,
+    "model_name": "",
+    "model_steps": [],
+    "model_note": "Model agents are off. Add ?model=on to the page address to use them.",
+    "issues": [],
+    "fixes": []
+  },
   "map": [
     {
       "barangay": "Bangkal",

@@ -148,3 +148,4 @@
 # Small MVP images and demo workbooks use ordinary Git, without LFS hydration.
 *.png -filter -diff -merge -text
 *.xlsx -filter -diff -merge -text
+*.pdf -filter -diff -merge -text

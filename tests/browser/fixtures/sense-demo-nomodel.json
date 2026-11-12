@@ -1,0 +1,701 @@
+{
+  "label": "illustrative",
+  "notice": "Every shop, comment and number on this page is invented for development. It says nothing about real shops or people.",
+  "headline": "3 candidate gap(s). Strongest: compatibility in Poblacion (score 73, demand confidence medium, supply confidence low). Built on illustrative data, so these are not findings about real shops or people.",
+  "opportunities": [
+    {
+      "rank": 1,
+      "barangay": "Poblacion",
+      "theme": "compatibility",
+      "score": 73.12,
+      "verdict": "candidate gap",
+      "demand_confidence": "medium",
+      "supply_confidence": "low",
+      "supply_status": "not seen",
+      "evidence": [
+        "meron bang oat milk?",
+        "sana may oat milk dito",
+        "any vegan milk options? please"
+      ],
+      "uncertainty": [
+        "Not seen among the 2 shop(s) we have listed in Poblacion. This is not proof that nothing is served there.",
+        "Largest contribution: supply. 0 of 5 supply observations in this barangay cover this theme; less coverage means more opportunity.",
+        "Part or all of this rests on illustrative data, not real observations, so treat it as a demonstration only."
+      ],
+      "validation_test": "Ask 20 nearby coffee drinkers if they would switch for this option. Then offer it at one shop for two weeks and count orders.",
+      "labels": [
+        "illustrative"
+      ],
+      "summary": "People in Poblacion ask about dietary or drink needs, and we did not see a listed shop that answers it. Demand confidence is medium and supply confidence is low.",
+      "summary_mode": "template"
+    },
+    {
+      "rank": 2,
+      "barangay": "Bel-Air",
+      "theme": "affordability",
+      "score": 72.5,
+      "verdict": "candidate gap",
+      "demand_confidence": "medium",
+      "supply_confidence": "low",
+      "supply_status": "not seen",
+      "evidence": [
+        "ang mahal ng kape dito",
+        "too pricey for a student",
+        "overpriced iced latte"
+      ],
+      "uncertainty": [
+        "Not seen among the 1 shop(s) we have listed in Bel-Air. This is not proof that nothing is served there.",
+        "Largest contribution: supply. 0 of 3 supply observations in this barangay cover this theme; less coverage means more opportunity.",
+        "Part or all of this rests on illustrative data, not real observations, so treat it as a demonstration only."
+      ],
+      "validation_test": "Offer one entry-priced drink at one shop for two weeks. Compare orders with the usual menu.",
+      "labels": [
+        "illustrative"
+      ],
+      "summary": "People in Bel-Air ask about price, and we did not see a listed shop that answers it. Demand confidence is medium and supply confidence is low.",
+      "summary_mode": "template"
+    },
+    {
+      "rank": 3,
+      "barangay": "Olympia",
+      "theme": "compatibility",
+      "score": 55.88,
+      "verdict": "candidate gap",
+      "demand_confidence": "medium",
+      "supply_confidence": "low",
+      "supply_status": "not seen",
+      "evidence": [
+        "meron bang oat milk?",
+        "sana may oat milk dito",
+        "any vegan milk options? please"
+      ],
+      "uncertainty": [
+        "Not seen among the 1 shop(s) we have listed in Olympia. This is not proof that nothing is served there.",
+        "Growth is missing and left out, and the other weights were rescaled. Not enough data: 6 recent and 1 earlier observations; each 28 day window needs at least 2.",
+        "Largest contribution: supply. 0 of 2 supply observations in this barangay cover this theme; less coverage means more opportunity.",
+        "Part or all of this rests on illustrative data, not real observations, so treat it as a demonstration only."
+      ],
+      "validation_test": "Ask 20 nearby coffee drinkers if they would switch for this option. Then offer it at one shop for two weeks and count orders.",
+      "labels": [
+        "illustrative"
+      ],
+      "summary": "People in Olympia ask about dietary or drink needs, and we did not see a listed shop that answers it. Demand confidence is medium and supply confidence is low.",
+      "summary_mode": "template"
+    },
+    {
+      "rank": 4,
+      "barangay": "Bangkal",
+      "theme": "compatibility",
+      "score": 37.5,
+      "verdict": "supply unknown",
+      "demand_confidence": "medium",
+      "supply_confidence": "low",
+      "supply_status": "unknown",
+      "evidence": [
+        "meron bang oat milk?",
+        "sana may oat milk dito",
+        "any vegan milk options? please"
+      ],
+      "uncertainty": [
+        "No supply evidence for Bangkal yet. This is missing data, not a gap.",
+        "Growth is missing and left out, and the other weights were rescaled. Not enough data: 6 recent and 0 earlier observations; each 28 day window needs at least 2.",
+        "Supply is missing and left out, and the other weights were rescaled. No supply evidence for this barangay. That is unknown, not zero supply, so it is left out.",
+        "Largest contribution: persistence. Observations fall in 5 distinct calendar weeks (full marks at 8).",
+        "Part or all of this rests on illustrative data, not real observations, so treat it as a demonstration only."
+      ],
+      "validation_test": "Ask 20 nearby coffee drinkers if they would switch for this option. Then offer it at one shop for two weeks and count orders.",
+      "labels": [
+        "illustrative"
+      ],
+      "summary": "People in Bangkal ask about dietary or drink needs. We have no shop data there yet, so we cannot say if it is met.",
+      "summary_mode": "template"
+    },
+    {
+      "rank": 5,
+      "barangay": "San Lorenzo",
+      "theme": "experience",
+      "score": 75.0,
+      "verdict": "demand only",
+      "demand_confidence": "high",
+      "supply_confidence": "low",
+      "supply_status": "not assessed",
+      "evidence": [
+        "bad service, sobrang tagal",
+        "slow service talaga",
+        "sobrang ingay at crowded"
+      ],
+      "uncertainty": [
+        "Shop listings and menus cannot show whether this need is met, so supply was not assessed.",
+        "Largest contribution: supply. 0 of 4 supply observations in this barangay cover this theme; less coverage means more opportunity.",
+        "Part or all of this rests on illustrative data, not real observations, so treat it as a demonstration only."
+      ],
+      "validation_test": "Time the wait at three shops at the same hour and ask 10 customers what slows them down.",
+      "labels": [
+        "illustrative"
+      ],
+      "summary": "People in San Lorenzo mention service and atmosphere. Shop listings cannot show whether it is met, so supply was not assessed.",
+      "summary_mode": "template"
+    },
+    {
+      "rank": 6,
+      "barangay": "Guadalupe Nuevo",
+      "theme": "trust",
+      "score": 66.28,
+      "verdict": "demand only",
+      "demand_confidence": "medium",
+      "supply_confidence": "low",
+      "supply_status": "not assessed",
+      "evidence": [
+        "madumi ang cups, hygiene ba ito?",
+        "legit ba to? parang scam",
+        "fake ba yung reviews?"
+      ],
+      "uncertainty": [
+        "Shop listings and menus cannot show whether this need is met, so supply was not assessed.",
+        "Growth is missing and left out, and the other weights were rescaled. Not enough data: 6 recent and 1 earlier observations; each 28 day window needs at least 2.",
+        "Largest contribution: supply. 0 of 2 supply observations in this barangay cover this theme; less coverage means more opportunity.",
+        "Part or all of this rests on illustrative data, not real observations, so treat it as a demonstration only."
+      ],
+      "validation_test": "Ask 10 customers what would make them trust a new shop. Compare with what the shops already show.",
+      "labels": [
+        "illustrative"
+      ],
+      "summary": "People in Guadalupe Nuevo mention trust and hygiene. Shop listings cannot show whether it is met, so supply was not assessed.",
+      "summary_mode": "template"
+    },
+    {
+      "rank": 7,
+      "barangay": "Valenzuela",
+      "theme": "quality",
+      "score": 61.76,
+      "verdict": "demand only",
+      "demand_confidence": "high",
+      "supply_confidence": "low",
+      "supply_status": "not assessed",
+      "evidence": [
+        "walang lasa ang kape",
+        "sunog ang kape, bitter",
+        "weak coffee, parang tubig"
+      ],
+      "uncertainty": [
+        "Shop listings and menus cannot show whether this need is met, so supply was not assessed.",
+        "Growth is missing and left out, and the other weights were rescaled. Not enough data: 7 recent and 1 earlier observations; each 28 day window needs at least 2.",
+        "Largest contribution: supply. 0 of 2 supply observations in this barangay cover this theme; less coverage means more opportunity.",
+        "Part or all of this rests on illustrative data, not real observations, so treat it as a demonstration only."
+      ],
+      "validation_test": "Run a blind tasting with 10 people between two shops in the area and record the preference.",
+      "labels": [
+        "illustrative"
+      ],
+      "summary": "People in Valenzuela mention taste and quality. Shop listings cannot show whether it is met, so supply was not assessed.",
+      "summary_mode": "template"
+    },
+    {
+      "rank": 8,
+      "barangay": "La Paz",
+      "theme": "discovery",
+      "score": 59.12,
+      "verdict": "demand only",
+      "demand_confidence": "medium",
+      "supply_confidence": "low",
+      "supply_status": "not assessed",
+      "evidence": [
+        "saan ba yung shop? hidden",
+        "di ko alam kung nasaan",
+        "where is it? hidden gem pero hindi ko makita"
+      ],
+      "uncertainty": [
+        "Shop listings and menus cannot show whether this need is met, so supply was not assessed.",
+        "Growth is missing and left out, and the other weights were rescaled. Not enough data: 5 recent and 0 earlier observations; each 28 day window needs at least 2.",
+        "Largest contribution: supply. 0 of 2 supply observations in this barangay cover this theme; less coverage means more opportunity.",
+        "Part or all of this rests on illustrative data, not real observations, so treat it as a demonstration only."
+      ],
+      "validation_test": "Post once in a local group asking where people look for coffee here. Count answers that name no shop.",
+      "labels": [
+        "illustrative"
+      ],
+      "summary": "People in La Paz mention finding the shop. Shop listings cannot show whether it is met, so supply was not assessed.",
+      "summary_mode": "template"
+    },
+    {
+      "rank": 9,
+      "barangay": "Magallanes",
+      "theme": "accessibility",
+      "score": 58.09,
+      "verdict": "demand only",
+      "demand_confidence": "medium",
+      "supply_confidence": "low",
+      "supply_status": "not assessed",
+      "evidence": [
+        "walang parking dito",
+        "hirap puntahan",
+        "no wifi and far from the station"
+      ],
+      "uncertainty": [
+        "Shop listings and menus cannot show whether this need is met, so supply was not assessed.",
+        "Growth is missing and left out, and the other weights were rescaled. Not enough data: 5 recent and 1 earlier observations; each 28 day window needs at least 2.",
+        "Largest contribution: supply. 0 of 2 supply observations in this barangay cover this theme; less coverage means more opportunity.",
+        "Part or all of this rests on illustrative data, not real observations, so treat it as a demonstration only."
+      ],
+      "validation_test": "Visit during a busy hour and note the barriers people mention. Ask 10 customers which matters most.",
+      "labels": [
+        "illustrative"
+      ],
+      "summary": "People in Magallanes mention getting there. Shop listings cannot show whether it is met, so supply was not assessed.",
+      "summary_mode": "template"
+    },
+    {
+      "rank": 10,
+      "barangay": "San Antonio",
+      "theme": "affordability",
+      "score": 60.33,
+      "verdict": "covered",
+      "demand_confidence": "medium",
+      "supply_confidence": "medium",
+      "supply_status": "covered",
+      "evidence": [
+        "ang mahal ng kape dito",
+        "too pricey for a student",
+        "overpriced iced latte"
+      ],
+      "uncertainty": [
+        "At least one listed shop answers this need.",
+        "Largest contribution: growth. 7 observations in the last 28 days against 2 in the 28 days before.",
+        "Part or all of this rests on illustrative data, not real observations, so treat it as a demonstration only."
+      ],
+      "validation_test": "Offer one entry-priced drink at one shop for two weeks. Compare orders with the usual menu.",
+      "labels": [
+        "illustrative"
+      ],
+      "summary": "People in San Antonio ask about price, and at least one listed shop answers it.",
+      "summary_mode": "template"
+    },
+    {
+      "rank": 11,
+      "barangay": "San Lorenzo",
+      "theme": "compatibility",
+      "score": 47.5,
+      "verdict": "covered",
+      "demand_confidence": "medium",
+      "supply_confidence": "medium",
+      "supply_status": "covered",
+      "evidence": [
+        "meron bang oat milk?",
+        "sana may oat milk dito",
+        "any vegan milk options? please"
+      ],
+      "uncertainty": [
+        "At least one listed shop answers this need.",
+        "Growth is missing and left out, and the other weights were rescaled. Not enough data: 5 recent and 1 earlier observations; each 28 day window needs at least 2.",
+        "Largest contribution: supply. 1 of 4 supply observations in this barangay cover this theme; less coverage means more opportunity.",
+        "Part or all of this rests on illustrative data, not real observations, so treat it as a demonstration only."
+      ],
+      "validation_test": "Ask 20 nearby coffee drinkers if they would switch for this option. Then offer it at one shop for two weeks and count orders.",
+      "labels": [
+        "illustrative"
+      ],
+      "summary": "People in San Lorenzo ask about dietary or drink needs, and at least one listed shop answers it.",
+      "summary_mode": "template"
+    },
+    {
+      "rank": 12,
+      "barangay": "Poblacion",
+      "theme": "availability",
+      "score": 41.32,
+      "verdict": "covered",
+      "demand_confidence": "medium",
+      "supply_confidence": "medium",
+      "supply_status": "covered",
+      "evidence": [
+        "sold out na naman",
+        "ubos na ang cold brew",
+        "closed na pag punta ko"
+      ],
+      "uncertainty": [
+        "At least one listed shop answers this need.",
+        "Growth is missing and left out, and the other weights were rescaled. Not enough data: 4 recent and 1 earlier observations; each 28 day window needs at least 2.",
+        "Largest contribution: supply. 2 of 5 supply observations in this barangay cover this theme; less coverage means more opportunity.",
+        "Part or all of this rests on illustrative data, not real observations, so treat it as a demonstration only."
+      ],
+      "validation_test": "Check opening hours against the times people ask about. Trial one extended day at one shop and count walk-ins.",
+      "labels": [
+        "illustrative"
+      ],
+      "summary": "People in Poblacion ask about availability, and at least one listed shop answers it.",
+      "summary_mode": "template"
+    }
+  ],
+  "insufficient_evidence": [
+    {
+      "rank": null,
+      "barangay": "Carmona",
+      "theme": "affordability",
+      "score": null,
+      "verdict": "insufficient evidence",
+      "demand_confidence": "medium",
+      "supply_confidence": "medium",
+      "supply_status": "covered",
+      "evidence": [
+        "ang mahal ng kape dito",
+        "too pricey for a student",
+        "overpriced iced latte"
+      ],
+      "uncertainty": [
+        "At least one listed shop answers this need.",
+        "Only 4 observations; at least 5 are needed.",
+        "No score is given, because a number here would look more certain than the evidence is.",
+        "Part or all of this rests on illustrative data, not real observations, so treat it as a demonstration only."
+      ],
+      "validation_test": "Offer one entry-priced drink at one shop for two weeks. Compare orders with the usual menu.",
+      "labels": [
+        "illustrative"
+      ],
+      "summary": "There is not enough evidence about price in Carmona to say anything yet.",
+      "summary_mode": "template"
+    },
+    {
+      "rank": null,
+      "barangay": "Pio del Pilar",
+      "theme": "availability",
+      "score": null,
+      "verdict": "insufficient evidence",
+      "demand_confidence": "low",
+      "supply_confidence": "low",
+      "supply_status": "not seen",
+      "evidence": [
+        "sold out na naman",
+        "ubos na ang cold brew",
+        "closed na pag punta ko"
+      ],
+      "uncertainty": [
+        "Not seen among the 1 shop(s) we have listed in Pio del Pilar. This is not proof that nothing is served there.",
+        "Only 3 observations; at least 5 are needed.",
+        "No score is given, because a number here would look more certain than the evidence is.",
+        "Part or all of this rests on illustrative data, not real observations, so treat it as a demonstration only."
+      ],
+      "validation_test": "Check opening hours against the times people ask about. Trial one extended day at one shop and count walk-ins.",
+      "labels": [
+        "illustrative"
+      ],
+      "summary": "There is not enough evidence about availability in Pio del Pilar to say anything yet.",
+      "summary_mode": "template"
+    }
+  ],
+  "trace": [
+    {
+      "agent": "friction miner",
+      "job": "sort comments into the eight frictions, keep the original quote",
+      "received": 105,
+      "produced": 101,
+      "note": "4 comment(s) matched no friction and were left unsorted",
+      "mode": "rules",
+      "decision": "rules planner, chose mine from ['mine', 'supply']: fixed order"
+    },
+    {
+      "agent": "supply loader",
+      "job": "turn shop and menu rows into supply evidence",
+      "received": 29,
+      "produced": 29,
+      "note": "0 warning(s) on the shop files",
+      "mode": "rules",
+      "decision": "rules planner, chose supply from ['supply', 'read']: fixed order"
+    },
+    {
+      "agent": "model reader",
+      "job": "model second opinion on comments the word list could not sort",
+      "received": 0,
+      "produced": 0,
+      "note": "skipped: no model configured",
+      "mode": "rules",
+      "decision": "rules planner, chose read from ['read', 'ghosts']: fixed order"
+    },
+    {
+      "agent": "ghost finder",
+      "job": "match demand against supply, keeping their confidence apart",
+      "received": 101,
+      "produced": 14,
+      "note": "4 candidate gap(s) saved as inferred evidence",
+      "mode": "rules",
+      "decision": "rules planner, chose ghosts from ['ghosts']: fixed order"
+    },
+    {
+      "agent": "scorer",
+      "job": "explainable score per barangay and need, or insufficient evidence",
+      "received": 14,
+      "produced": 14,
+      "note": "12 scored, 2 with insufficient evidence",
+      "mode": "rules",
+      "decision": "rules planner, chose score from ['score']: fixed order"
+    },
+    {
+      "agent": "dossier writer",
+      "job": "rank, attach quotes and doubts, suggest one validation test",
+      "received": 14,
+      "produced": 14,
+      "note": "3 candidate gap(s). Strongest: compatibility in Poblacion (score 73, demand confidence medium, supply confidence low). Built on illustrative data, so these are not findings about real shops or people.",
+      "mode": "rules",
+      "decision": "rules planner, chose dossier from ['dossier']: fixed order"
+    },
+    {
+      "agent": "model narrator",
+      "job": "model summary of each ranked opportunity, checked against the facts",
+      "received": 0,
+      "produced": 0,
+      "note": "skipped: no model configured",
+      "mode": "rules",
+      "decision": "rules planner, chose narrate from ['narrate']: fixed order"
+    },
+    {
+      "agent": "critic",
+      "job": "check quotes, labels, honesty rules and every model summary with plain code",
+      "received": 14,
+      "produced": 0,
+      "note": "0 issue(s) found",
+      "mode": "rules",
+      "decision": "rules planner, chose critic from ['critic']: fixed order"
+    }
+  ],
+  "agents": {
+    "planner": "rules",
+    "model_requested": true,
+    "model_name": "",
+    "model_steps": [],
+    "model_note": "No model is configured (it needs ENABLE_AI_CHAT=1 and a key on the server), so the steps ran without one.",
+    "issues": [],
+    "fixes": []
+  },
+  "map": [
+    {
+      "barangay": "Bangkal",
+      "demand": 6,
+      "shops": 0,
+      "gaps": 0,
+      "has_data": true
+    },
+    {
+      "barangay": "Bel-Air",
+      "demand": 12,
+      "shops": 1,
+      "gaps": 1,
+      "has_data": true
+    },
+    {
+      "barangay": "Carmona",
+      "demand": 4,
+      "shops": 1,
+      "gaps": 0,
+      "has_data": true
+    },
+    {
+      "barangay": "Cembo",
+      "demand": 0,
+      "shops": 0,
+      "gaps": 0,
+      "has_data": false
+    },
+    {
+      "barangay": "Comembo",
+      "demand": 0,
+      "shops": 0,
+      "gaps": 0,
+      "has_data": false
+    },
+    {
+      "barangay": "Dasmariñas",
+      "demand": 0,
+      "shops": 0,
+      "gaps": 0,
+      "has_data": false
+    },
+    {
+      "barangay": "East Rembo",
+      "demand": 0,
+      "shops": 0,
+      "gaps": 0,
+      "has_data": false
+    },
+    {
+      "barangay": "Forbes Park",
+      "demand": 0,
+      "shops": 0,
+      "gaps": 0,
+      "has_data": false
+    },
+    {
+      "barangay": "Guadalupe Nuevo",
+      "demand": 7,
+      "shops": 1,
+      "gaps": 0,
+      "has_data": true
+    },
+    {
+      "barangay": "Guadalupe Viejo",
+      "demand": 0,
+      "shops": 0,
+      "gaps": 0,
+      "has_data": false
+    },
+    {
+      "barangay": "Kasilawan",
+      "demand": 0,
+      "shops": 0,
+      "gaps": 0,
+      "has_data": false
+    },
+    {
+      "barangay": "La Paz",
+      "demand": 5,
+      "shops": 1,
+      "gaps": 0,
+      "has_data": true
+    },
+    {
+      "barangay": "Magallanes",
+      "demand": 6,
+      "shops": 1,
+      "gaps": 0,
+      "has_data": true
+    },
+    {
+      "barangay": "Olympia",
+      "demand": 7,
+      "shops": 1,
+      "gaps": 1,
+      "has_data": true
+    },
+    {
+      "barangay": "Palanan",
+      "demand": 0,
+      "shops": 0,
+      "gaps": 0,
+      "has_data": false
+    },
+    {
+      "barangay": "Pembo",
+      "demand": 0,
+      "shops": 0,
+      "gaps": 0,
+      "has_data": false
+    },
+    {
+      "barangay": "Pinagkaisahan",
+      "demand": 0,
+      "shops": 0,
+      "gaps": 0,
+      "has_data": false
+    },
+    {
+      "barangay": "Pio del Pilar",
+      "demand": 3,
+      "shops": 1,
+      "gaps": 0,
+      "has_data": true
+    },
+    {
+      "barangay": "Pitogo",
+      "demand": 0,
+      "shops": 0,
+      "gaps": 0,
+      "has_data": false
+    },
+    {
+      "barangay": "Poblacion",
+      "demand": 19,
+      "shops": 2,
+      "gaps": 1,
+      "has_data": true
+    },
+    {
+      "barangay": "Post Proper Northside",
+      "demand": 0,
+      "shops": 0,
+      "gaps": 0,
+      "has_data": false
+    },
+    {
+      "barangay": "Post Proper Southside",
+      "demand": 0,
+      "shops": 0,
+      "gaps": 0,
+      "has_data": false
+    },
+    {
+      "barangay": "Rizal",
+      "demand": 0,
+      "shops": 0,
+      "gaps": 0,
+      "has_data": false
+    },
+    {
+      "barangay": "San Antonio",
+      "demand": 9,
+      "shops": 2,
+      "gaps": 0,
+      "has_data": true
+    },
+    {
+      "barangay": "San Isidro",
+      "demand": 0,
+      "shops": 0,
+      "gaps": 0,
+      "has_data": false
+    },
+    {
+      "barangay": "San Lorenzo",
+      "demand": 15,
+      "shops": 2,
+      "gaps": 0,
+      "has_data": true
+    },
+    {
+      "barangay": "Santa Cruz",
+      "demand": 0,
+      "shops": 0,
+      "gaps": 0,
+      "has_data": false
+    },
+    {
+      "barangay": "Singkamas",
+      "demand": 0,
+      "shops": 0,
+      "gaps": 0,
+      "has_data": false
+    },
+    {
+      "barangay": "South Cembo",
+      "demand": 0,
+      "shops": 0,
+      "gaps": 0,
+      "has_data": false
+    },
+    {
+      "barangay": "Tejeros",
+      "demand": 0,
+      "shops": 0,
+      "gaps": 0,
+      "has_data": false
+    },
+    {
+      "barangay": "Urdaneta",
+      "demand": 0,
+      "shops": 0,
+      "gaps": 0,
+      "has_data": false
+    },
+    {
+      "barangay": "Valenzuela",
+      "demand": 8,
+      "shops": 1,
+      "gaps": 0,
+      "has_data": true
+    },
+    {
+      "barangay": "West Rembo",
+      "demand": 0,
+      "shops": 0,
+      "gaps": 0,
+      "has_data": false
+    }
+  ],
+  "map_note": "Tiles are in alphabetical order. This is not a geographic map; real boundaries need a license check first."
+}

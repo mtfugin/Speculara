@@ -40,6 +40,7 @@ class Observation:
     lon: float | None = None
     model: str | None = None       # inferred only: which model or rule made it
     derived_from: list[str] = field(default_factory=list)  # inferred only: observed ids it rests on
+    source_ref: str | None = None  # inferred demand only: id of the raw comment a model read, when no observed id exists for it
     extra: dict = field(default_factory=dict)
 
     def validate(self) -> None:
@@ -71,10 +72,12 @@ class Observation:
             raise ValueError(f"{self.id}: give both lat and lon, or neither")
         if self.lat is not None and not (14.0 < self.lat < 15.0 and 120.5 < self.lon < 121.5):
             raise ValueError(f"{self.id}: coordinates are outside the Metro Manila area")
-        if self.basis == "inferred" and not (self.model and self.derived_from):
-            raise ValueError(f"{self.id}: inferred evidence must name its model and the observed ids it came from")
-        if self.basis == "observed" and (self.model or self.derived_from):
-            raise ValueError(f"{self.id}: observed evidence has no model or derived_from")
+        if self.basis == "inferred" and not (self.model and (self.derived_from or self.source_ref)):
+            raise ValueError(f"{self.id}: inferred evidence must name its model and what it came from (observed ids, or a source comment)")
+        if self.basis == "inferred" and self.source_ref and self.kind == "demand" and not self.quote.strip():
+            raise ValueError(f"{self.id}: a model reading of a comment must keep the comment's original words")
+        if self.basis == "observed" and (self.model or self.derived_from or self.source_ref):
+            raise ValueError(f"{self.id}: observed evidence has no model, derived_from or source_ref")
 
 
 class EvidenceStore:

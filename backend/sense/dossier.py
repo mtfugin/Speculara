@@ -6,6 +6,7 @@ claims. Pairs without enough evidence are listed apart as "insufficient evidence
 from dataclasses import dataclass, field
 
 from backend.sense.ghosts import Ghost
+from backend.sense.offerings import THEME_LABEL
 from backend.sense.scoring import OpportunityScore
 
 # One cheap way to find out if the need is real, per friction. Plain language, no jargon.
@@ -35,6 +36,23 @@ class Opportunity:
     uncertainty: list[str] = field(default_factory=list)
     validation_test: str = ""
     labels: list[str] = field(default_factory=list)
+    summary: str = ""
+    summary_mode: str = "template"   # "template" (fixed wording) or "model" (written by a model, checked)
+
+
+def template_summary(o: "Opportunity") -> str:
+    """Fixed wording built only from the verdict and confidences. The fallback for any model summary."""
+    need = THEME_LABEL[o.theme]
+    if o.verdict == "candidate gap":
+        return (f"People in {o.barangay} ask about {need}, and we did not see a listed shop that answers it. "
+                f"Demand confidence is {o.demand_confidence} and supply confidence is {o.supply_confidence}.")
+    if o.verdict == "covered":
+        return f"People in {o.barangay} ask about {need}, and at least one listed shop answers it."
+    if o.verdict == "supply unknown":
+        return f"People in {o.barangay} ask about {need}. We have no shop data there yet, so we cannot say if it is met."
+    if o.verdict == "demand only":
+        return f"People in {o.barangay} mention {need}. Shop listings cannot show whether it is met, so supply was not assessed."
+    return f"There is not enough evidence about {need} in {o.barangay} to say anything yet."
 
 
 def build_dossier(ghosts: list[Ghost], scores: list[OpportunityScore]) -> dict:
@@ -54,6 +72,7 @@ def build_dossier(ghosts: list[Ghost], scores: list[OpportunityScore]) -> dict:
             insufficient.append(entry)
         else:
             ranked.append(entry)
+        entry.summary = template_summary(entry)
     # candidate gaps first, then by score; evidence that is only demand or supply-unknown follows
     priority = {"candidate gap": 0, "covered": 3, "supply unknown": 1, "demand only": 2}
     ranked.sort(key=lambda o: (priority[o.verdict], -(o.score or 0), o.barangay, o.theme))

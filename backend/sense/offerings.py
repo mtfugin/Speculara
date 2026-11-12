@@ -7,6 +7,11 @@ Only three frictions can be checked against shop listings and menus:
 The other five frictions (discovery, accessibility, trust, quality, experience) cannot be judged
 from a menu, so SENSE reports demand for them and says the supply side was not assessed.
 """
+THEME_LABEL = {
+    "compatibility": "dietary or drink needs", "affordability": "price", "availability": "availability",
+    "discovery": "finding the shop", "accessibility": "getting there", "trust": "trust and hygiene",
+    "quality": "taste and quality", "experience": "service and atmosphere",
+}
 AFFORDABLE_CENTAVOS = 10000  # a plain item at or under 100 pesos
 CHECKABLE = ("compatibility", "affordability", "availability")
 COMPATIBILITY_CUES = ("oat", "almond", "soy", "coconut milk", "plant", "vegan", "decaf", "sugar free", "sugar-free",

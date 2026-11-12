@@ -5,7 +5,7 @@ must be labeled illustrative. The shapes match what the collector would produce 
 
 Two sizes:
 - "small": 27 comments over 4 barangays. The tests and the demo script rely on its exact shape.
-- "large": 101 comments over 12 barangays, built to show every kind of result: candidate gaps, needs
+- "large": 105 comments over 12 barangays (4 of them slangy price complaints the word list cannot sort), built to show every kind of result: candidate gaps, needs
   that are already covered, needs with no supply data, needs a menu cannot judge, and pairs with too
   little evidence to rank. It pairs with the *_large.csv shop and menu files.
 """
@@ -60,6 +60,15 @@ _LARGE_PLAN = (
 )
 _SOURCES = ("illustrative post A", "illustrative post B", "illustrative post C")
 
+# Slangy price complaints in Bel-Air that the word list does not recognise. They exist so the model reader
+# has real work: without a model they stay unsorted, and the trace says so.
+_LARGE_HARD = (
+    "di keri ng allowance ko dito, grabe",
+    "pang-mayaman lang ata ang kape dito",
+    "kulang sa bulsa pag dito kakain",
+    "di ko afford ang drinks nila",
+)
+
 
 def illustrative_comments(today: date, size: str = "small") -> list[dict]:
     if size not in ("small", "large"):
@@ -88,4 +97,7 @@ def illustrative_comments(today: date, size: str = "small") -> list[dict]:
                 "source": _SOURCES[n % len(_SOURCES)],
                 "collected_at": (today - timedelta(days=back)).isoformat(),
             })
+    for n, text in enumerate(_LARGE_HARD):
+        comments.append({"id": f"bel-air-hard-{n + 1}", "text": text, "barangay": "Bel-Air",
+                         "source": _SOURCES[n % len(_SOURCES)], "collected_at": (today - timedelta(days=n * 3)).isoformat()})
     return comments

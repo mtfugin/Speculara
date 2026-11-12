@@ -60,13 +60,46 @@ test("choosing a barangay filters the list, and the layer buttons switch what th
   await expect(page.getByRole("button", { name: /^Poblacion \d/ })).toContainText("10");
 });
 
-test("how it was made lists the five agent steps", async ({ page }) => {
+test("how it was made lists the steps, marks the model steps as skipped, and shows the critic", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 900 });
   await open(page);
   await page.getByText("How this was made").click();
-  for (const name of ["friction miner", "supply loader", "ghost finder", "scorer", "dossier writer"]) {
+  for (const name of ["friction miner", "supply loader", "ghost finder", "scorer", "dossier writer", "critic"]) {
     await expect(page.getByText(name, { exact: false }).first()).toBeVisible();
   }
+  const steps = page.locator("section[aria-labelledby=trace-title] ol > li");
+  await expect(steps).toHaveCount(8);
+  await expect(steps.filter({ hasText: "Skipped" })).toHaveCount(2); // the two optional model steps, with no model
+  await expect(page.getByText("Model agents are off")).toBeVisible();
+  await expect(page.getByText("no problems found")).toBeVisible();
+});
+
+test("with the model agents on, the page shows which steps used a model and which summaries it wrote", async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 900 });
+  const modelPayload = JSON.parse(readFileSync(new URL("./fixtures/sense-demo-model.json", import.meta.url), "utf8"));
+  await page.route("**/api/sense/demo**", (route) => route.fulfill({ json: modelPayload }));
+  await page.goto("/sense.html?size=large&model=on");
+  await expect(page.getByRole("heading", { name: "Opportunity Explorer" })).toBeVisible();
+  const first = page.locator("section[aria-labelledby=ranked-title] > ol > li").first();
+  await expect(first).toContainText("Written by a model, checked");
+  await page.getByText("How this was made").click();
+  await expect(page.getByText("a model chose the order of the steps")).toBeVisible();
+  const steps = page.locator("section[aria-labelledby=trace-title] ol > li");
+  await expect(steps.filter({ hasText: "Used a model" })).toHaveCount(2); // reader and narrator
+  await expect(steps.filter({ hasText: "Skipped" })).toHaveCount(0);
+  await expect(steps.filter({ hasText: "Why now:" }).first()).toBeVisible();
+});
+
+test("asking for the model on a server with none configured explains it and still shows results", async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 900 });
+  // A fixed response for a server with no model. Tests never call the real model, even if this machine has a key.
+  const none = JSON.parse(readFileSync(new URL("./fixtures/sense-demo-nomodel.json", import.meta.url), "utf8"));
+  await page.route("**/api/sense/demo**", (route) => route.fulfill({ json: none }));
+  await page.goto("/sense.html?size=large&model=on");
+  await expect(page.getByRole("heading", { name: "Opportunity Explorer" })).toBeVisible();
+  await expect(page.locator("section[aria-labelledby=ranked-title] > ol > li").first()).toContainText("Candidate gap");
+  await page.getByText("How this was made").click();
+  await expect(page.getByText(/No model is configured/)).toBeVisible();
 });
 
 test("no sideways scrolling on a phone and no accessibility violations", async ({ page }) => {

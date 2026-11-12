@@ -26,12 +26,13 @@ def by_pair(result):
 
 
 class LargeDatasetTests(unittest.TestCase):
-    def test_shape_is_101_comments_over_12_barangays_and_every_comment_is_sorted(self):
+    def test_shape_is_105_comments_over_12_barangays_and_only_the_slangy_ones_stay_unsorted(self):
         comments = illustrative_comments(TODAY, 'large')
-        self.assertEqual(len(comments), 101)
+        self.assertEqual(len(comments), 105)
         self.assertEqual(len({c['barangay'] for c in comments}), 12)
-        self.assertEqual(len({c['id'] for c in comments}), 101)  # ids are unique
-        self.assertEqual(run_large().unclassified, [])
+        self.assertEqual(len({c['id'] for c in comments}), 105)  # ids are unique
+        # the word list cannot sort the four slangy price complaints; a model reader can
+        self.assertEqual(sorted(run_large().unclassified), [f'bel-air-hard-{n}' for n in range(1, 5)])
 
     def test_the_small_dataset_is_unchanged(self):
         self.assertEqual(len(illustrative_comments(TODAY)), 27)

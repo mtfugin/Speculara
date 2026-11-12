@@ -1,0 +1,87 @@
+<!doctype html><html><head><meta charset="utf-8"><style>
+@font-face{font-family:Bricolage;src:url("../../node_modules/@fontsource-variable/bricolage-grotesque/files/bricolage-grotesque-latin-wght-normal.woff2");font-weight:200 800}
+@font-face{font-family:Inter;src:url("../../node_modules/@fontsource-variable/inter/files/inter-latin-wght-normal.woff2");font-weight:100 900}
+@font-face{font-family:JBM;src:url("../../node_modules/@fontsource/jetbrains-mono/files/jetbrains-mono-latin-500-normal.woff2");font-weight:500}
+:root{--canvas:#09090b;--card:#141417;--raised:#1c1c1f;--line:#2a2a2f;--line2:#48484f;--t1:#f5f5f7;--t2:#d2d2d7;--t3:#a1a1a6;--orange:#ff9f0a;--red:#ff453a}
+*{box-sizing:border-box;margin:0}
+body{background:#000}
+.s{width:1920px;height:1080px;position:relative;overflow:hidden;background:var(--canvas);color:var(--t1);font-family:Inter,sans-serif;padding:96px 120px}
+.s::before{content:"";position:absolute;inset:0;background:radial-gradient(900px 600px at 85% 0%,rgba(255,159,10,.14),transparent 70%),radial-gradient(700px 500px at 0% 100%,rgba(255,255,255,.05),transparent 70%)}
+.s>*{position:relative}
+.lab{font-family:JBM,monospace;font-size:22px;letter-spacing:.14em;text-transform:uppercase;color:var(--orange)}
+h1,h2{font-family:Bricolage,sans-serif;font-weight:800;letter-spacing:-.035em;line-height:.98}
+.refl{display:block;transform:scaleY(-1);height:.55em;overflow:hidden;opacity:.18;-webkit-mask-image:linear-gradient(to bottom,#000,transparent);mask-image:linear-gradient(to bottom,#000,transparent);margin-top:2px}
+.foot{position:absolute;left:120px;right:120px;bottom:56px;display:flex;justify-content:space-between;font-family:JBM,monospace;font-size:18px;letter-spacing:.12em;text-transform:uppercase;color:var(--t3)}
+.hair{height:1px;background:var(--line)}
+/* slide 1 */
+.s1 h1{font-size:230px;margin-top:20px}
+.s1 .tag{font-size:44px;color:var(--t2);margin-top:30px;font-weight:400}
+.team{position:absolute;left:120px;right:120px;bottom:120px;display:grid;grid-template-columns:repeat(3,1fr);gap:28px}
+.m{background:var(--card);border:1px solid var(--line);border-radius:24px;padding:30px 34px}
+.m b{font-family:Bricolage;font-size:42px;letter-spacing:-.02em;font-weight:700;display:block}
+.m span{font-family:JBM;font-size:18px;letter-spacing:.14em;text-transform:uppercase;color:var(--orange)}
+.s1 .logo{height:110px}
+/* slide 2 */
+.s2 h2{font-size:100px;max-width:1600px;margin-top:24px}
+.s2 h2 em{font-style:normal;color:var(--orange)}
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:28px;margin-top:48px}
+.c{background:var(--card);border:1px solid var(--line);border-radius:24px;padding:32px 36px}
+.c .n{font-family:JBM;font-size:20px;letter-spacing:.14em;color:var(--orange)}
+.c h3{font-family:Bricolage;font-size:40px;letter-spacing:-.02em;margin:14px 0 12px;line-height:1.05}
+.c p{font-size:25px;line-height:1.4;color:var(--t3)}
+.bars{display:flex;gap:10px;align-items:flex-end;height:60px;margin-top:22px}
+.bars i{width:20px;border-radius:7px;background:#fff}
+.bars.o i{background:var(--orange);opacity:.9}
+.quote{margin-top:34px;font-size:30px;color:var(--t2);border-left:4px solid var(--orange);padding-left:28px}
+/* slide 3 */
+.s3{padding-top:80px}
+.s3 h2{font-size:76px;margin-top:20px}
+.stage{position:absolute;left:120px;top:270px;width:1180px}
+.frame{border:1px solid var(--line2);border-radius:22px;overflow:hidden;background:var(--card);box-shadow:0 40px 120px rgba(0,0,0,.7),0 0 0 1px #000}
+.bar{height:54px;background:var(--raised);display:flex;align-items:center;gap:10px;padding:0 22px;border-bottom:1px solid var(--line)}
+.bar i{width:14px;height:14px;border-radius:50%;background:var(--line2)}
+.bar span{margin-left:18px;font-family:JBM;font-size:16px;color:var(--t3);background:var(--canvas);border-radius:999px;padding:6px 18px}
+.shot{width:1180px;height:580px;overflow:hidden}
+.shot img{width:1300px;margin-left:-70px;display:block}
+.side{position:absolute;left:1370px;right:120px;top:270px;display:flex;flex-direction:column;gap:22px}
+.side .c{padding:24px 30px}
+.side h3{font-size:34px;margin:10px 0 8px}
+.side p{font-size:22px}
+</style></head><body><style>.s{display:none}#s3{display:block}</style>
+
+<section class="s s1" id="s1">
+  <img class="logo" src="../../src/assets/branding/logos/logo-horizontal-reversed.svg">
+  <div class="lab" style="margin-top:50px">ManilaHack 2026 &middot; Bucket 05 &middot; Measure</div>
+  <h1>Speculara<span class="refl" aria-hidden="true">Speculara</span></h1>
+  <div class="tag">Honest numbers. Plain words.</div>
+  <div class="team">
+    <div class="m"><span>Team</span><b>Christian Merano</b></div>
+    <div class="m"><span>Team</span><b>Kim Lamano</b></div>
+    <div class="m"><span>Team</span><b>Amerogin Kamid</b></div>
+  </div>
+</section>
+
+<section class="s s2" id="s2">
+  <div class="lab">The problem</div>
+  <h2>Small businesses have the numbers. <em>They cannot tell what to do next.</em></h2>
+  <div class="cards">
+    <div class="c"><div class="n">[ 01 ]</div><h3>Numbers without meaning</h3><p>Views, saves and sales sit in separate places. Nobody explains what they say about the next decision.</p><div class="bars"><i style="height:20px"></i><i style="height:34px"></i><i style="height:52px"></i></div></div>
+    <div class="c"><div class="n">[ 02 ]</div><h3>Guesses look like facts</h3><p>Tools show confident charts and never say what was counted and what was only a guess.</p><div class="bars o"><i style="height:20px"></i><i style="height:34px"></i><i style="height:52px"></i></div></div>
+    <div class="c"><div class="n">[ 03 ]</div><h3>Gaps stay hidden</h3><p>Customers say what they are missing in comments, in English and Filipino. Owners never see it.</p><div class="bars"><i style="height:52px"></i><i style="height:34px"></i><i style="height:20px"></i></div></div>
+  </div>
+  <div class="quote">&ldquo;Meron bang oat milk?&rdquo; &ldquo;Too pricey for a student.&rdquo; Real needs, buried in comments.</div>
+  <div class="foot"><span>Speculara</span><span>02 / 03</span></div>
+</section>
+
+<section class="s s3" id="s3">
+  <div class="lab">The product</div>
+  <h2>Opportunity Explorer</h2>
+  <div class="stage"><div class="frame"><div class="bar"><i></i><i></i><i></i><span>speculara / sense</span></div><div class="shot"><img src="../../docs/screenshots/sense-explorer-large.png"></div></div></div>
+  <div class="side">
+    <div class="c"><div class="n">[ MAP ]</div><h3>Gaps by barangay</h3><p>See where demand has no listed supply.</p></div>
+    <div class="c"><div class="n">[ SCORE ]</div><h3>Explainable ranking</h3><p>Every score shows its evidence and its doubt.</p></div>
+    <div class="c"><div class="n">[ TEST ]</div><h3>One way to test it</h3><p>Each gap ends with a cheap next step, or says &ldquo;insufficient evidence&rdquo;.</p></div>
+  </div>
+  <div class="foot"><span>Illustrative data &middot; Makati coffee shops</span><span>03 / 03</span></div>
+</section>
+</body></html>

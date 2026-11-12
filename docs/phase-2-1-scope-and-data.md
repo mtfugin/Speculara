@@ -48,6 +48,8 @@ This lowers the risk. It does not decide the law. The lawyer questions below sti
 
 ### Questions for a Philippine privacy lawyer
 
+A full brief to hand over is in `lawyer-brief-data-collection.md`. It has more questions than the six below.
+
 1. Is collecting public comments on business accounts for market research a legitimate purpose under the Data Privacy Act and NPC Advisory No. 2026-01? What lawful basis applies?
 2. Does the research exemption apply to a commercial tool?
 3. If we store text only, with no author, is it still personal data?

@@ -25,6 +25,8 @@ class AgentStep:
     received: int
     produced: int
     note: str = ""
+    mode: str = "rules"      # "rules" (plain code) or "model" (a language model took part)
+    decision: str = ""       # why the orchestrator ran this step now (empty for the fixed pipeline)
 
 
 @dataclass
