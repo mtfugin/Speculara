@@ -108,4 +108,4 @@ The hero (`src/components/ui/responsive-hero-banner.tsx`) started from the suppl
 
 `aside` takes the content beside the headline. `tests/browser/landing.spec.ts` checks that the first screen fits at 1440x810, 1280x720 and 1024x768.
 
-The challenge section is `src/components/challenge.tsx` (content as supplied; a test compares every phrase). Chat styles `.ios-sheet` and `.typing-dot` are in `src/index.css`.
+Chat styles `.ios-sheet` and `.typing-dot` are in `src/index.css`.

@@ -54,7 +54,7 @@ export function AnimatedMark({ size = 96, mode = "reveal", onDone }: { size?: nu
       {MARK_BARS.map((b, i) => (
         <g key={b.x}>
           <rect ref={(el) => { bars.current[i] = el; }} x={b.x} y={top - b.h} width="8" height={b.h} rx="3" fill="var(--color-ink)" />
-          <rect ref={(el) => { reflections.current[i] = el; }} x={b.x} y={bottom} width="8" height={b.h} rx="3" fill="var(--color-sky)" opacity="0.9" />
+          <rect ref={(el) => { reflections.current[i] = el; }} x={b.x} y={bottom} width="8" height={b.h} rx="3" fill="var(--color-orange)" opacity="0.9" />
         </g>
       ))}
     </svg>

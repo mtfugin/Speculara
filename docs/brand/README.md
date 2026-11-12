@@ -19,8 +19,8 @@ Backup before the redesign: git tag `backup-before-redesign-2026-11-12`, branch 
 1. The light "ink and ivory" identity was replaced by a dark, Apple-grade system, applied to the whole app.
 2. The hero photo, the serif headline and the partner and badge filler were removed. The hero is one screen: headline and actions on the left, the upload card on the right, the logo's bars drawn behind as a blueprint.
 3. New logo: three bars and their reflection (the mirror). A 1.5 second loading screen plays the bars rising and the reflection answering.
-4. A "The challenge" section sets the four buckets exactly as supplied.
-5. The chat is a message sheet: glass panel, bubbles, suggestion chips, pill input with an arrow send button, and a switch for AI answers.
+4. The challenge text (four buckets) is the hackathon brief, not site content, so it is not on the page.
+5. The accent is orange (no blue). The chat is a message sheet: glass panel, bubbles, suggestion chips, pill input with an arrow send button, and a switch for AI answers.
 
 Earlier looks are in git tag `backup-before-redesign-2026-11-12` and the earlier commits on branch `redesign`.
 

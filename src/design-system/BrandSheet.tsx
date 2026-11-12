@@ -11,7 +11,7 @@ const file = (name: string) => logoFiles[`../assets/branding/logos/${name}.svg`]
 
 const COLORS = [
   ["canvas", "--color-canvas"], ["card", "--color-card"], ["raised", "--color-raised"], ["line", "--color-line"], ["line-strong", "--color-line-strong"],
-  ["snow", "--color-snow"], ["fog", "--color-fog"], ["mute", "--color-mute"], ["sky", "--color-sky"], ["wine", "--color-wine"],
+  ["snow", "--color-snow"], ["fog", "--color-fog"], ["mute", "--color-mute"], ["orange", "--color-orange"], ["wine", "--color-wine"],
 ] as const;
 const TYPE = [
   ["Display", "text-5xl font-bold", "56 / 60"], ["H1", "text-4xl font-bold", "40 / 48"], ["H2", "text-3xl font-bold", "32 / 40"],
@@ -72,7 +72,7 @@ export default function BrandSheet() {
         <p className="mt-4 text-sm text-slate-600">Do not stretch, rotate, recolor outside the palette, add shadows or outlines, or place on busy images.</p>
       </Section>
 
-      <Section id="color" title="Color" note="A dark zinc system taken from the hero template: canvas, card and raised surfaces, hairline lines, white and zinc text. Sky is the one accent (data), wine is caution. Legacy names (ink, mist, primary) point at these values.">
+      <Section id="color" title="Color" note="A dark zinc system taken from the hero template: canvas, card and raised surfaces, hairline lines, white and zinc text. Orange is the one accent (data and filled controls), wine is caution. Legacy names (ink, mist, primary) point at these values.">
         <ul className="grid grid-cols-2 gap-3 sm:grid-cols-5">
           {COLORS.map(([n, v]) => (
             <li key={n}><div className="h-16 rounded-xl border border-border-default" style={{ background: `var(${v})` }} /><p className="mt-1 text-sm font-semibold text-ink">{n}</p><p className="mono text-xs text-slate-600">{v}</p></li>

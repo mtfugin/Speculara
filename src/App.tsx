@@ -27,7 +27,6 @@ import { Splash } from "./design-system/Splash";
 import { AnalysisLoader } from "./design-system/AnalysisLoader";
 import { Card, Fact, H, KeyNumber, Numbers, Pills, Well } from "./design-system/ui";
 import ResponsiveHeroBanner from "./components/ui/responsive-hero-banner";
-import ChallengeSection from "./components/challenge";
 import { ArrowUp } from "lucide-react";
 
 import { moduleInfo, updatedLabel, priorityLabel, type ModuleKey } from "./polish";
@@ -35,7 +34,7 @@ import { moduleInfo, updatedLabel, priorityLabel, type ModuleKey } from "./polis
 type Key = ModuleKey;
 
 const INK = "var(--color-ink)",
-  SKY = "var(--color-sky)",
+  SKY = "var(--color-orange)",
   CREAM = "var(--color-cream)",
   WINE = "var(--color-wine)";
 
@@ -1296,7 +1295,7 @@ function Chat() {
                   checked={aiOn}
                   onChange={(e) => setAiOn(e.target.checked)}
                   aria-describedby="ai-note"
-                  className="relative h-[26px] w-[44px] shrink-0 cursor-pointer appearance-none rounded-full bg-white/20 transition-colors duration-200 checked:bg-[#30d158] after:absolute after:left-0.5 after:top-0.5 after:h-[22px] after:w-[22px] after:rounded-full after:bg-white after:shadow after:transition-transform after:duration-200 after:content-[''] checked:after:translate-x-[18px]"
+                  className="relative h-[26px] w-[44px] shrink-0 cursor-pointer appearance-none rounded-full bg-white/20 transition-colors duration-200 checked:bg-orange-fill after:absolute after:left-0.5 after:top-0.5 after:h-[22px] after:w-[22px] after:rounded-full after:bg-white after:shadow after:transition-transform after:duration-200 after:content-[''] checked:after:translate-x-[18px]"
                 />
                 <span aria-hidden="true">AI</span>
                 <span className="sr-only">Use AI answers</span>
@@ -1331,7 +1330,7 @@ function Chat() {
             {msgs.map((m, i) => (
               <div key={i} className={`focus-in flex ${m.me ? "justify-end" : "justify-start"}`}>
                 <div
-                  className={`max-w-[82%] whitespace-pre-line break-words rounded-[20px] px-3.5 py-2 ${m.me ? "rounded-br-md bg-blue-fill text-white" : "rounded-bl-md bg-white/[0.12] text-ink"}`}
+                  className={`max-w-[82%] whitespace-pre-line break-words rounded-[20px] px-3.5 py-2 ${m.me ? "rounded-br-md bg-orange-fill text-neutral-950" : "rounded-bl-md bg-white/[0.12] text-ink"}`}
                 >
                   {m.t}
                 </div>
@@ -1395,7 +1394,7 @@ function Chat() {
               />
               <button
                 aria-label="Send"
-                className={`grid h-11 w-11 shrink-0 place-items-center rounded-full bg-blue-fill text-white transition-all duration-150 active:scale-90 ${text.trim() ? "opacity-100" : "opacity-40"}`}
+                className={`grid h-11 w-11 shrink-0 place-items-center rounded-full bg-orange-fill text-neutral-950 transition-all duration-150 active:scale-90 ${text.trim() ? "opacity-100" : "opacity-40"}`}
               >
                 <ArrowUp className="h-5 w-5" strokeWidth={2.6} />
               </button>
@@ -1415,7 +1414,7 @@ function Chat() {
         }}
         aria-label={open ? "Close chat" : "Open chat"}
         aria-expanded={open}
-        className="grid h-14 w-14 place-items-center rounded-full bg-blue-fill text-white shadow-[0_10px_34px_rgba(0,113,227,0.5)] transition-transform duration-150 hover:brightness-110 active:scale-95"
+        className="grid h-14 w-14 place-items-center rounded-full bg-orange-fill text-neutral-950 shadow-[0_10px_34px_rgba(255,159,10,0.45)] transition-transform duration-150 hover:brightness-110 active:scale-95"
       >
         <svg
           width="26"
@@ -1817,8 +1816,6 @@ export default function App() {
               </div>
             </section>
           )}
-
-          <ChallengeSection />
 
           <section id="questions" aria-labelledby="modules-title" className="scroll-mt-6 border-t border-border-default py-16 sm:py-20">
             <h2 id="modules-title" className="font-display text-4xl font-extrabold tracking-[-0.04em] text-ink md:text-5xl">

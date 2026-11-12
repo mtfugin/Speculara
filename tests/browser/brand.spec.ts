@@ -75,10 +75,10 @@ test("hero banner mobile menu is reachable, closes with Escape and on choosing a
   await toggle.click();
   const close = page.getByRole("button", { name: "Close menu" });
   await expect(close).toHaveAttribute("aria-expanded", "true");
-  await expect(page.getByRole("link", { name: "Challenge" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Questions" })).toBeVisible();
   await page.keyboard.press("Escape");
   await expect(toggle).toHaveAttribute("aria-expanded", "false");
   await toggle.click();
-  await page.getByRole("link", { name: "Questions" }).click();
+  await page.getByRole("link", { name: "About" }).click();
   await expect(page.getByRole("button", { name: "Open menu" })).toHaveAttribute("aria-expanded", "false");
 });

@@ -1,7 +1,7 @@
 import { useState, type ReactNode } from 'react'
 import { demandPeriods, sentimentView, sourceHref, type TextSample } from '../analysis'
 
-const tones = { pos: { label: 'Positive', color: 'var(--color-sky)' }, neg: { label: 'Negative', color: 'var(--color-wine)' }, neu: { label: 'Neutral', color: 'var(--color-mute)' } }
+const tones = { pos: { label: 'Positive', color: 'var(--color-green)' }, neg: { label: 'Negative', color: 'var(--color-wine)' }, neu: { label: 'Neutral', color: 'var(--color-mute)' } }
 const Well = ({ children }: { children: ReactNode }) => <div className="well mt-4 rounded-2xl p-4">{children}</div>
 const Metric = ({ label, value }: { label: string; value: ReactNode }) => <div className="ctl rounded-2xl p-3"><p className="text-xs text-slate-600">{label}</p><p className="mt-1 font-display text-xl font-semibold text-ink">{value}</p></div>
 
@@ -89,7 +89,7 @@ export function DemandPanel({ analysis }: { analysis: any }) {
       <ul className="space-y-4">{ranking.map((post) => <li key={post.post_id} className="ctl rounded-2xl p-4">
         <div className="flex items-start justify-between gap-3"><div><p className="text-[11px] font-semibold text-ink">{post.type}</p><p className="mt-1 break-words text-sm text-slate-700">{post.p}</p></div><SourceButton url={post.url} postType={post.type} /></div>
         <p className="mt-3 text-xs text-slate-600">{post.q} questions · {post.ask} requests · {post.sampled_comments ?? 0} comments sampled</p>
-        <div className="well mt-2 flex h-2.5 overflow-hidden rounded-full"><span className="bg-ink" style={{ width: `${100 * post.q / maxRank}%` }} /><span className="bg-sky" style={{ width: `${100 * post.ask / maxRank}%` }} /></div>
+        <div className="well mt-2 flex h-2.5 overflow-hidden rounded-full"><span className="bg-ink" style={{ width: `${100 * post.q / maxRank}%` }} /><span className="bg-orange" style={{ width: `${100 * post.ask / maxRank}%` }} /></div>
         {!!samples.filter((c) => c.kind === 'comment' && c.post_id === post.post_id).length && <details className="mt-3"><summary className="cursor-pointer text-xs font-semibold text-ink">Read sampled comments</summary><ul className="mt-3 space-y-3">{samples.filter((c) => c.kind === 'comment' && c.post_id === post.post_id).map((c) => <CommentCard key={c.id} sample={c} />)}</ul></details>}
       </li>)}</ul>
       {!ranking.length && <p className="text-sm text-slate-600">No posts match this search.</p>}

@@ -18,24 +18,6 @@
         }
       }
     },
-    "sky": {
-      "$type": "color",
-      "$value": "#64d2ff",
-      "$extensions": {
-        "speculara": {
-          "css": "--color-sky"
-        }
-      }
-    },
-    "sky-deep": {
-      "$type": "color",
-      "$value": "#0a84ff",
-      "$extensions": {
-        "speculara": {
-          "css": "--color-sky-deep"
-        }
-      }
-    },
     "cream": {
       "$type": "color",
       "$value": "#141417",
@@ -243,21 +225,39 @@
         }
       }
     },
-    "blue": {
+    "orange": {
       "$type": "color",
-      "$value": "#0a84ff",
+      "$value": "#ff9f0a",
       "$extensions": {
         "speculara": {
-          "css": "--color-blue"
+          "css": "--color-orange"
         }
       }
     },
-    "blue-fill": {
+    "orange-fill": {
       "$type": "color",
-      "$value": "#0071e3",
+      "$value": "#ff9f0a",
       "$extensions": {
         "speculara": {
-          "css": "--color-blue-fill"
+          "css": "--color-orange-fill"
+        }
+      }
+    },
+    "orange-deep": {
+      "$type": "color",
+      "$value": "#ea580c",
+      "$extensions": {
+        "speculara": {
+          "css": "--color-orange-deep"
+        }
+      }
+    },
+    "green": {
+      "$type": "color",
+      "$value": "#30d158",
+      "$extensions": {
+        "speculara": {
+          "css": "--color-green"
         }
       }
     }
@@ -445,7 +445,7 @@
       },
       "secondary": {
         "$type": "color",
-        "$value": "{palette.sky}",
+        "$value": "{palette.orange}",
         "$extensions": {
           "speculara": {
             "css": "--color-chart-secondary"

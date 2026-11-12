@@ -10,7 +10,7 @@ Speculara comes from *speculum*, Latin for mirror. The product holds a mirror up
 
 ## Logo
 
-**Mark.** Three rising bars above a mirror line, and their reflection below. White bars and a sky-blue reflection on the dark interface (`onLight`: near-black bars and a blue reflection). It reads at 16px, works in one color (the reflection drops to 45% opacity), and animates naturally: the bars rise, then the reflection answers.
+**Mark.** Three rising bars above a mirror line, and their reflection below. White bars and an orange reflection on the dark interface (`onLight`: near-black bars and a deep orange reflection). It reads at 16px, works in one color (the reflection drops to 45% opacity), and animates naturally: the bars rise, then the reflection answers.
 
 **Wordmark.** "Speculara" in Sora Bold, tracking -0.02em. Live text in the app, kerned outlines in the static files.
 
@@ -22,7 +22,7 @@ Speculara comes from *speculum*, Latin for mirror. The product holds a mirror up
 
 | Background | Use |
 | --- | --- |
-| The dark interface | `Logo tone="reversed"` (or the default tone, which follows the tokens): white bars, sky reflection, white wordmark |
+| The dark interface | `Logo tone="reversed"` (or the default tone, which follows the tokens): white bars, orange reflection, white wordmark |
 | White pages, print | `tone="onLight"`, or the plain `logo-*` files |
 | Any single color | Mono dark or mono light |
 | App icon | Near-black rounded square with the white and sky mark. The favicon switches between near-black and near-white by the browser theme |
@@ -31,16 +31,17 @@ Speculara comes from *speculum*, Latin for mirror. The product holds a mirror up
 
 ## Color
 
-Apple-grade dark: layered near-black surfaces, system blue and system red, one cyan for data (`tokens/speculara.json`).
+Apple-grade dark: layered near-black surfaces, one orange accent, system red for caution (`tokens/speculara.json`).
 
 | Role | Value |
 | --- | --- |
 | Canvas, card, raised | `#09090b`, `#141417`, `#1c1c1f` |
 | Hairline, strong hairline | `#2a2a2f`, `#48484f` |
 | Text: primary, secondary, tertiary | `#f5f5f7`, `#d2d2d7`, `#a1a1a6` |
-| Data accent (cyan) | `#64d2ff` |
-| Interactive blue | `#0a84ff` for text and highlights, `#0071e3` for filled controls (4.7:1 with white) |
-| Caution | `#ff453a` |
+| Accent and data color | Orange `#ff9f0a` (text, highlights, charts). Filled controls (chat bubble, send, launcher) are orange with near-black text, 9:1 |
+| On white pages | Deep orange `#ea580c` |
+| Positive sentiment | Green `#30d158` |
+| Caution | Red `#ff453a` |
 | Chat sheet | Translucent `#1c1c1e` at 74%, 40px blur, 180% saturation |
 
 The primary action is a white pill with dark text. Contrast is tested in the browser: body and secondary text 7:1 or better, focus ring 3:1 or better, plus axe scans on every screen.

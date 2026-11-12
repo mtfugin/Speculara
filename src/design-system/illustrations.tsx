@@ -4,7 +4,7 @@
 import type { ReactNode } from "react";
 
 const INK = "var(--color-ink)";
-const SKY = "var(--color-sky)";
+const ORANGE = "var(--color-orange)";
 const TRACK = "var(--color-track)";
 const LINE = "var(--color-border-default)";
 const CARD = "var(--color-card)";
@@ -24,11 +24,11 @@ export const Illustrations = {
   welcome: (c?: string) => (
     <Frame className={c}>
       <Ground />
-      <rect x="62" y="96" width="22" height="36" rx="5" fill={SKY} />
-      <rect x="94" y="72" width="22" height="60" rx="5" fill={SKY} />
+      <rect x="62" y="96" width="22" height="36" rx="5" fill={ORANGE} />
+      <rect x="94" y="72" width="22" height="60" rx="5" fill={ORANGE} />
       <rect x="126" y="44" width="22" height="88" rx="5" fill={INK} />
       <circle cx="178" cy="56" r="20" fill={INK} opacity=".9" />
-      <circle cx="192" cy="70" r="20" fill={SKY} opacity=".9" />
+      <circle cx="192" cy="70" r="20" fill={ORANGE} opacity=".9" />
     </Frame>
   ),
   upload: (c?: string) => (
@@ -45,7 +45,7 @@ export const Illustrations = {
     <Frame className={c}>
       <path d="M52 80 H188" stroke={LINE} strokeWidth="2" strokeDasharray="2 8" strokeLinecap="round" />
       <circle cx="98" cy="80" r="32" fill={INK} />
-      <circle cx="142" cy="80" r="32" fill={SKY} />
+      <circle cx="142" cy="80" r="32" fill={ORANGE} />
     </Frame>
   ),
   empty: (c?: string) => (
@@ -58,7 +58,7 @@ export const Illustrations = {
   success: (c?: string) => (
     <Frame className={c}>
       <circle cx="104" cy="80" r="36" fill={INK} />
-      <circle cx="136" cy="80" r="36" fill={SKY} />
+      <circle cx="136" cy="80" r="36" fill={ORANGE} />
       <path d="M108 82 L118 92 L134 70" stroke={CANVAS} strokeWidth="6" strokeLinecap="round" strokeLinejoin="round" />
     </Frame>
   ),
@@ -75,13 +75,13 @@ export const Illustrations = {
       <rect x="66" y="96" width="22" height="36" rx="5" stroke={TRACK} strokeWidth="2.5" strokeDasharray="5 5" />
       <rect x="98" y="76" width="22" height="56" rx="5" stroke={TRACK} strokeWidth="2.5" strokeDasharray="5 5" />
       <rect x="130" y="56" width="22" height="76" rx="5" stroke={TRACK} strokeWidth="2.5" strokeDasharray="5 5" />
-      <circle cx="176" cy="48" r="9" fill={SKY} />
+      <circle cx="176" cy="48" r="9" fill={ORANGE} />
     </Frame>
   ),
   chat: (c?: string) => (
     <Frame className={c}>
       <rect x="64" y="40" width="88" height="52" rx="16" fill={INK} />
-      <rect x="92" y="72" width="88" height="52" rx="16" fill={SKY} />
+      <rect x="92" y="72" width="88" height="52" rx="16" fill={ORANGE} />
       <circle cx="136" cy="98" r="3.5" fill={CANVAS} />
       <circle cx="150" cy="98" r="3.5" fill={CANVAS} />
       <circle cx="164" cy="98" r="3.5" fill={CANVAS} />

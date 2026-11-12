@@ -6,10 +6,10 @@
 
 type Tone = "color" | "mono" | "reversed" | "onLight";
 const TONES: Record<Tone, { a: string; b: string; word: string; reflect: number }> = {
-  color: { a: "var(--color-ink)", b: "var(--color-sky)", word: "var(--color-ink)", reflect: 0.9 },
+  color: { a: "var(--color-ink)", b: "var(--color-orange)", word: "var(--color-ink)", reflect: 0.9 },
   mono: { a: "currentColor", b: "currentColor", word: "currentColor", reflect: 0.45 },
-  reversed: { a: "var(--color-white)", b: "var(--color-sky)", word: "var(--color-white)", reflect: 0.9 },
-  onLight: { a: "#18181b", b: "#0a84ff", word: "#18181b", reflect: 0.9 },
+  reversed: { a: "var(--color-white)", b: "var(--color-orange)", word: "var(--color-white)", reflect: 0.9 },
+  onLight: { a: "#18181b", b: "#ea580c", word: "#18181b", reflect: 0.9 },
 };
 
 /** Bar geometry on a 48 grid: three bars, 8 wide, 4 apart; mirror axis at y = 24. */

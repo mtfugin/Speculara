@@ -75,7 +75,7 @@ function MirrorBackdrop() {
                     <rect
                         className="bar-grow"
                         style={{ ["--i" as string]: i + 3, transformBox: "fill-box", transformOrigin: "50% 0%" }}
-                        x={b.x} y={bottom} width="8" height={b.h} rx="3" fill="none" stroke="#64d2ff" strokeOpacity="0.28" strokeWidth="0.12"
+                        x={b.x} y={bottom} width="8" height={b.h} rx="3" fill="none" stroke="#ff9f0a" strokeOpacity="0.28" strokeWidth="0.12"
                     />
                 </g>
             ))}
@@ -86,7 +86,6 @@ function MirrorBackdrop() {
 const ResponsiveHeroBanner: React.FC<ResponsiveHeroBannerProps> = ({
     navLinks = [
         { label: "Home", href: "#top", isActive: true },
-        { label: "Challenge", href: "#challenge" },
         { label: "Questions", href: "#questions" },
         { label: "About", href: "#docs" }
     ],
@@ -116,13 +115,13 @@ const ResponsiveHeroBanner: React.FC<ResponsiveHeroBannerProps> = ({
 
     return (
         <section id="top" className="on-dark relative isolate flex min-h-svh w-full flex-col overflow-hidden bg-canvas">
-            {/* Background: a fine dot grid that fades toward the edges, the logo's bars, and one soft blue light. */}
+            {/* Background: a fine dot grid that fades toward the edges, the logo's bars, and one soft orange light. */}
             <div
                 className="pointer-events-none absolute inset-0 -z-10"
                 aria-hidden="true"
                 style={{
                     backgroundImage:
-                        "radial-gradient(rgba(245,245,247,0.09) 1px, transparent 1px), radial-gradient(60% 55% at 12% 105%, rgba(10,132,255,0.16), transparent 70%)",
+                        "radial-gradient(rgba(245,245,247,0.09) 1px, transparent 1px), radial-gradient(60% 55% at 12% 105%, rgba(255,159,10,0.13), transparent 70%)",
                     backgroundSize: "28px 28px, 100% 100%",
                     maskImage: "radial-gradient(90% 85% at 35% 45%, #000 35%, transparent 90%)",
                     WebkitMaskImage: "radial-gradient(90% 85% at 35% 45%, #000 35%, transparent 90%)"
