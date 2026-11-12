@@ -44,8 +44,8 @@ Setup: `npm run collector:setup` and `collector:browser` installed; browser smok
 | Dates, captions, type | Present. Types seen: video and photo. Dates look current |
 | Likes, comments, shares, views | Present on all 3 posts inspected (for example 836 likes, 134 comments, 25 shares, 24.6K views) |
 | Comment text | Returned: 35 to 44 comment rows per post on the 3 posts inspected, signed out |
-| Cancel mid-collection | Not tested |
-| Private or missing profile error | Not tested |
+| Cancel mid-collection | Works: cancelled at 12 s, finished at 24.6 s, collector free afterwards. See notes |
+| Private or missing profile error | Missing profile: fails in about 10 s with 503 "did not load". Private profile not tested (no private account available) |
 | Blocks, challenges | None seen in this run |
 
 Notes:
@@ -53,3 +53,21 @@ Notes:
 - The worker returns up to about 44 comments per post, but `normalize()` keeps only 8 per post. Decide in 1.3 whether 8 is enough for friction mining in stage 2.
 - Thumbnail URLs carry signed, expiring tokens. Do not store them as long-lived data.
 - Only 3 of 5 posts were inspected in this printout; the rest were not logged. Re-run with a saved fixture in 1.4.
+
+## Live result: cancel and error cases (TikTok, run 2)
+| Case | Result |
+| --- | --- |
+| Link to another site | Rejected before any browser starts, clear message |
+| Link to a single video | Rejected, message tells the person to paste the profile link |
+| Empty input | Rejected, clear message |
+| Profile that does not exist | `CollectorError`, status 503, message "the profile @name did not load" after about 10 s |
+| Cancel while collecting | Cancel call returned `cancelled: true`; the collection then raised "Collection cancelled." |
+| Busy flag and progress after cancel and after errors | Reset correctly (not busy, "Ready to collect."); a new run started right after |
+
+Problems to fix in 1.2:
+1. A missing profile returns 503 (server unavailable). It should be a 404 style "profile not found or private", in plain words. Private and missing cannot be told apart yet.
+2. A cancel is reported as an error (503 "Collection cancelled."). It should be its own non-error outcome, and the UI should not show a failure.
+3. The cancel call blocked for about 12 seconds before returning, because it waits up to 12 s for the worker to stop. The UI needs to show "Cancelling" meanwhile.
+4. While collecting, the worker logged that the public profile opened "past TikTok's Please wait check". Confirm in the worker code that this only waits for the interstitial to clear and does not solve or bypass any challenge; if it does anything more, remove it.
+
+Still untested: private profile, expired Instagram sign-in, rate limiting, TikTok layout change.
