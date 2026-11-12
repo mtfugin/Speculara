@@ -7,7 +7,8 @@ const INK = "var(--color-ink)";
 const SKY = "var(--color-sky)";
 const TRACK = "var(--color-track)";
 const LINE = "var(--color-border-default)";
-const WHITE = "var(--color-white)";
+const CARD = "var(--color-card)";
+const CANVAS = "var(--color-canvas)";
 const WINE = "var(--color-wine)";
 
 function Frame({ children, className = "" }: { children: ReactNode; className?: string }) {
@@ -33,11 +34,11 @@ export const Illustrations = {
   upload: (c?: string) => (
     <Frame className={c}>
       <circle cx="120" cy="80" r="52" stroke={TRACK} strokeWidth="2" strokeDasharray="4 7" />
-      <rect x="88" y="42" width="64" height="82" rx="10" fill={WHITE} stroke={LINE} strokeWidth="2" />
+      <rect x="88" y="42" width="64" height="82" rx="10" fill={CARD} stroke={LINE} strokeWidth="2" />
       <line x1="100" y1="64" x2="140" y2="64" stroke={TRACK} strokeWidth="4" strokeLinecap="round" />
       <line x1="100" y1="78" x2="132" y2="78" stroke={TRACK} strokeWidth="4" strokeLinecap="round" />
       <circle cx="120" cy="104" r="12" fill={INK} />
-      <path d="M120 110 V98 M115 103 L120 98 L125 103" stroke={WHITE} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M120 110 V98 M115 103 L120 98 L125 103" stroke={CANVAS} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
     </Frame>
   ),
   processing: (c?: string) => (
@@ -50,7 +51,7 @@ export const Illustrations = {
   empty: (c?: string) => (
     <Frame className={c}>
       <circle cx="120" cy="80" r="46" stroke={TRACK} strokeWidth="2.5" strokeDasharray="6 8" />
-      <circle cx="120" cy="80" r="14" fill={WHITE} stroke={LINE} strokeWidth="2" />
+      <circle cx="120" cy="80" r="14" fill={CARD} stroke={LINE} strokeWidth="2" />
       <path d="M120 74 V86 M114 80 H126" stroke={INK} strokeWidth="2.5" strokeLinecap="round" />
     </Frame>
   ),
@@ -58,12 +59,12 @@ export const Illustrations = {
     <Frame className={c}>
       <circle cx="104" cy="80" r="36" fill={INK} />
       <circle cx="136" cy="80" r="36" fill={SKY} />
-      <path d="M108 82 L118 92 L134 70" stroke={WHITE} strokeWidth="6" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M108 82 L118 92 L134 70" stroke={CANVAS} strokeWidth="6" strokeLinecap="round" strokeLinejoin="round" />
     </Frame>
   ),
   error: (c?: string) => (
     <Frame className={c}>
-      <circle cx="120" cy="80" r="42" fill={WHITE} stroke={WINE} strokeWidth="3" />
+      <circle cx="120" cy="80" r="42" fill={CARD} stroke={WINE} strokeWidth="3" />
       <path d="M120 62 V84" stroke={WINE} strokeWidth="5" strokeLinecap="round" />
       <circle cx="120" cy="98" r="3.5" fill={WINE} />
     </Frame>
@@ -81,9 +82,9 @@ export const Illustrations = {
     <Frame className={c}>
       <rect x="64" y="40" width="88" height="52" rx="16" fill={INK} />
       <rect x="92" y="72" width="88" height="52" rx="16" fill={SKY} />
-      <circle cx="136" cy="98" r="3.5" fill={WHITE} />
-      <circle cx="150" cy="98" r="3.5" fill={WHITE} />
-      <circle cx="164" cy="98" r="3.5" fill={WHITE} />
+      <circle cx="136" cy="98" r="3.5" fill={CANVAS} />
+      <circle cx="150" cy="98" r="3.5" fill={CANVAS} />
+      <circle cx="164" cy="98" r="3.5" fill={CANVAS} />
     </Frame>
   ),
 } as const;

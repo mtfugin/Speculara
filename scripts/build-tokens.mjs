@@ -24,8 +24,6 @@ for(const [path,token] of flat) {
  const name=token.$extensions?.speculara?.css;
  if(name) lines.push(`  ${name}: ${resolve(path)};`);
 }
-// Keep existing text-slate-600 uses on the shared semantic secondary color.
-lines.push('  --color-slate-600: var(--color-text-secondary);');
 const output=`/* Generated from tokens/speculara.json. Run npm run tokens:build. */\n@theme static {\n${lines.join('\n')}\n}\n`;
 const target=new URL('src/tokens.css', root);
 if(process.argv.includes('--check')) {

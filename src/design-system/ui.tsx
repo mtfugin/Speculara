@@ -18,7 +18,7 @@ export const Well = ({ children, className = "" }: { children: ReactNode; classN
 
 export const H = ({ children, sub }: { children: ReactNode; sub?: string }) => (
   <div className="mb-4">
-    <h3 className="font-display text-xl font-semibold text-ink">{children}</h3>
+    <h3 className="font-display text-3xl text-ink">{children}</h3>
     {sub && <p className="mt-0.5 text-sm text-slate-600">{sub}</p>}
   </div>
 );
@@ -38,7 +38,7 @@ export function KeyNumber({ label, value, note, muted = false }: { label: string
   return (
     <div className="tabular min-w-0 border-t border-border-default pt-3">
       <dt className="text-sm font-semibold text-ink">{label}</dt>
-      <dd className={muted ? "mt-1 font-display text-xl font-semibold leading-tight text-slate-600 sm:text-2xl" : "mt-1 font-display text-2xl font-bold leading-tight text-ink [overflow-wrap:anywhere] sm:text-3xl"}>{value}</dd>
+      <dd className={muted ? "mt-1 font-sans text-xl font-medium leading-tight text-slate-600" : "mt-1 font-sans text-3xl font-semibold leading-tight tracking-tight text-ink [overflow-wrap:anywhere] sm:text-4xl"}>{value}</dd>
       {note && <dd className="mt-1 text-sm text-slate-600">{note}</dd>}
     </div>
   );

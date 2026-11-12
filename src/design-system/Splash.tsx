@@ -31,7 +31,7 @@ export function Splash() {
       role="presentation"
       data-splash
       onClick={() => setPhase("out")}
-      className="fixed inset-0 z-[var(--z-modal)] grid place-items-center bg-white"
+      className="fixed inset-0 z-[var(--z-modal)] grid place-items-center bg-canvas"
       style={{ opacity: phase === "out" ? 0 : 1, transition: "opacity 240ms var(--ease-exit)" }}
     >
       <div className="flex items-center gap-4" aria-hidden="true">

@@ -34,20 +34,22 @@ test("signature splash plays once, can be skipped, and never runs with reduced m
   await reduced.close();
 });
 
-test("design tokens are applied: Instrument Serif hero headline, Inter text, Sora section headings, flat surfaces", async ({ page }) => {
+test("design tokens are applied: Instrument Serif headings, Inter text, Sora wordmark, flat surfaces", async ({ page }) => {
   await page.goto("/");
   const h1 = await page.locator("h1").evaluate((el) => getComputedStyle(el).fontFamily);
   expect(h1).toContain("Instrument Serif");
   const body = await page.evaluate(() => getComputedStyle(document.body).fontFamily);
   expect(body).toContain("Inter");
   const section = await page.locator("h2").first().evaluate((el) => getComputedStyle(el).fontFamily);
-  expect(section).toContain("Sora");
+  expect(section).toContain("Instrument Serif");
+  const word = await page.locator(".font-wordmark").first().evaluate((el) => getComputedStyle(el).fontFamily);
+  expect(word).toContain("Sora");
   const card = await page.locator(".surface").first().evaluate((el) => {
     const s = getComputedStyle(el);
     return { border: s.borderTopWidth, radius: s.borderTopLeftRadius };
   });
   expect(card.border).toBe("1px");
-  expect(card.radius).toBe("16px");
+  expect(card.radius).toBe("24px");
 });
 
 test("hero banner: one h1, nav links, mobile menu opens and closes, actions work", async ({ page }) => {

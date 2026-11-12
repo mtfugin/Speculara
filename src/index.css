@@ -1,5 +1,6 @@
-/* Speculara design system styles. Every value comes from tokens.css (generated from tokens/speculara.json).
-   Colors are unchanged; this file owns shape, space, type, elevation and motion. */
+/* Speculara design system styles (dark system, from the supplied hero template). Every value comes from tokens.css
+   (generated from tokens/speculara.json): zinc surfaces, white pill controls, hairline borders, glass overlays,
+   Instrument Serif headings, Inter text. This file owns shape, space, type, elevation and motion. */
 @import "@fontsource-variable/sora/index.css";
 @import "@fontsource-variable/manrope/index.css";
 @import "@fontsource/jetbrains-mono/400.css";
@@ -19,6 +20,7 @@
     background: var(--color-surface-page);
     color: var(--color-text-primary);
     font-family: var(--font-sans);
+    font-synthesis: none;
     font-size: var(--text-base);
     line-height: var(--text-base--line-height);
     text-rendering: optimizeLegibility;
@@ -26,7 +28,8 @@
   }
   h1, h2, h3, h4 {
     font-family: var(--font-display);
-    letter-spacing: var(--tracking-tight);
+    font-weight: 400;
+    letter-spacing: -0.01em;
     text-wrap: balance;
   }
   code, kbd, samp, .mono {
@@ -45,8 +48,8 @@
     z-index: var(--z-skip);
     padding: 12px;
     background: var(--color-white);
-    color: var(--color-ink);
-    border-radius: var(--radius-xl);
+    color: var(--color-canvas);
+    border-radius: 9999px;
     transform: translateY(-200%);
   }
   .skip-link:focus { transform: translateY(0); }
@@ -78,9 +81,11 @@
     border: var(--border-width) solid var(--color-border-default);
   }
   .overlay {
-    background: var(--color-surface-highlight);
-    border: var(--border-width) solid var(--color-border-default);
+    background: rgb(24 24 27 / 0.82);
+    border: var(--border-width) solid rgb(255 255 255 / 0.12);
     box-shadow: var(--shadow-md);
+    -webkit-backdrop-filter: blur(18px);
+    backdrop-filter: blur(18px);
   }
 
   /* ---------- Controls ---------- */
@@ -97,7 +102,7 @@
   .ctl:active:not(:disabled) { transform: scale(0.97); }
   .ctl.is-selected,
   .ctl[aria-pressed="true"] {
-    background: color-mix(in srgb, var(--color-ink) 9%, var(--color-white));
+    background: color-mix(in srgb, var(--color-ink) 14%, transparent);
     border-color: var(--color-ink);
     color: var(--color-ink);
   }
@@ -117,7 +122,7 @@
   }
   .btn-primary:active:not(:disabled) { transform: scale(0.97); }
   .chip {
-    background: color-mix(in srgb, var(--color-ink) 9%, var(--color-white));
+    background: color-mix(in srgb, var(--color-ink) 12%, transparent);
     color: var(--color-ink);
     border-radius: 9999px;
     font-weight: var(--font-weight-semibold);
@@ -249,4 +254,20 @@
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+/* Template shape language: controls are pills; cards keep their radius. */
+.btn-primary,
+.ctl:not(.rounded-2xl) {
+  border-radius: 9999px;
+}
+/* Instrument Serif ships one weight; never synthesize bold. */
+.font-display {
+  font-weight: 400 !important;
+  letter-spacing: -0.01em;
+}
+.font-wordmark {
+  font-family: var(--font-wordmark);
+  font-weight: 700;
+  letter-spacing: -0.02em;
 }

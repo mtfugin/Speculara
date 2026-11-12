@@ -1,5 +1,7 @@
 # Speculara brand: Phase 01, audit and strategy
 
+> Superseded in part: the color lock, the Sora and Manrope type, the 10px shape language and the ink-and-ivory direction below were replaced by the dark template system on 2026-11-12 (see README). The audit findings, logo concept and motion philosophy still apply.
+
 Status: approved and implemented (see 02 to 05). Decisions: colors stay locked, the logo mark was fully remade (two circles and a lens) while the wordmark typography stayed unchanged, Sora and Manrope self-hosted plus a small mono, lucide-react icons, GSAP for sequences, no Lottie, and a global skill after the system is proven. Original proposal below. Work happens on branch `redesign`. Backup: tag `backup-before-redesign-2026-11-12`, branch `backup/before-redesign-2026-11-12`, folder `Speculara-backup-2026-11-12`.
 
 ## 1. What the product is

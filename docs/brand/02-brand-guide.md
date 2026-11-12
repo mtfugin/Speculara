@@ -11,7 +11,7 @@ Speculara comes from *speculum*, Latin for mirror. The product holds up a mirror
 
 ## Logo
 
-**Mark.** Two equal circles, ink and sky, offset on the diagonal. The lens where they overlap is cut away. It stands for a thing and its reflection, and the overlap is where insight happens. The cut is a mask, so the mark is transparent in the middle and works on any background.
+**Mark.** Two equal circles, white and sky on dark (`onLight`: near-black and a deeper sky), offset on the diagonal. The lens where they overlap is cut away. It stands for a thing and its reflection, and the overlap is where insight happens. The cut is a mask, so the mark is transparent in the middle and works on any background.
 
 **Wordmark.** "Speculara" in Sora Bold, tracking -0.02em. It is the original product typography, unchanged. In static files it is converted to outlines (kerned) so it renders identically without the font.
 
@@ -23,38 +23,41 @@ Speculara comes from *speculum*, Latin for mirror. The product holds up a mirror
 
 | Background | Use |
 | --- | --- |
-| White, mist, cream | Color logo |
-| Ink, primary (dark) | Reversed logo (white circle, sky circle, white wordmark) |
+| The dark interface (canvas, card, photo) | Default and reversed logo: white circle, sky circle, white wordmark |
+| White pages, print | `onLight` tone, or the static `logo-*` files without a suffix |
 | Any single-color context | Mono dark or mono light |
-| App icon | Ink rounded square with the reversed mark |
+| App icon | Near-black rounded square with the white and sky mark. The favicon switches between near-black and white by the browser theme |
 
 **Responsive behavior.** Header shows the horizontal lockup at 32px mark. Under 20px use the favicon mark. In-app code uses the `Logo`, `LogoMark` and `Wordmark` components in `src/design-system/Logo.tsx`.
 
 **Do not.** Stretch, rotate, recolor outside the palette, add shadows, outlines or gradients, close the lens, or place on busy imagery.
 
+## Color
+
+Dark zinc, taken from the hero template (`tokens/speculara.json`). Surfaces: canvas `#09090b`, card `#18181b`, raised `#27272a`. Lines: `#2e2e33`, strong `#52525b`. Text: snow `#fafafa`, fog `#e4e4e7`, subtle `#d4d4d8`, mute `#a1a1aa`. Accent: sky `#38bdf8` for data only. Caution: `#f87171`. Primary action is a white pill with dark text. Contrast is tested: body and secondary text 7:1 or better, focus ring 3:1 or better.
+
 ## Typography
 
 | Role | Typeface | Notes |
 | --- | --- | --- |
-| Display and headings, wordmark | Sora (variable) | Geometric and round, echoes the circles |
-| Text and interface | Manrope (variable) | Open, readable at small sizes |
+| Headings and the hero headline | Instrument Serif | One weight (400). Never faux bold. Sizes run larger than sans because the face is condensed |
+| Text, interface, every number | Inter (variable) | Numbers are Inter because Instrument Serif digits read badly (a 1 looks like an l) |
+| Wordmark | Sora Bold | Unchanged logo typography |
 | Statistics (r, p, IDs) | JetBrains Mono | Only where exact characters matter |
 
-All three are self-hosted through Fontsource (no third-party request). Numbers in tables, charts and cards use tabular figures.
+All faces are self-hosted through Fontsource.
 
-| Style | Size / line | Weight |
+| Style | Size / line | Face and weight |
 | --- | --- | --- |
-| Display | 56 / 60 | 700 |
-| H1 | 40 / 48 | 700 |
-| H2 | 32 / 40 | 700 |
-| H3 | 24 / 32 | 600 |
-| H4 | 20 / 28 | 600 |
-| H5 | 18 / 28 | 600 |
-| Body large | 16 / 24 | 400 |
-| Body | 14 / 20 | 400 |
-| Caption | 12 / 16 | 400 to 600 |
+| Hero | 56 to 72 / tight | Instrument Serif 400 |
+| Section heading | 36 to 48 | Instrument Serif 400 |
+| Card heading | 30 | Instrument Serif 400 |
+| Key number | 30 to 36 | Inter 600 |
+| Data sentence, list titles | 18 to 30 | Inter 500 to 600 |
+| Body | 16 / 24 | Inter 400 |
+| Small, caption | 14, 12 | Inter 400 to 600 |
 
-Hierarchy comes from weight and size together, never size alone. Headings use `text-wrap: balance`. Prefer wrapping to truncation. Line length stays under about 75 characters.
+Hierarchy comes from size, face and contrast. Headings use `text-wrap: balance`. Prefer wrapping to truncation.
 
 ## Voice
 

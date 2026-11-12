@@ -10,8 +10,8 @@ const logoFiles = import.meta.glob("../assets/branding/logos/*.svg", { eager: tr
 const file = (name: string) => logoFiles[`../assets/branding/logos/${name}.svg`];
 
 const COLORS = [
-  ["ink", "--color-ink"], ["primary", "--color-primary"], ["sky", "--color-sky"], ["sky-deep", "--color-sky-deep"], ["wine", "--color-wine"],
-  ["secondary", "--color-secondary"], ["mist", "--color-mist"], ["cream", "--color-cream"], ["track", "--color-track"], ["border", "--color-border-default"],
+  ["canvas", "--color-canvas"], ["card", "--color-card"], ["raised", "--color-raised"], ["line", "--color-line"], ["line-strong", "--color-line-strong"],
+  ["snow", "--color-snow"], ["fog", "--color-fog"], ["mute", "--color-mute"], ["sky", "--color-sky"], ["wine", "--color-wine"],
 ] as const;
 const TYPE = [
   ["Display", "text-5xl font-bold", "56 / 60"], ["H1", "text-4xl font-bold", "40 / 48"], ["H2", "text-3xl font-bold", "32 / 40"],
@@ -51,28 +51,28 @@ export default function BrandSheet() {
         Honest numbers. Plain words. An optical instrument: two circles, the lens between them, thin lines, light that comes into focus.
       </p>
 
-      <Section id="logo" title="Logo" note="The mark is a thing and its reflection. The lens they share is cut away, so it works on any background. The wordmark is Sora Bold, unchanged. Clear space is half the mark width. Minimum: mark 16px, horizontal lockup 96px.">
+      <Section id="logo" title="Logo" note="The mark is a thing and its reflection. The lens they share is cut away, so it works on any background. On the dark interface it is white and sky; on white pages use the onLight version. The wordmark stays Sora Bold. Clear space is half the mark width. Minimum: mark 16px, horizontal lockup 96px.">
         <div className="grid gap-4 md:grid-cols-2">
           <div className="surface grid place-items-center rounded-2xl p-10"><Logo size={56} tagline /></div>
-          <div className="grid place-items-center rounded-2xl bg-primary p-10"><Logo size={56} tone="reversed" tagline /></div>
+          <div className="grid place-items-center rounded-2xl bg-white p-10"><Logo size={56} tone="onLight" tagline /></div>
           <div className="surface grid place-items-center rounded-2xl p-10"><Logo variant="stacked" size={72} /></div>
           <div className="surface flex items-end justify-around gap-6 rounded-2xl p-10">
             {[16, 24, 32, 48, 72].map((s) => <div key={s} className="text-center"><LogoMark size={s} /><p className="mt-2 text-xs text-slate-600">{s}px</p></div>)}
           </div>
           <div className="surface flex items-center justify-around rounded-2xl p-10 text-primary"><LogoMark size={48} tone="mono" /><Logo size={36} tone="mono" /></div>
-          <div className="flex items-center justify-around rounded-2xl bg-ink p-10 text-white"><LogoMark size={48} tone="mono" /><Logo size={36} tone="mono" /></div>
+          <div className="flex items-center justify-around rounded-2xl bg-white p-10 text-neutral-900"><LogoMark size={48} tone="mono" /><Logo size={36} tone="mono" /></div>
         </div>
         <h3 className="mt-8 font-display text-xl font-semibold text-ink">Files</h3>
         <ul className="mt-3 grid gap-2 text-sm sm:grid-cols-2 lg:grid-cols-3">
           {Object.keys(logoFiles).map((k) => {
             const name = k.split("/").pop()!.replace(".svg", "");
-            return <li key={name} className="well flex items-center gap-3 rounded-xl p-2"><img src={file(name)} alt="" className="h-9 w-14 object-contain" /><span className="mono truncate">{name}.svg</span></li>;
+            return <li key={name} className="well flex items-center gap-3 rounded-xl p-2"><span className={`grid h-9 w-14 place-items-center rounded ${/mono-light|reversed/.test(name) ? "bg-zinc-700" : "bg-white"}`}><img src={file(name)} alt="" className="h-8 w-12 object-contain" /></span><span className="mono truncate">{name}.svg</span></li>;
           })}
         </ul>
         <p className="mt-4 text-sm text-slate-600">Do not stretch, rotate, recolor outside the palette, add shadows or outlines, or place on busy images.</p>
       </Section>
 
-      <Section id="color" title="Color (unchanged)" note="Every color is an existing token. Nothing here was added or changed by the brand work, apart from sky-deep, which was added earlier for chart contrast.">
+      <Section id="color" title="Color" note="A dark zinc system taken from the hero template: canvas, card and raised surfaces, hairline lines, white and zinc text. Sky is the one accent (data), wine is caution. Legacy names (ink, mist, primary) point at these values.">
         <ul className="grid grid-cols-2 gap-3 sm:grid-cols-5">
           {COLORS.map(([n, v]) => (
             <li key={n}><div className="h-16 rounded-xl border border-border-default" style={{ background: `var(${v})` }} /><p className="mt-1 text-sm font-semibold text-ink">{n}</p><p className="mono text-xs text-slate-600">{v}</p></li>
@@ -80,7 +80,7 @@ export default function BrandSheet() {
         </ul>
       </Section>
 
-      <Section id="type" title="Typography" note="Sora for headings and the wordmark, Manrope for text, JetBrains Mono only for statistics. Weight carries hierarchy. Numbers use tabular figures.">
+      <Section id="type" title="Typography" note="Instrument Serif for headings (one weight, never faux bold), Inter for text and every number, Sora only for the wordmark, JetBrains Mono for statistics. Numbers use Inter because the serif digits are hard to read.">
         <ul className="divide-y divide-border-default">
           {TYPE.map(([n, c, m]) => (
             <li key={n} className="flex items-baseline justify-between gap-4 py-3">

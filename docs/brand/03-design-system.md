@@ -13,15 +13,15 @@
 
 ## Tokens
 
-Colors are untouched. New and replaced token groups:
+The dark system lives in the token file (colors, fonts, radius, elevation). Token groups:
 
 | Group | Tokens |
 | --- | --- |
 | Type | `--text-xs` to `--text-5xl` each with `--line-height`, weights 400 to 700, `--tracking-*` |
-| Fonts | `--font-display` (Sora), `--font-sans` (Manrope), `--font-mono` |
-| Radius | 4, 6, 8 (lg), 10 (xl, controls), 16 (2xl and 3xl, cards) |
+| Fonts | `--font-display` (Instrument Serif), `--font-sans` (Inter), `--font-wordmark` (Sora), `--font-mono` |
+| Radius | 4, 6, 8, 12 (lg), 16 (xl), 24 (2xl and 3xl, cards). Controls are pills (9999px) |
 | Border | `--border-width` 1px, `--border-focus-width` 3px |
-| Elevation | `--shadow-xs` cards, `--shadow-sm`, `--shadow-md` overlays only (replaces the embossed shadows) |
+| Elevation | Black-based `--shadow-xs`, `--shadow-sm`, `--shadow-md` (overlays) |
 | Layout | `--layout-app` 1120px, `--layout-reading` 680px, `--layout-gutter` 20px |
 | Layers | `--z-header` 20, `--z-overlay` 30, `--z-modal` 40, `--z-toast` 50, `--z-skip` 100 |
 | Icons | `--size-icon-sm` 16, md 20, lg 24, xl 32, stroke 1.75 |
@@ -32,20 +32,20 @@ Spacing uses Tailwind's 4px scale. Roles: control padding 12 to 16, gaps 8 to 12
 
 ## Shape
 
-Circle and soft rectangle only. Controls 10px, cards 16px, chips and avatars fully round. Surfaces are white with a 1px line (`--color-border-default`) and almost no shadow. Only overlays (chat, menus) use `--shadow-md`.
+Pills and large soft cards. Controls, chips and buttons are fully round, cards are 24px. Surfaces are zinc with a 1px hairline and almost no shadow. Overlays (chat) are glass: translucent zinc, 18px blur, white hairline.
 
 ## Components (classes and React)
 
 | Piece | Class or component | Notes |
 | --- | --- | --- |
-| Card | `.surface` or `<Card>` | White, 1px line, xs shadow |
+| Card | `.surface` or `<Card>` | Card zinc, 1px hairline, xs shadow |
 | Nested group | `.panel` or `<Well>` | Hairline only, no fill. Rule: line, not box |
 | Labelled fact | `<Fact label>` | Small muted label above a plain sentence. Replaces "Label: text" runs |
 | Key number | `<KeyNumber>` and `Stat` | Large tabular figure, quiet note |
 | Inset group | `.well` | Mist fill, 1px line |
-| Overlay | `.overlay` | Chat panel, menus |
+| Overlay | `.overlay` | Glass panel: chat, menus |
 | Secondary control, pill, tab | `.ctl` (+ `.is-selected` or `aria-pressed="true"`) | |
-| Primary button | `.btn-primary` | One per area |
+| Primary button | `.btn-primary` | White pill, dark text. One per area |
 | Badge | `.chip` | |
 | Logo | `<Logo variant tone size tagline />` | horizontal, stacked, mark, wordmark |
 | Icon | `<Icon name size label />` | 26 named icons |
@@ -57,11 +57,11 @@ States, defined once in `index.css` and shared by every control:
 
 | State | Treatment |
 | --- | --- |
-| Default | White fill, 1px line |
-| Hover | Line turns ink (200ms) |
-| Focus | 3px ink outline, 3px offset, always visible, wins over utilities |
+| Default | Card fill, 1px hairline |
+| Hover | Line turns white (200ms) |
+| Focus | 3px white outline, 3px offset, always visible, wins over utilities |
 | Active | Scale 0.97 in 120ms |
-| Selected | Ink-tinted fill, ink line |
+| Selected | White-tinted fill, white line |
 | Disabled | 55% opacity, not-allowed cursor, `disabled` attribute |
 | Loading | Disabled plus the real status text (never a fake percentage) |
 | Error | Wine text, `role="alert"`, specific message with a way to recover |

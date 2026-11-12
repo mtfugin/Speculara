@@ -1,7 +1,7 @@
 import { useState, type ReactNode } from 'react'
 import { demandPeriods, sentimentView, sourceHref, type TextSample } from '../analysis'
 
-const tones = { pos: { label: 'Positive', color: '#29348f' }, neg: { label: 'Negative', color: '#8f2934' }, neu: { label: 'Neutral', color: '#475569' } }
+const tones = { pos: { label: 'Positive', color: 'var(--color-sky)' }, neg: { label: 'Negative', color: 'var(--color-wine)' }, neu: { label: 'Neutral', color: 'var(--color-mute)' } }
 const Well = ({ children }: { children: ReactNode }) => <div className="well mt-4 rounded-2xl p-4">{children}</div>
 const Metric = ({ label, value }: { label: string; value: ReactNode }) => <div className="ctl rounded-2xl p-3"><p className="text-xs text-slate-600">{label}</p><p className="mt-1 font-display text-xl font-semibold text-ink">{value}</p></div>
 

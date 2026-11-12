@@ -166,7 +166,7 @@ function Query({
         onChange={(e) => setDraft(e.target.value)}
         className="min-h-[var(--size-target)] min-w-0 flex-1 bg-transparent px-2 text-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
       />
-      <button className="btn-primary min-h-11 rounded-xl px-5 py-2.5 text-sm font-medium text-white">
+      <button className="btn-primary min-h-11 rounded-xl px-5 py-2.5 text-sm font-medium">
         {cta}
       </button>
     </form>
@@ -182,7 +182,7 @@ const Explain = ({ children }: { children: ReactNode }) => (
 
 const Stat = ({ l, v, c = INK }: { l: string; v: string | number; c?: string }) => (
   <div className="panel tabular rounded-2xl p-4">
-    <p className="font-display text-2xl font-bold leading-tight [overflow-wrap:anywhere] sm:text-3xl" style={{ color: c }}>
+    <p className="font-sans text-3xl font-semibold leading-tight tracking-tight [overflow-wrap:anywhere] sm:text-4xl" style={{ color: c }}>
       {v}
     </p>
     <p className="mt-1 text-sm text-slate-600">{l}</p>
@@ -278,7 +278,7 @@ function BarChart({
                 className="group flex h-full min-w-0 flex-1 flex-col items-center justify-end"
               >
                 <span
-                  className={`mb-1 rounded bg-white/90 px-1 font-semibold text-ink ${!many || v === top ? "" : "pointer-events-none opacity-0 transition-opacity duration-150 group-hover:opacity-100"}`}
+                  className={`mb-1 rounded bg-card/90 px-1 font-semibold text-ink ${!many || i === values.indexOf(top) ? "" : "pointer-events-none opacity-0 transition-opacity duration-150 group-hover:opacity-100"}`}
                 >
                   {fmt(v)}
                 </span>
@@ -288,7 +288,7 @@ function BarChart({
                     ["--i" as string]: i,
                     height: `${(v / max) * 100}%`,
                     background:
-                      v === top
+                      i === values.indexOf(top)
                         ? `linear-gradient(180deg,var(--color-action-primary-start),var(--color-chart-primary))`
                         : "var(--color-chart-secondary)",
                                       }}
@@ -301,7 +301,7 @@ function BarChart({
               className="pointer-events-none absolute inset-x-0 border-t-2 border-dashed"
               style={{ bottom: `${(mean / max) * 100}%`, borderColor: WINE }}
             >
-              <span className="absolute -top-5 right-0 rounded bg-mist px-1 font-semibold text-wine">
+              <span className="absolute -top-5 right-0 rounded bg-card px-1 font-semibold text-wine">
                 avg {fmt(mean)}
               </span>
             </div>
@@ -345,7 +345,7 @@ function Unavailable({ children }: { children: ReactNode }) {
       <div className="flex flex-col items-center gap-4 text-center sm:flex-row sm:text-left">
         <Illustration name="needsData" className="h-24 w-36 shrink-0" />
         <div>
-          <p className="font-display text-lg font-semibold text-ink">A little more data will help</p>
+          <p className="font-display text-2xl text-ink">A little more data will help</p>
           <p className="mt-1 text-sm text-slate-700">{children}</p>
         </div>
       </div>
@@ -437,7 +437,7 @@ function DecisionOverview() {
       <Card label="Decision brief">
         <H sub="Start with the evidence, then choose one small test.">Your decision brief</H>
         <p className="text-xs font-semibold uppercase tracking-wide text-slate-600">What changed</p>
-        <p className="mt-1 break-words font-display text-xl font-semibold leading-snug text-ink sm:text-2xl">
+        <p className="mt-1 break-words font-sans text-2xl font-medium leading-snug tracking-tight text-ink sm:text-3xl">
           {brief.changed}
         </p>
         <dl className="mt-6 grid gap-x-8 gap-y-5 border-t border-border-default pt-5 sm:grid-cols-3">
@@ -501,12 +501,12 @@ function RecommendationItem({
   return (
     <li className="panel rounded-2xl p-4 sm:p-5">
       <div className="flex items-start gap-3">
-        <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-ink text-sm font-bold text-white" aria-hidden="true">
+        <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-white text-sm font-bold text-neutral-900" aria-hidden="true">
           {index + 1}
         </span>
         <div className="min-w-0 flex-1">
           <p className="chip inline-block px-2.5 py-0.5 text-xs">{priorityLabel(index)}</p>
-          <h4 className="mt-1 font-display text-lg font-semibold leading-snug text-ink">{item.title}</h4>
+          <h4 className="mt-1 font-sans text-lg font-semibold leading-snug text-ink">{item.title}</h4>
         </div>
       </div>
       <dl className="mt-4 space-y-3 sm:ml-11">
@@ -830,7 +830,7 @@ function Correlation() {
           </span>
           <StrengthMeter steps={strengthSteps(p.r)} label={summary.strength} />
         </div>
-        <p className="mt-3 font-display text-base font-semibold text-ink">{summary.finding}</p>
+        <p className="mt-3 font-sans text-base font-semibold text-ink">{summary.finding}</p>
         <p className="mt-1 text-sm text-slate-600">
           {calculationLabel(p.a)} and {p.b}
         </p>
@@ -1110,7 +1110,7 @@ function ProfileLink({
                   setMsg("Signed in. Now paste a profile link and analyze.");
                 })
               }
-              className="btn-primary min-h-11 rounded-xl px-3 font-semibold text-white"
+              className="btn-primary min-h-11 rounded-xl px-3 font-semibold"
             >
               Done signing in
             </button>
@@ -1140,7 +1140,7 @@ function ProfileLink({
               onAnalyzed(data, url.trim().replace(/^https?:\/\/(www\.)?/, ""));
             })
           }
-          className="btn-primary min-h-11 w-full rounded-xl px-4 font-semibold text-white"
+          className="btn-primary min-h-11 w-full rounded-xl px-4 font-semibold"
         >
           Analyze this profile
         </button>
@@ -1324,13 +1324,13 @@ function Chat() {
             {msgs.map((m, i) => (
               <div
                 key={i}
-                className={`max-w-[85%] whitespace-pre-line break-words rounded-2xl px-3 py-2 ${m.me ? "ml-auto bg-ink text-white" : "border border-border-default bg-white text-slate-800"}`}
+                className={`max-w-[85%] whitespace-pre-line break-words rounded-2xl px-3 py-2 ${m.me ? "ml-auto bg-white text-neutral-900" : "border border-border-default bg-raised text-slate-800"}`}
               >
                 {m.t}
               </div>
             ))}
             {thinking && (
-              <div role="status" className="skeleton-pulse max-w-[85%] rounded-2xl bg-white/70 px-3 py-2 text-slate-700">
+              <div role="status" className="skeleton-pulse max-w-[85%] rounded-2xl bg-raised px-3 py-2 text-slate-700">
                 {slow ? "Still working. AI answers can take up to a minute." : "Writing an answer…"}
               </div>
             )}
@@ -1370,7 +1370,7 @@ function Chat() {
               aria-label="Your question"
               className="well min-h-11 min-w-0 flex-1 rounded-xl bg-transparent px-3 text-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
             />
-            <button className="btn-primary min-h-11 rounded-xl px-4 text-sm text-white">Send</button>
+            <button className="btn-primary min-h-11 rounded-xl px-4 text-sm">Send</button>
           </form>
         </div>
       )}
@@ -1386,7 +1386,7 @@ function Chat() {
         }}
         aria-label={open ? "Close chat" : "Open chat"}
         aria-expanded={open}
-        className="btn-primary grid h-14 w-14 place-items-center rounded-full text-white"
+        className="btn-primary grid h-14 w-14 place-items-center rounded-full"
       >
         <svg
           width="26"
@@ -1581,7 +1581,7 @@ export default function App() {
           <div className="mx-auto max-w-[var(--layout-app)] px-[var(--layout-gutter)]">
           <section className="grid items-start gap-10 py-10 md:grid-cols-[1.05fr_1fr] md:py-14">
             <div className="min-w-0 md:pt-2">
-              <p className="font-display text-2xl font-bold text-ink">See it before you upload</p>
+              <p className="font-display text-3xl text-ink">See it before you upload</p>
               <ul className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-sm font-medium text-ink">
                 {["Plain-English answers", "Nothing is saved", "No account needed"].map((t) => (
                   <li key={t} className="inline-flex items-center gap-1.5">
@@ -1592,7 +1592,7 @@ export default function App() {
               </ul>
               <div className="surface mt-6 hidden max-w-lg rounded-2xl p-5 md:block" aria-hidden="true">
                 <p className="text-xs font-semibold uppercase tracking-wide text-slate-600">Example of an answer</p>
-                <p className="mt-1 font-display text-lg font-semibold leading-snug text-ink">
+                <p className="mt-1 font-sans text-lg font-semibold leading-snug text-ink">
                   Sales dipped a little last week, and your carousel posts did best.
                 </p>
                 <div className="mt-4 flex h-16 items-end gap-1.5">
@@ -1609,7 +1609,7 @@ export default function App() {
             </div>
 
             <div ref={listRef} id="start" className="surface min-w-0 scroll-mt-6 rounded-2xl p-5 sm:p-6">
-              <h2 className="font-display text-xl font-bold text-ink">Start with your data</h2>
+              <h2 className="font-display text-3xl text-ink">Start with your data</h2>
               <p className="mt-1 text-sm text-slate-600">Upload a file, or try the demo first.</p>
               <div className="mt-4" aria-busy={busy}>
                 <label htmlFor="upload" className="mb-2 block text-sm font-semibold text-ink">
@@ -1642,7 +1642,7 @@ export default function App() {
                       if (file) void analyzeFile(file);
                       e.target.value = "";
                     }}
-                    className="mt-3 block min-h-11 w-full min-w-0 rounded-xl text-sm file:mr-3 file:min-h-11 file:rounded-xl file:border-0 file:bg-ink file:px-4 file:py-2 file:font-semibold file:text-white"
+                    className="mt-3 block min-h-11 w-full min-w-0 rounded-xl text-sm file:mr-3 file:min-h-11 file:rounded-xl file:border-0 file:bg-white file:px-4 file:py-2 file:font-semibold file:text-neutral-900"
                   />
                 </div>
                 <p id="upload-help" className="mt-2 text-sm text-slate-600">
@@ -1719,7 +1719,7 @@ export default function App() {
                   <h2
                     id="upload-preview-title"
                     tabIndex={-1}
-                    className="font-display text-lg font-bold text-ink"
+                    className="font-display text-xl font-bold text-ink"
                   >
                     Upload preview
                   </h2>
@@ -1786,7 +1786,7 @@ export default function App() {
                   )}
                 </div>
                 <div className="min-w-0">
-                  <h3 className="font-display text-lg font-semibold text-ink">What this file supports</h3>
+                  <h3 className="font-display text-2xl text-ink">What this file supports</h3>
                   <ul className="mt-3 space-y-3">
                     {ORDER.map((key) => {
                       const info = moduleInfo(key, candidate.data);
@@ -1808,7 +1808,7 @@ export default function App() {
                       type="button"
                       disabled={busy}
                       onClick={() => commitDataset(candidate.data, candidate.label)}
-                      className="btn-primary min-h-11 rounded-xl px-4 text-sm text-white"
+                      className="btn-primary min-h-11 rounded-xl px-4 text-sm"
                     >
                       Use this dataset
                     </button>
@@ -1829,7 +1829,7 @@ export default function App() {
           )}
 
           <section id="questions" aria-labelledby="modules-title" className="scroll-mt-6 pb-12">
-            <h2 id="modules-title" className="font-display text-2xl font-bold text-ink md:text-3xl">
+            <h2 id="modules-title" className="font-display text-4xl text-ink md:text-5xl">
               What do you want to know?
             </h2>
             <p className="mt-1 text-slate-600">Pick a question. Each one turns your numbers into a plain answer.</p>
@@ -1857,7 +1857,7 @@ export default function App() {
                     <span className="grid h-10 w-10 place-items-center rounded-xl bg-ink/10 text-ink">
                       <Icon name={k} size="lg" />
                     </span>
-                    <span className="font-display text-lg font-semibold leading-snug">{META[k].q}</span>
+                    <span className="font-sans text-lg font-semibold leading-snug">{META[k].q}</span>
                     <StatusBadge module={k} analysis={analysis} />
                   </button>
                 </li>
@@ -1888,7 +1888,7 @@ export default function App() {
                 </div>
                 <div className="flex flex-wrap gap-3">
                   <button
-                    className="btn-primary min-h-11 rounded-xl px-4 text-sm text-white"
+                    className="btn-primary min-h-11 rounded-xl px-4 text-sm"
                     onClick={() => exportResults("report")}
                   >
                     Download report
@@ -2036,7 +2036,7 @@ export default function App() {
           </section>
           </div>
         </main>
-        <footer className="border-t border-border-default bg-white">
+        <footer className="border-t border-border-default bg-canvas">
           <div className="mx-auto flex max-w-[var(--layout-app)] flex-wrap items-center justify-between gap-3 px-[var(--layout-gutter)] py-8 text-sm text-slate-600">
             <Logo size={24} />
             <p>Honest numbers. Plain words. Demo records are fictional.</p>

@@ -5,11 +5,12 @@
    Colors only come from existing tokens: ink, sky, primary, white. */
 import { useId } from "react";
 
-type Tone = "color" | "mono" | "reversed";
+type Tone = "color" | "mono" | "reversed" | "onLight";
 const TONES: Record<Tone, { a: string; b: string; word: string }> = {
   color: { a: "var(--color-ink)", b: "var(--color-sky)", word: "var(--color-ink)" },
   mono: { a: "currentColor", b: "currentColor", word: "currentColor" },
   reversed: { a: "var(--color-white)", b: "var(--color-sky)", word: "var(--color-white)" },
+  onLight: { a: "#18181b", b: "#0ea5e9", word: "#18181b" },
 };
 
 export function LogoMark({ size = 32, tone = "color", title }: { size?: number; tone?: Tone; title?: string }) {
@@ -38,7 +39,7 @@ export function LogoMark({ size = 32, tone = "color", title }: { size?: number; 
 
 export function Wordmark({ tone = "color", className = "" }: { tone?: Tone; className?: string }) {
   return (
-    <span className={`font-display font-bold leading-none tracking-tight ${className}`} style={{ color: TONES[tone].word }}>
+    <span className={`font-wordmark leading-none ${className}`} style={{ color: TONES[tone].word }}>
       Speculara
     </span>
   );
@@ -64,7 +65,7 @@ export function Logo({
       <span className={`flex flex-col ${stacked ? "items-center" : ""}`}>
         <Wordmark tone={tone} className={stacked ? "text-2xl" : "text-xl"} />
         {tagline && (
-          <span className="mt-1 text-xs font-medium tracking-wide" style={{ color: tone === "reversed" ? "var(--color-white)" : "var(--color-text-secondary)" }}>
+          <span className="mt-1 text-xs font-medium tracking-wide" style={{ color: tone === "reversed" ? "var(--color-white)" : tone === "onLight" ? "#52525b" : "var(--color-text-secondary)" }}>
             Honest numbers. Plain words.
           </span>
         )}
