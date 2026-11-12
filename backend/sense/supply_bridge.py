@@ -5,6 +5,7 @@ date, method-derived confidence and real or illustrative label. A barangay that 
 observation here means no data yet. It is never evidence that nothing is sold there.
 """
 from backend.sense.model import EvidenceStore, Observation
+from backend.sense.offerings import frictions_covered
 from backend.supply import SupplyData
 
 LISTING_THEME = "coffee shop listed"
@@ -14,18 +15,21 @@ def supply_to_observations(data: SupplyData) -> list[Observation]:
     by_shop = {s.shop_id: s for s in data.shops}
     out = []
     for shop in data.shops:
+        extra = {"shop_name": shop.shop_name, "hours": shop.hours}
+        extra["frictions"] = frictions_covered(LISTING_THEME, extra)
         out.append(Observation(
             id=f"s-{shop.shop_id}", kind="supply", basis="observed", theme=LISTING_THEME, barangay=shop.barangay,
             source=shop.source, collected_at=shop.collected_at, confidence=shop.confidence,
-            data_label=shop.data_label, shop_id=shop.shop_id, extra={"shop_name": shop.shop_name, "hours": shop.hours},
+            data_label=shop.data_label, shop_id=shop.shop_id, extra=extra,
         ))
     for number, item in enumerate(data.menu, start=1):
         shop = by_shop[item.shop_id]
+        extra = {"price_centavos": item.price_centavos}  # None means price unknown, never zero
+        extra["frictions"] = frictions_covered(item.item, extra)
         out.append(Observation(
             id=f"s-{item.shop_id}-m{number}", kind="supply", basis="observed", theme=item.item.casefold(),
             barangay=shop.barangay, source=item.source, collected_at=item.collected_at, confidence=item.confidence,
-            data_label=item.data_label, shop_id=item.shop_id,
-            extra={"price_centavos": item.price_centavos},  # None means price unknown, never zero
+            data_label=item.data_label, shop_id=item.shop_id, extra=extra,
         ))
     return out
 
