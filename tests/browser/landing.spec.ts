@@ -102,6 +102,14 @@ test("loading screen: a faint grid with lines of light gliding across it, no tex
   expect(await flow.evaluate((el) => getComputedStyle(el).pointerEvents)).toBe("none");
   const streaks = flow.locator(".streak");
   expect(await streaks.count()).toBeGreaterThanOrEqual(8);
+  // it is a faded background, not a feature: grid and streak colors are nearly transparent
+  const alpha = (color: string) => Number((color.match(/\/\s*([\d.]+)\s*\)|,\s*([\d.]+)\s*\)$/) ?? [])[1] ?? (color.match(/,\s*([\d.]+)\s*\)$/) ?? [])[1] ?? 1);
+  expect(alpha(await flow.locator(".streak-orange").first().evaluate((el) => getComputedStyle(el).getPropertyValue("--c").trim()))).toBeLessThanOrEqual(0.3);
+  expect(alpha(await flow.locator(".streak-white").first().evaluate((el) => getComputedStyle(el).getPropertyValue("--c").trim()))).toBeLessThanOrEqual(0.2);
+  // and a few soft pools where the grid bends and blurs like water
+  const pools = flow.locator("[data-water-area]");
+  expect(await pools.count()).toBeGreaterThanOrEqual(3);
+  expect(await pools.first().evaluate((el) => getComputedStyle(el).backdropFilter)).toContain("lineflow-water");
   const first = streaks.first();
   const x1 = await first.evaluate((el) => new DOMMatrix(getComputedStyle(el).transform).m41);
   await page.waitForTimeout(300);

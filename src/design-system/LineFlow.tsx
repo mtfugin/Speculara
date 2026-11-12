@@ -20,11 +20,39 @@ const STREAKS: Streak[] = [
   { axis: "y", line: 19, len: 240, dur: 13, delay: -5, tone: "orange" },
 ];
 
+/* Soft pools, as percentages of the screen. Each one refracts and blurs the grid under it, and drifts slowly. */
+const POOLS = [
+  { left: 4, top: 14, size: 380, drift: 9, delay: 0 },
+  { left: 60, top: 2, size: 320, drift: 11, delay: -3 },
+  { left: 74, top: 52, size: 440, drift: 10, delay: -6 },
+  { left: 24, top: 62, size: 360, drift: 12, delay: -2 },
+];
+
 /** `speed` multiplies how fast the lines run: 1 is a slow drift, higher suits a short moment like the loading screen. */
 export default function LineFlow({ speed = 1 }: { speed?: number }) {
   return (
     <div aria-hidden="true" data-lineflow className="line-flow">
+      <svg aria-hidden="true" focusable="false" width="0" height="0" style={{ position: "absolute" }}>
+        <filter id="lineflow-water" x="-10%" y="-10%" width="120%" height="120%" colorInterpolationFilters="sRGB">
+          <feTurbulence type="fractalNoise" baseFrequency="0.006 0.012" numOctaves="2" seed="7" result="noise" />
+          <feDisplacementMap in="SourceGraphic" in2="noise" scale="38" xChannelSelector="R" yChannelSelector="G" />
+        </filter>
+      </svg>
       <div className="line-flow__grid" />
+      {POOLS.map((p, i) => (
+        <span
+          key={`pool-${i}`}
+          data-water-area
+          className="water-area"
+          style={{
+            left: `${p.left}%`,
+            top: `${p.top}%`,
+            ["--size" as string]: `${p.size}px`,
+            ["--drift" as string]: `${(p.drift / Math.max(1, speed / 2)).toFixed(1)}s`,
+            ["--delay" as string]: `${p.delay}s`,
+          }}
+        />
+      ))}
       {STREAKS.map((s, i) => (
         <span
           key={i}

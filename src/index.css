@@ -307,25 +307,24 @@ html[data-at-end] .edge-blur--bottom { opacity: 0; }
   inset: 0;
   overflow: hidden;
   pointer-events: none;
-  -webkit-mask-image: radial-gradient(90% 85% at 50% 45%, #000 38%, transparent 100%);
-  mask-image: radial-gradient(90% 85% at 50% 45%, #000 38%, transparent 100%);
+  -webkit-mask-image: radial-gradient(75% 70% at 50% 48%, #000 15%, transparent 100%);
+  mask-image: radial-gradient(75% 70% at 50% 48%, #000 15%, transparent 100%);
 }
 .line-flow__grid {
   position: absolute;
   inset: 0;
   background-image:
-    linear-gradient(rgb(245 245 247 / 0.07) 1px, transparent 1px),
-    linear-gradient(90deg, rgb(245 245 247 / 0.07) 1px, transparent 1px);
+    linear-gradient(rgb(245 245 247 / 0.028) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(245 245 247 / 0.028) 1px, transparent 1px);
   background-size: 64px 64px;
 }
 .streak {
   position: absolute;
   opacity: 0;
   will-change: transform, opacity;
-  --c: rgb(255 159 10 / 0.95);
-  filter: drop-shadow(0 0 5px rgb(255 159 10 / 0.55));
+  --c: rgb(255 159 10 / 0.26);
 }
-.streak-white { --c: rgb(245 245 247 / 0.6); filter: drop-shadow(0 0 4px rgb(245 245 247 / 0.25)); }
+.streak-white { --c: rgb(245 245 247 / 0.16); }
 .streak-x {
   left: 0;
   height: 1px;
@@ -351,4 +350,22 @@ html[data-at-end] .edge-blur--bottom { opacity: 0; }
   12%  { opacity: 1; }
   88%  { opacity: 1; }
   100% { transform: translateY(130vh); opacity: 0; }
+}
+
+/* Water pools on the loading screen: soft areas where the grid bends and blurs like seen through water. */
+.water-area {
+  position: absolute;
+  width: var(--size);
+  height: var(--size);
+  border-radius: 9999px;
+  background: radial-gradient(closest-side, rgb(245 245 247 / 0.035), rgb(255 159 10 / 0.012) 60%, transparent);
+  -webkit-backdrop-filter: url(#lineflow-water) blur(2.5px);
+  backdrop-filter: url(#lineflow-water) blur(2.5px);
+  -webkit-mask-image: radial-gradient(closest-side, #000 35%, transparent 100%);
+  mask-image: radial-gradient(closest-side, #000 35%, transparent 100%);
+  animation: water-drift var(--drift) ease-in-out var(--delay) infinite alternate;
+}
+@keyframes water-drift {
+  from { transform: translate3d(-22px, -14px, 0) scale(0.96); }
+  to   { transform: translate3d(26px, 18px, 0) scale(1.05); }
 }
