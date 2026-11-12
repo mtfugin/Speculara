@@ -33,6 +33,8 @@ Goal: one complete workflow, for one industry in one city, that ends in an evide
 | 2.7 | Dossier and validation | Ranked dossier with evidence, uncertainty and one suggested validation test. Opportunity Explorer screen built in the current design system. |
 | 2.8 | Exit gate | Real or clearly labeled dataset run end to end, tests green, demo script written. |
 
+Status: 2.2 to 2.7 are built and run on illustrative data. 2.8 is met with an illustrative dataset (see `phase-2-8-exit-gate.md`). 2.1 stays open until the privacy checklist is closed, so no real data is collected yet.
+
 Later, only after 2.8: Cultural Radar, Market Contradiction Engine, Opportunity Genome (knowledge graph), Validation Lab.
 
 ## Rules for both stages
