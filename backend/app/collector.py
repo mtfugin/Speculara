@@ -34,9 +34,29 @@ def cancellation_version() -> int:
 
 
 class CollectorError(RuntimeError):
-    def __init__(self, message: str, status_code: int = 503):
+    def __init__(self, message: str, status_code: int = 503, kind: str = "unavailable"):
         super().__init__(message)
         self.status_code = status_code
+        self.kind = kind
+
+
+# Worker error text -> (kind, HTTP status, plain message). First match wins. The worker's own wording is kept out of
+# the person's way: these are the cases we can tell apart today. Anything else stays a generic collection failure.
+_ERROR_KINDS = [
+    ("cancelled", 409, "Collection cancelled.", re.compile(r"cancelled", re.I)),
+    ("not_found", 404, "That profile was not found, or it is private. Check the link, then try again.", re.compile(r"did not load|not found|doesn.t exist|isn.t available|couldn.t find", re.I)),
+    ("sign_in_required", 401, "This network needs you signed in. Use Sign in, close the sign-in window, then try again.", re.compile(r"requires sign-?in|log ?in wall|login wall|signed out|session (has )?expired|sign in again", re.I)),
+    ("rate_limited", 429, "The platform is limiting requests right now. Wait a while before trying again.", re.compile(r"rate.?limit|too many requests|try again later|429", re.I)),
+    ("blocked", 403, "The platform asked for a check (a captcha or a security step). Speculara will not get around it. Complete it yourself in the sign-in window, or try again later.", re.compile(r"captcha|checkpoint|challenge|please wait|security check", re.I)),
+    ("timeout", 504, "The collection took too long and was stopped. Try again, or collect fewer posts.", re.compile(r"timed out|timeout", re.I)),
+]
+
+
+def classify_error(message: str) -> CollectorError:
+    for kind, status_code, text, pattern in _ERROR_KINDS:
+        if pattern.search(message or ""):
+            return CollectorError(text, status_code, kind)
+    return CollectorError("The collector could not read that profile. The page may have changed. Try again later.", 502, "failed")
 
 
 def profile_url(raw: str) -> tuple[str, str, str]:
@@ -74,13 +94,14 @@ def _terminate_owned_worker(proc):
     proc.wait(timeout=10)
 
 
-def _stop_sync(proc, action):
+def _stop_sync(proc, action, wait: bool = True):
     if proc is None or proc.poll() is not None:
         return
     try:
         proc.stdin.write(json.dumps({"action": action}) + "\n")
         proc.stdin.flush()
-        proc.wait(timeout=12)
+        if wait:
+            proc.wait(timeout=12)
     except (BrokenPipeError, OSError, ValueError, subprocess.TimeoutExpired):
         _terminate_owned_worker(proc)
 
@@ -95,9 +116,20 @@ async def finish_login() -> dict:
 async def cancel_collection() -> dict:
     global _cancel_version
     _cancel_version += 1
-    await asyncio.to_thread(_stop_sync, _collection_process, "cancel")
-    await asyncio.to_thread(_done.wait, 3)
-    return {"cancelled": True}
+    # Ask the worker to stop and return at once; the collection ends on its own as the browser closes.
+    proc = _collection_process
+    await asyncio.to_thread(_stop_sync, proc, "cancel", False)
+    stopped = await asyncio.to_thread(_done.wait, 3)
+    if not stopped and proc is not None:
+        # The worker did not stop politely: close only this worker and its browser after a short grace period.
+        def force():
+            if not _done.wait(7):
+                try:
+                    _terminate_owned_worker(proc)
+                except (OSError, subprocess.TimeoutExpired):
+                    pass
+        threading.Thread(target=force, daemon=True).start()
+    return {"cancelled": True, "stopped": stopped, "message": "Cancelled." if stopped else "Cancelling. The browser is closing."}
 
 
 def _process() -> subprocess.Popen:
@@ -115,7 +147,7 @@ def _process() -> subprocess.Popen:
 def _invoke_sync(payload: dict) -> dict:
     global _collection_process, _progress
     if not _lock.acquire(blocking=False):
-        raise CollectorError("The collector is busy. Finish signing in and close the sign-in window, or wait for the current collection.", 409)
+        raise CollectorError("The collector is busy. Finish signing in and close the sign-in window, or wait for the current collection.", 409, "busy")
     proc = None
     timer = None
     expired = threading.Event()
@@ -144,11 +176,11 @@ def _invoke_sync(payload: dict) -> dict:
                 result = message
         proc.wait(timeout=10)
         if expired.is_set():
-            raise CollectorError("SocialMonitor collection timed out after 3½ minutes. Please try again.")
+            raise CollectorError("The collection took too long and was stopped. Try again, or collect fewer posts.", 504, "timeout")
         if result is None:
             raise CollectorError("SocialMonitor could not start. Check Node.js and run npm run collector:setup.")
         if not result.get("ok"):
-            raise CollectorError(str(result.get("error") or "SocialMonitor could not read that profile."))
+            raise classify_error(str(result.get("error") or ""))
         return result["data"]
     finally:
         if timer:

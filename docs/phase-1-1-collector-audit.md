@@ -71,3 +71,9 @@ Problems to fix in 1.2:
 4. Checked: the "Please wait" message is TikTok's own script check. The collector first asks from Node, and when TikTok answers with that page it opens a normal logged-out browser page, which runs the check by itself (`vendor/collect/tiktok.ts`). A captcha is not solved: the code throws a `Challenge` error and stops. That is acceptable. Keep it that way, and keep a test that a captcha stops the run.
 
 Still untested: private profile, expired Instagram sign-in, rate limiting, TikTok layout change.
+
+## Phase 1.2 fixes (done, checked live on TikTok)
+- Worker errors are sorted into kinds with plain messages and honest statuses (`classify_error` in `backend/app/collector.py`): not found or private (404), sign-in needed (401), rate limited (429), platform check or captcha (403), cancelled (409), timeout (504), anything else (502). Missing profile now returns 404, not 503.
+- Cancel returns in at most 3 seconds with "Cancelling. The browser is closing." and then closes only this worker's browser if it has not stopped within about 7 more seconds. Live: cancel at 12 s ended the run at 22.7 s (before the first fix, a plain cancel took 90 s).
+- Still not covered: telling private from missing (the page looks the same signed out), an expired Instagram session, and a TikTok layout change. These need Instagram and Facebook runs and a recorded fixture (1.4).
+- Backend tests: 101 pass (3 new for error kinds, 404 on a missing profile, and fast cancel).

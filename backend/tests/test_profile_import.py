@@ -90,6 +90,58 @@ class ProfileRouteTests(unittest.TestCase):
         self.assertEqual(r.status_code, 401)
         self.assertIn("Sign in", r.json()["detail"])
 
+    def test_worker_errors_are_told_apart(self):
+        cases = {
+            "the profile @nobody did not load": (404, "not_found"),
+            "Collection cancelled.": (409, "cancelled"),
+            "Facebook requires sign-in. Use Sign in for comments": (401, "sign_in_required"),
+            "TikTok: a captcha appeared. Open sign in": (403, "blocked"),
+            'TikTok answered with its "Please wait" check instead of the page': (403, "blocked"),
+            "HTTP 429 too many requests": (429, "rate_limited"),
+            "Collection timed out. Try a profile with fewer posts": (504, "timeout"),
+            "something strange happened": (502, "failed"),
+            "": (502, "failed"),
+        }
+        for message, (status, kind) in cases.items():
+            err = collector.classify_error(message)
+            self.assertEqual((err.status_code, err.kind), (status, kind), message)
+            self.assertNotIn("SocialMonitor", str(err))
+
+    def test_missing_profile_is_404_not_503(self):
+        async def missing(url):
+            raise collector.classify_error("the profile @nobody did not load")
+
+        with patch.dict(os.environ, {"ENABLE_PROFILE_COLLECTOR": "1"}), patch.object(collector, "collect_profile", missing):
+            r = client.post("/api/profile/analyze", json={"url": "https://www.tiktok.com/@nobody"})
+        self.assertEqual(r.status_code, 404)
+        self.assertIn("not found", r.json()["detail"])
+
+    def test_cancel_returns_without_waiting_for_the_browser(self):
+        import asyncio, time
+
+        class Slow:
+            def __init__(self): self.sent = []
+            def poll(self): return None
+            class stdin:
+                @staticmethod
+                def write(x): pass
+                @staticmethod
+                def flush(): pass
+            def wait(self, timeout=None): time.sleep(5)
+
+        collector._collection_process = Slow()
+        collector._done.clear()
+        try:
+            started = time.time()
+            with patch.object(collector._done, "wait", lambda t=None: False):
+                result = asyncio.run(collector.cancel_collection())
+            self.assertLess(time.time() - started, 2)
+            self.assertTrue(result["cancelled"])
+            self.assertFalse(result["stopped"])
+        finally:
+            collector._collection_process = None
+            collector._done.set()
+
 
 if __name__ == "__main__":
     unittest.main()
