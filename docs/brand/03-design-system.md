@@ -83,3 +83,29 @@ Automated axe-core scans (WCAG 2 A and AA) run on the home screen, all six modul
 3. New icon: add it to the `ICONS` map in `Icon.tsx`, same grid and stroke.
 4. New animation: use the motion tokens and the rules in 05. Add it to the brand sheet.
 5. Run `npm run typecheck`, `npm test`, `npm run test:e2e`.
+
+## shadcn-style structure and the Responsive Hero Banner
+
+The project is shadcn compatible without running the shadcn CLI (its `init` rewrites color variables, and colors are locked):
+
+| Piece | Where |
+| --- | --- |
+| Config | `components.json` (style new-york, Tailwind v4, css at `src/index.css`, lucide icons) |
+| Alias | `@/*` maps to `src/*` (already set in `tsconfig.json` and `vite.config.ts`) |
+| UI components | `src/components/ui/` (the folder the shadcn CLI installs into; keeping this exact path means `npx shadcn@latest add <name>` and pasted components land in the right place) |
+| Class helper | `src/lib/utils.ts` (`cn`, built on `clsx` and `tailwind-merge`) |
+
+`src/components/ui/responsive-hero-banner.tsx` is the supplied template adapted to the brand. Kept: structure, props (nav links, badge, title lines, description, two actions, audience row), responsive behavior. Changed on purpose:
+
+| Template | Speculara |
+| --- | --- |
+| Zinc and black palette, extra CSS variables | Existing tokens only (primary, white, ink, sky). Nothing added to the palette |
+| Instrument Serif and Inter | Sora headline, Manrope text (self-hosted) |
+| Space photo and logo images from a CDN | Ring pattern backdrop, live `Logo`. `backgroundImageUrl` is still available. Photos are off by default so no third-party image is requested |
+| Partner logo images | "Built for" audience labels (`partners` takes `label`, optional `href`) |
+| Mobile toggle with no menu | Real mobile menu: `aria-expanded`, `aria-controls`, Escape and link choice close it |
+| Link-only actions | Link or button (`onCtaClick`, `onPrimaryClick`, `onSecondaryClick`): the page uses them to start the demo or focus the upload box |
+| `animate-fade-slide-in-*` classes and `tw-animate-css` | Shared `stagger-in` motion; `tw-animate-css` was not needed so it was not installed |
+| Focus ring | White ring on the dark banner (`.on-dark`) so contrast stays at 3:1 or better |
+
+The banner replaces the old sticky header. Its first button and the nav "Try the demo" call the same demo loader as "Try synthetic demo data".

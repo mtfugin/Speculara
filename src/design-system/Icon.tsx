@@ -2,7 +2,7 @@
    Lucide supplies the glyphs (ISC license); brand glyphs below follow the same rules.
    Decorative icons are hidden from assistive technology; pass `label` when an icon stands alone. */
 import {
-  ArrowDownRight, ArrowUpRight, Check, ChevronRight, CircleAlert, CircleCheck, Copy, Download, FileSpreadsheet,
+  ArrowDownRight, ArrowRight, ArrowUpRight, Menu, Play, Check, ChevronRight, CircleAlert, CircleCheck, Copy, Download, FileSpreadsheet,
   Info, Lightbulb, Link2, Lock, LogIn, MessageCircle, MessageSquareText, Minus, RefreshCw, Send, ShoppingBag,
   TrendingUp, TriangleAlert, Upload, X, ChartColumn,
 } from "lucide-react";
@@ -45,6 +45,9 @@ export const ICONS = {
   refresh: RefreshCw,
   next: ChevronRight,
   lens: Lens,
+  arrow: ArrowRight,
+  play: Play,
+  menu: Menu,
 } as const satisfies Record<string, Glyph>;
 
 export type IconName = keyof typeof ICONS;

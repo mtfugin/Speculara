@@ -23,10 +23,10 @@ import { chartTicks, niceMax } from "./chart-presentation";
 import { Logo } from "./design-system/Logo";
 import { Icon } from "./design-system/Icon";
 import { Illustration } from "./design-system/illustrations";
-import { RingsPattern } from "./design-system/patterns";
 import { Splash } from "./design-system/Splash";
 import { AnalysisLoader } from "./design-system/AnalysisLoader";
 import { Card, Fact, H, KeyNumber, Numbers, Pills, Well } from "./design-system/ui";
+import ResponsiveHeroBanner from "./components/ui/responsive-hero-banner";
 
 import { moduleInfo, updatedLabel, priorityLabel, type ModuleKey } from "./polish";
 
@@ -1406,14 +1406,6 @@ function Chat() {
   );
 }
 
-const MARKETS = [
-  "Marketing Teams",
-  "Advertisement Agencies",
-  "Public Relations (PR) Agencies",
-  "Brand Strategists",
-  "Market Research Analysts",
-];
-
 /* ---------- App ---------- */
 export default function App() {
   const [picked, setPicked] = useState<Key | null>(null);
@@ -1577,31 +1569,20 @@ export default function App() {
     <Results.Provider value={analysis}>
       <Splash />
       <div className="min-h-screen pb-24">
-        <header className="sticky top-0 z-[var(--z-header)] border-b border-border-default bg-white/90 backdrop-blur">
-          <div className="mx-auto flex h-16 max-w-[var(--layout-app)] items-center gap-3 px-[var(--layout-gutter)]">
-            <a href="#top" className="inline-flex min-h-11 items-center rounded-lg" aria-label="Speculara home">
-              <Logo size={32} />
-            </a>
-            <span className="ml-auto hidden text-sm text-slate-600 md:block">
-              Honest numbers. Plain words.
-            </span>
-          </div>
-        </header>
-
-        <main id="main" className="mx-auto max-w-[var(--layout-app)] px-[var(--layout-gutter)]">
-          <section id="top" className="relative isolate grid items-center gap-10 overflow-hidden py-10 md:grid-cols-[1.05fr_1fr] md:py-16">
-            <div className="pointer-events-none absolute -right-32 -top-32 -z-10 hidden w-[560px] text-ink md:block" aria-hidden="true">
-              <RingsPattern />
-            </div>
-            <div className="min-w-0">
-              <h1 className="stagger-in font-display text-4xl font-bold leading-[1.1] text-ink md:text-5xl" style={{ ["--i" as string]: 0 }}>
-                Turn views, saves, and sales into the next decision.
-              </h1>
-              <p className="stagger-in mt-4 max-w-lg text-lg text-slate-700" style={{ ["--i" as string]: 1 }}>
-                Upload your CSV or Excel export. Get measured findings, clear limits, and a next
-                action grounded in views, saves and sales.
-              </p>
-              <ul className="stagger-in mt-6 flex flex-wrap gap-x-5 gap-y-2 text-sm font-medium text-ink" style={{ ["--i" as string]: 2 }}>
+        <main id="main">
+          <ResponsiveHeroBanner
+            onCtaClick={() => void loadDemo()}
+            onPrimaryClick={() => void loadDemo()}
+            onSecondaryClick={() => {
+              document.getElementById("start")?.scrollIntoView({ behavior: "smooth" });
+              document.getElementById("upload")?.focus({ preventScroll: true });
+            }}
+          />
+          <div className="mx-auto max-w-[var(--layout-app)] px-[var(--layout-gutter)]">
+          <section className="grid items-start gap-10 py-10 md:grid-cols-[1.05fr_1fr] md:py-14">
+            <div className="min-w-0 md:pt-2">
+              <p className="font-display text-2xl font-bold text-ink">See it before you upload</p>
+              <ul className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-sm font-medium text-ink">
                 {["Plain-English answers", "Nothing is saved", "No account needed"].map((t) => (
                   <li key={t} className="inline-flex items-center gap-1.5">
                     <Icon name="check" size="sm" />
@@ -1609,7 +1590,7 @@ export default function App() {
                   </li>
                 ))}
               </ul>
-              <div className="surface stagger-in mt-8 hidden max-w-lg rounded-2xl p-5 md:block" style={{ ["--i" as string]: 4 }} aria-hidden="true">
+              <div className="surface mt-6 hidden max-w-lg rounded-2xl p-5 md:block" aria-hidden="true">
                 <p className="text-xs font-semibold uppercase tracking-wide text-slate-600">Example of an answer</p>
                 <p className="mt-1 font-display text-lg font-semibold leading-snug text-ink">
                   Sales dipped a little last week, and your carousel posts did best.
@@ -1627,7 +1608,7 @@ export default function App() {
               </div>
             </div>
 
-            <div ref={listRef} className="surface stagger-in min-w-0 rounded-2xl p-5 sm:p-6" style={{ ["--i" as string]: 3 }}>
+            <div ref={listRef} id="start" className="surface min-w-0 scroll-mt-6 rounded-2xl p-5 sm:p-6">
               <h2 className="font-display text-xl font-bold text-ink">Start with your data</h2>
               <p className="mt-1 text-sm text-slate-600">Upload a file, or try the demo first.</p>
               <div className="mt-4" aria-busy={busy}>
@@ -1847,7 +1828,7 @@ export default function App() {
             </section>
           )}
 
-          <section aria-labelledby="modules-title" className="pb-12">
+          <section id="questions" aria-labelledby="modules-title" className="scroll-mt-6 pb-12">
             <h2 id="modules-title" className="font-display text-2xl font-bold text-ink md:text-3xl">
               What do you want to know?
             </h2>
@@ -2030,18 +2011,6 @@ export default function App() {
             )}
           </div>
 
-          <section className="mt-14">
-            <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-slate-600">
-              Built for
-            </p>
-            <ul className="flex flex-wrap gap-3">
-              {MARKETS.map((m) => (
-                <li key={m} className="ctl rounded-full px-4 py-2 text-sm font-medium text-ink">
-                  {m}
-                </li>
-              ))}
-            </ul>
-          </section>
 
           <section
             id="docs"
@@ -2065,6 +2034,7 @@ export default function App() {
               </p>
             </details>
           </section>
+          </div>
         </main>
         <footer className="border-t border-border-default bg-white">
           <div className="mx-auto flex max-w-[var(--layout-app)] flex-wrap items-center justify-between gap-3 px-[var(--layout-gutter)] py-8 text-sm text-slate-600">

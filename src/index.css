@@ -55,6 +55,11 @@
   outline-offset: 3px;
 }
 
+/* On dark (primary) backgrounds the focus ring turns white so it keeps 3:1 contrast. */
+.on-dark :is(button, a, input, textarea, select, summary, [tabindex]):focus-visible {
+  outline-color: var(--color-white);
+}
+
 /* ---------- Surfaces: structure comes from space and 1px lines, not shadows ---------- */
 @layer components {
   .surface {

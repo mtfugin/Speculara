@@ -97,7 +97,7 @@ test("nonmodal chat keyboard and pointer focus paths", async ({ page }) => {
   await expect(launcher).toBeFocused();
   await launcher.click();
   const upload = page.locator("#upload");
-  for (let i = 0; i < 8 && !(await upload.evaluate((el) => el === document.activeElement)); i++) {
+  for (let i = 0; i < 24 && !(await upload.evaluate((el) => el === document.activeElement)); i++) {
     await page.keyboard.press("Tab");
   }
   await expect(dialog).toBeVisible();

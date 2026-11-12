@@ -47,3 +47,32 @@ test("design tokens are applied: Sora headings, Manrope text, flat surfaces", as
   expect(card.border).toBe("1px");
   expect(card.radius).toBe("16px");
 });
+
+test("hero banner: one h1, nav links, mobile menu opens and closes, actions work", async ({ page }) => {
+  await page.goto("/");
+  await expect(page.locator("h1")).toHaveCount(1);
+  await expect(page.locator("h1")).toContainText("into the next decision.");
+  const nav = page.getByRole("navigation", { name: "Primary" });
+  await expect(nav.getByRole("link", { name: "Questions" })).toHaveAttribute("href", "#questions");
+  // The audience row moved into the banner.
+  await expect(page.getByText("Built for", { exact: true })).toHaveCount(1);
+  // The primary action starts the demo.
+  await page.getByRole("button", { name: "Try the demo" }).first().click();
+  await expect(page.getByRole("region", { name: "Dataset summary" })).toContainText("42 rows", { timeout: 30000 });
+});
+
+test("hero banner mobile menu is reachable, closes with Escape and on choosing a link", async ({ page }) => {
+  await page.setViewportSize({ width: 375, height: 812 });
+  await page.goto("/");
+  const toggle = page.getByRole("button", { name: "Open menu" });
+  await expect(page.getByRole("navigation", { name: "Primary" })).toBeHidden();
+  await toggle.click();
+  const close = page.getByRole("button", { name: "Close menu" });
+  await expect(close).toHaveAttribute("aria-expanded", "true");
+  await expect(page.getByRole("link", { name: "Start" })).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(toggle).toHaveAttribute("aria-expanded", "false");
+  await toggle.click();
+  await page.getByRole("link", { name: "Questions" }).click();
+  await expect(page.getByRole("button", { name: "Open menu" })).toHaveAttribute("aria-expanded", "false");
+});
