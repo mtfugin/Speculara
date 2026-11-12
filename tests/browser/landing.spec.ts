@@ -121,7 +121,9 @@ test("scroll edges: blur bands fixed to the top and bottom, the top appears when
     await expect(band).toHaveAttribute("aria-hidden", "true");
     expect(await band.evaluate((el) => getComputedStyle(el).pointerEvents)).toBe("none");
     expect(await band.evaluate((el) => getComputedStyle(el).position)).toBe("fixed");
-    expect(await band.locator("i").first().evaluate((el) => getComputedStyle(el).backdropFilter)).toContain("blur");
+    // first layer is the water lens (an SVG displacement filter), the rest are the progressive blur
+    expect(await band.locator("i[data-water]").evaluate((el) => getComputedStyle(el).backdropFilter)).toContain("edge-water");
+    expect(await band.locator("i:not([data-water])").first().evaluate((el) => getComputedStyle(el).backdropFilter)).toContain("blur");
   }
   const opacity = (loc: typeof top) => loc.evaluate((el) => Number(getComputedStyle(el).opacity));
   expect(await opacity(top)).toBe(0); // the nav at the top of the page stays crisp
@@ -130,4 +132,20 @@ test("scroll edges: blur bands fixed to the top and bottom, the top appears when
   await expect.poll(() => opacity(top)).toBe(1);
   await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
   await expect.poll(() => opacity(bottom)).toBe(0);
+});
+
+test("water lens filters exist for both edges and calm down with reduced motion", async ({ page, browser }) => {
+  await page.goto("/");
+  for (const edge of ["top", "bottom"]) {
+    const filter = page.locator(`filter#edge-water-${edge}`);
+    await expect(filter).toHaveCount(1);
+    await expect(filter.locator("feDisplacementMap")).toHaveCount(1);
+    await expect(filter.locator("feImage")).toHaveCount(1);
+    await expect(filter.locator("animate")).toHaveCount(1); // the slow wobble
+  }
+  const ctx = await browser.newContext({ reducedMotion: "reduce" });
+  const calm = await ctx.newPage();
+  await calm.goto("/");
+  await expect(calm.locator("filter#edge-water-top animate")).toHaveCount(0); // lens stays, wobble stops
+  await ctx.close();
 });
