@@ -34,12 +34,14 @@ test("signature splash plays once, can be skipped, and never runs with reduced m
   await reduced.close();
 });
 
-test("design tokens are applied: Sora headings, Manrope text, flat surfaces", async ({ page }) => {
+test("design tokens are applied: Instrument Serif hero headline, Inter text, Sora section headings, flat surfaces", async ({ page }) => {
   await page.goto("/");
   const h1 = await page.locator("h1").evaluate((el) => getComputedStyle(el).fontFamily);
-  expect(h1).toContain("Sora");
+  expect(h1).toContain("Instrument Serif");
   const body = await page.evaluate(() => getComputedStyle(document.body).fontFamily);
-  expect(body).toContain("Manrope");
+  expect(body).toContain("Inter");
+  const section = await page.locator("h2").first().evaluate((el) => getComputedStyle(el).fontFamily);
+  expect(section).toContain("Sora");
   const card = await page.locator(".surface").first().evaluate((el) => {
     const s = getComputedStyle(el);
     return { border: s.borderTopWidth, radius: s.borderTopLeftRadius };
@@ -55,7 +57,7 @@ test("hero banner: one h1, nav links, mobile menu opens and closes, actions work
   const nav = page.getByRole("navigation", { name: "Primary" });
   await expect(nav.getByRole("link", { name: "Questions" })).toHaveAttribute("href", "#questions");
   // The audience row moved into the banner.
-  await expect(page.getByText("Built for", { exact: true })).toHaveCount(1);
+  await expect(page.getByText(/^Built for/)).toHaveCount(1);
   // The primary action starts the demo.
   await page.getByRole("button", { name: "Try the demo" }).first().click();
   await expect(page.getByRole("region", { name: "Dataset summary" })).toContainText("42 rows", { timeout: 30000 });

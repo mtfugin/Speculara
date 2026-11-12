@@ -86,26 +86,31 @@ Automated axe-core scans (WCAG 2 A and AA) run on the home screen, all six modul
 
 ## shadcn-style structure and the Responsive Hero Banner
 
-The project is shadcn compatible without running the shadcn CLI (its `init` rewrites color variables, and colors are locked):
+The project is shadcn compatible without running the shadcn CLI:
 
 | Piece | Where |
 | --- | --- |
 | Config | `components.json` (style new-york, Tailwind v4, css at `src/index.css`, lucide icons) |
-| Alias | `@/*` maps to `src/*` (already set in `tsconfig.json` and `vite.config.ts`) |
-| UI components | `src/components/ui/` (the folder the shadcn CLI installs into; keeping this exact path means `npx shadcn@latest add <name>` and pasted components land in the right place) |
+| Alias | `@/*` maps to `src/*` (`tsconfig.json` and `vite.config.ts`) |
+| UI components | `src/components/ui/`, the folder the shadcn CLI installs into, so `npx shadcn@latest add <name>` and pasted components land in the right place |
 | Class helper | `src/lib/utils.ts` (`cn`, built on `clsx` and `tailwind-merge`) |
 
-`src/components/ui/responsive-hero-banner.tsx` is the supplied template adapted to the brand. Kept: structure, props (nav links, badge, title lines, description, two actions, audience row), responsive behavior. Changed on purpose:
+**Decision (owner, 2026-11-12): the hero banner follows the supplied template, not the Speculara brand, because the whole system will be overhauled in that direction.** `src/components/ui/responsive-hero-banner.tsx` keeps the template's markup, classes and layout. What is the template's:
 
-| Template | Speculara |
+- Full-screen photo background, dark overlay, glass nav pill, badge, serif headline, two actions, partner row.
+- Fonts: Instrument Serif (headline) and Inter (all body text, app-wide). The CSS variables `--bg-*`, `--text-*`, `--radius`, `--font-serif`, `--font-sans`, `--color-background`, `--color-foreground` and the `fadeSlideIn` keyframes are in `src/index.css` as supplied, plus the `animate-fade-slide-in-1..4` classes the markup needs and `tw-animate-css`.
+
+What is Speculara's, and why:
+
+| Item | Choice |
 | --- | --- |
-| Zinc and black palette, extra CSS variables | Existing tokens only (primary, white, ink, sky). Nothing added to the palette |
-| Instrument Serif and Inter | Sora headline, Manrope text (self-hosted) |
-| Space photo and logo images from a CDN | Ring pattern backdrop, live `Logo`. `backgroundImageUrl` is still available. Photos are off by default so no third-party image is requested |
-| Partner logo images | "Built for" audience labels (`partners` takes `label`, optional `href`) |
-| Mobile toggle with no menu | Real mobile menu: `aria-expanded`, `aria-controls`, Escape and link choice close it |
-| Link-only actions | Link or button (`onCtaClick`, `onPrimaryClick`, `onSecondaryClick`): the page uses them to start the demo or focus the upload box |
-| `animate-fade-slide-in-*` classes and `tw-animate-css` | Shared `stagger-in` motion; `tw-animate-css` was not needed so it was not installed |
-| Focus ring | White ring on the dark banner (`.on-dark`) so contrast stays at 3:1 or better |
+| Copy | Speculara text instead of the space copy |
+| Background image | Unsplash `photo-1451187580459-43490279c0fa` (Earth at night, connected lights), checked to exist. It loads from Unsplash at runtime (a third-party request) |
+| Logo | The live `Logo` component in its reversed tone (the template's logo image was a CDN placeholder) |
+| Partner logos | lucide-react icons with audience labels |
+| Inline svgs | lucide-react icons |
+| Mobile menu | The template toggled state but rendered nothing; a real menu is rendered (Escape and link choice close it) |
+| Actions | Link, or button via `onCtaClick`, `onPrimaryClick`, `onSecondaryClick`; the page uses them to start the demo or focus the upload box |
+| Legibility | An extra 45% black layer over the photo so text stays readable on any image |
 
-The banner replaces the old sticky header. Its first button and the nav "Try the demo" call the same demo loader as "Try synthetic demo data".
+Known mismatch until the overhaul reaches the rest of the page: below the hero the app still uses Sora section headings and the Speculara colors, while all body text is now Inter.

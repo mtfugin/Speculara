@@ -3,7 +3,10 @@
 @import "@fontsource-variable/sora/index.css";
 @import "@fontsource-variable/manrope/index.css";
 @import "@fontsource/jetbrains-mono/400.css";
+@import "@fontsource/instrument-serif/400.css";
+@import "@fontsource-variable/inter/index.css";
 @import "tailwindcss";
+@import "tw-animate-css";
 @import "./tokens.css";
 
 /* ---------- Base ---------- */
@@ -207,5 +210,43 @@
     transition-duration: 0.01ms !important;
     animation: none !important;
     scroll-behavior: auto !important;
+  }
+}
+
+/* ---------- Hero banner template (supplied CSS, used as given) ----------
+   The template's fonts and variables apply app-wide: body text is Inter and the headline serif is Instrument Serif.
+   The fade-slide-in classes the markup uses are defined here from the supplied keyframes. */
+@theme inline {
+  --font-serif: "Instrument Serif", Georgia, serif;
+  --font-instrument-serif: "Instrument Serif", Georgia, serif;
+  --font-sans: "Inter Variable", "Inter", system-ui, sans-serif;
+  --color-background: var(--bg-0);
+  --color-foreground: var(--text-100);
+  --animate-fade-slide-in-1: fadeSlideIn 0.8s ease-out 0.1s both;
+  --animate-fade-slide-in-2: fadeSlideIn 0.8s ease-out 0.25s both;
+  --animate-fade-slide-in-3: fadeSlideIn 0.8s ease-out 0.4s both;
+  --animate-fade-slide-in-4: fadeSlideIn 0.8s ease-out 0.55s both;
+}
+
+:root {
+  --bg-0: #09090b;
+  --bg-100: #18181b;
+  --bg-200: #27272a;
+  --bg-300: #3f3f46;
+  --text-100: #fafafa;
+  --text-200: #e4e4e7;
+  --text-300: #a1a1aa;
+  --text-400: #71717a;
+  --radius: 0.5rem;
+}
+
+@keyframes fadeSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
