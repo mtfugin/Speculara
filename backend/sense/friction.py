@@ -211,15 +211,23 @@ def classify_text(text: str) -> list[Match]:
     needs_shown = has_question or any(rx.search(norm) for rx in _NEED_REGEX)
     requested = any(rx.search(norm) and (not q or has_question) for rx, q in _REQUEST_REGEX)
 
-    matches = []
+    found: dict[str, list[str]] = {}
     for friction in FRICTIONS:
         cues = _cues_for(friction, norm)
         if friction in GATED_FRICTIONS and not (needs_shown or requested):
             cues = []
-        if friction == "availability" and requested:
-            cues.append(REQUEST_CUE)
-        if cues:
-            matches.append(Match(friction, tuple(cues), language))
+        found[friction] = cues
+    # A plain request ("do you have pasta?") is an availability need only when it names nothing more specific.
+    # "meron bang oat milk?" is a compatibility need; counting it as availability too would double count it.
+    # A real availability cue in the same comment ("... sold out lagi") keeps the request as corroboration.
+    names_specific_need = any(cues for friction, cues in found.items() if friction != "availability")
+    if requested and (not names_specific_need or found["availability"]):
+        found["availability"] = found["availability"] + [REQUEST_CUE]
+
+    matches = []
+    for friction in FRICTIONS:
+        if found[friction]:
+            matches.append(Match(friction, tuple(found[friction]), language))
     matches.sort(key=lambda m: -len(m.cues))  # stable: ties keep FRICTIONS order
     return matches
 

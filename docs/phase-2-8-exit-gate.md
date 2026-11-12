@@ -25,7 +25,7 @@ The same browser suite run against the working folder, with uncommitted edits to
 - Phase 2.1 is not closed for the same reason.
 - The map is alphabetical tiles, not geography. Real boundaries need a license check.
 - Scoring weights and caps are judgment calls, not calibrated on real data.
-- The friction miner can count one comment under two frictions. The map counts a comment once; the scorer counts observations.
+- The friction miner can still count one comment under two frictions when it really shows two (for example price and slow service). A question that names a specific need ("meron bang oat milk?") is now counted once, as that need, not also as availability. The map counts a comment once; the scorer counts observations.
 - Only compatibility, affordability and availability can be checked against menus and hours. Five other frictions are reported as demand only.
 - The "agents" are plain code, not language models.
 - Agent-written code (friction mining, scoring) was checked by running its tests, not read line by line.

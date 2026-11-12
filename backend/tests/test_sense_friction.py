@@ -72,9 +72,14 @@ class NegationTests(unittest.TestCase):
 
 
 class QuestionTests(unittest.TestCase):
-    def test_need_question_is_compatibility_and_availability(self):
-        found = frictions("Meron bang oat milk?")
-        self.assertEqual(found, {"compatibility", "availability"})
+    def test_a_question_about_a_specific_need_is_counted_once_as_that_need(self):
+        # "meron bang oat milk?" is a compatibility need. It is not also an availability need.
+        self.assertEqual(frictions("Meron bang oat milk?"), {"compatibility"})
+        self.assertEqual(frictions("Any vegan milk options? please"), {"compatibility"})
+        self.assertEqual(frictions("do you have lactose free milk?"), {"compatibility"})
+
+    def test_a_request_with_a_real_availability_cue_keeps_both(self):
+        self.assertEqual(frictions("Meron bang oat milk? Sold out lagi"), {"compatibility", "availability"})
 
     def test_praise_of_a_diet_item_is_not_demand(self):
         self.assertEqual(classify_text("I love the oat milk latte here"), [])
