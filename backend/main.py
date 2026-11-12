@@ -27,8 +27,10 @@ from fastapi.responses import Response
 from starlette.concurrency import run_in_threadpool
 from backend import ai_chat, profile_import
 from backend.analysis import MAX_BYTES, analyze, parse_file
+from backend.sense.api import router as sense_router
 
 app = FastAPI(title='Speculara', version='1.0.0')
+app.include_router(sense_router)
 origins = os.getenv('ALLOWED_ORIGINS','http://localhost:8443,http://127.0.0.1:8443').split(',')
 app.add_middleware(CORSMiddleware, allow_origins=[x.strip() for x in origins], allow_methods=['GET','POST'], allow_headers=['Content-Type','X-Filename'])
 
