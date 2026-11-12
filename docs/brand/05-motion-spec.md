@@ -34,7 +34,7 @@ Things arrive sharp and decisive, then settle. Nothing bounces in everyday UI. T
 
 ## Tooling
 
-CSS transitions and keyframes handle every micro-interaction (no library). GSAP handles timelines only (logo reveal, loader). It loads on demand as its own 27 kB (gzip) chunk, so it never delays first paint.
+CSS transitions and keyframes handle every micro-interaction (no library). GSAP handles timelines only (logo reveal, loader). It loads on demand as its own 27 kB (gzip) chunk, so it never delays first paint. When the splash will play, the chunk is requested at startup (`preloadMotion`) so the reveal starts on time. Frame by frame check: circles at 0.3s, meeting at 0.8s, lens open by 0.9s, wordmark rising at 1.0s, full lockup by 1.5s.
 
 ## Signature animation: logo reveal (1.4s, plus fade out)
 
@@ -65,6 +65,8 @@ The lens cut moves with the circles (mask and clip animate together), so the log
 | Loader | Honest waiting | File being analyzed | Circles drift apart and back, 2.4s sine cycle | Static mark |
 | Logo reveal | Brand moment | First visit per session | See storyboard, 1.4s | Not shown |
 | Skeleton pulse | Placeholder shimmer | Content pending | Opacity 0.55 to 1, 1.4s | Static |
+| Toast | Confirm a quick action (copy, download, reset) | Action completes | Fades and scales in from 0.96 in 380ms `--ease-enter`, stays 4.5s, then is removed. Bottom left, never steals focus, `role="status"` | Appears instantly |
+| Bar value reveal | Exact value on hover | Pointer over a bar | Value label fades in 150ms, bar darkens 10% | Instant |
 | Ring drift | Optional ambient backdrop | Reserved | 2.4s linear rotation | Removed |
 
 AI answers show a "Writing an answer" status that changes to "Still working. AI answers can take up to a minute." after 8 seconds. This is text, not a decorative animation.

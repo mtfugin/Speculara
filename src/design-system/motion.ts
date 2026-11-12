@@ -25,3 +25,9 @@ export function markSplashSeen() {
     /* ignore */
   }
 }
+
+/** Start downloading the animation library early (only when the splash will actually play),
+ *  so the reveal begins on time instead of waiting for the chunk. */
+export function preloadMotion() {
+  if (shouldPlaySplash()) void import("gsap");
+}

@@ -182,7 +182,7 @@ const Explain = ({ children }: { children: ReactNode }) => (
 
 const Stat = ({ l, v, c = INK }: { l: string; v: string | number; c?: string }) => (
   <div className="panel tabular rounded-2xl p-4">
-    <p className="font-display text-3xl font-bold leading-tight [overflow-wrap:anywhere]" style={{ color: c }}>
+    <p className="font-display text-2xl font-bold leading-tight [overflow-wrap:anywhere] sm:text-3xl" style={{ color: c }}>
       {v}
     </p>
     <p className="mt-1 text-sm text-slate-600">{l}</p>
@@ -275,13 +275,15 @@ function BarChart({
                 key={i}
                 data-chart-bar
                 title={`${labels[i]}: ${v}`}
-                className="flex h-full min-w-0 flex-1 flex-col items-center justify-end"
+                className="group flex h-full min-w-0 flex-1 flex-col items-center justify-end"
               >
-                {(!many || v === top) && (
-                  <span className="mb-1 font-semibold text-ink">{fmt(v)}</span>
-                )}
+                <span
+                  className={`mb-1 rounded bg-white/90 px-1 font-semibold text-ink ${!many || v === top ? "" : "pointer-events-none opacity-0 transition-opacity duration-150 group-hover:opacity-100"}`}
+                >
+                  {fmt(v)}
+                </span>
                 <div
-                  className="bar-grow w-full rounded-t-lg"
+                  className="bar-grow w-full rounded-t-lg transition-[filter] duration-150 group-hover:brightness-90"
                   style={{
                     ["--i" as string]: i,
                     height: `${(v / max) * 100}%`,
@@ -496,7 +498,7 @@ function RecommendationItem({
   index: number;
 }) {
   return (
-    <li className="panel rounded-2xl p-5">
+    <li className="panel rounded-2xl p-4 sm:p-5">
       <div className="flex items-start gap-3">
         <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-ink text-sm font-bold text-white" aria-hidden="true">
           {index + 1}
@@ -504,13 +506,13 @@ function RecommendationItem({
         <div className="min-w-0 flex-1">
           <p className="chip inline-block px-2.5 py-0.5 text-xs">{priorityLabel(index)}</p>
           <h4 className="mt-1 font-display text-lg font-semibold leading-snug text-ink">{item.title}</h4>
-          <dl className="mt-3 space-y-3">
-            <Fact label="Evidence">{item.evidence}</Fact>
-            <Fact label="Try this">{item.action}</Fact>
-            <Fact label="How to measure">{experimentMetric(item)}</Fact>
-          </dl>
         </div>
       </div>
+      <dl className="mt-4 space-y-3 sm:ml-11">
+        <Fact label="Evidence">{item.evidence}</Fact>
+        <Fact label="Try this">{item.action}</Fact>
+        <Fact label="How to measure">{experimentMetric(item)}</Fact>
+      </dl>
       {item.post_id && (
         <p className="mt-3 break-all text-sm text-slate-700">Post ID {item.post_id}</p>
       )}
@@ -1421,6 +1423,12 @@ export default function App() {
   const [updatedAt, setUpdatedAt] = useState<number | null>(null);
   const [viewRevision, setViewRevision] = useState(0);
   const [notice, setNotice] = useState("");
+  /* Notices are toasts: they appear bottom left and dismiss themselves. */
+  useEffect(() => {
+    if (!notice) return;
+    const t = window.setTimeout(() => setNotice(""), 4500);
+    return () => window.clearTimeout(t);
+  }, [notice]);
   const [loadingMessage, setLoadingMessage] = useState("");
   const listRef = useRef<HTMLDivElement>(null);
   const [revision, setRevision] = useState(0);
@@ -1910,7 +1918,15 @@ export default function App() {
                   </button>
                 </div>
               </div>
-              <p role="status" className="mt-3 text-sm text-ink">
+              <p
+                role="status"
+                className={
+                  notice
+                    ? "overlay focus-in fixed bottom-4 left-4 z-[var(--z-toast)] flex max-w-[calc(100vw-2rem)] items-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold text-ink sm:max-w-sm"
+                    : "sr-only"
+                }
+              >
+                {notice && <Icon name="success" size="sm" />}
                 {notice}
               </p>
               <details className="mt-4 text-base leading-7">

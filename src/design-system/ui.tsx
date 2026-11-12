@@ -38,7 +38,7 @@ export function KeyNumber({ label, value, note }: { label: string; value: ReactN
   return (
     <div className="tabular min-w-0 border-t border-border-default pt-3">
       <dt className="text-sm font-semibold text-ink">{label}</dt>
-      <dd className="mt-1 break-words font-display text-3xl font-bold leading-tight text-ink">{value}</dd>
+      <dd className="mt-1 font-display text-2xl font-bold leading-tight text-ink [overflow-wrap:anywhere] sm:text-3xl">{value}</dd>
       {note && <dd className="mt-1 text-sm text-slate-600">{note}</dd>}
     </div>
   );
