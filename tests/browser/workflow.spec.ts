@@ -47,7 +47,7 @@ test("real CSV workflow, six modules, chat and report export", async ({ page }) 
   await expect(
     page
       .getByRole("region", { name: "Sentiment results" })
-      .getByText("Add a text column with individual comments or reviews."),
+      .getByText(/No comment text was found/).first(),
   ).toBeVisible();
   await choose(page, "What do you want to get demand of?");
   const demand = page.getByRole("region", { name: "Demand results" });
@@ -117,7 +117,7 @@ test("XLSX upload, text-only replacement, errors and clear", async ({ page }) =>
   await choose(page, "What do you want to get sentiment of?");
   const sentiment = page.getByRole("region", { name: "Sentiment results" });
   await expect(sentiment.getByText("Based on a simple word check")).toBeVisible();
-  await expect(sentiment.getByText("Negative", { exact: true })).toBeVisible();
+  await expect(sentiment.getByText("Negative", { exact: true }).first()).toBeVisible();
   await expect(sentiment.getByText(/Reads \d+ comments/)).toBeVisible();
   await expect(sentiment.getByText(/lexicon/)).toBeHidden();
   await choose(page, "What do you want to Predict?");
@@ -198,5 +198,5 @@ test("duplicate numeric post IDs keep evidence available in details", async ({ p
   await expect(
     charts.getByText("Repeated post IDs make snapshots versus increments ambiguous.").first(),
   ).toBeVisible();
-  await expect(charts.getByText(/5 sales \/ 300 views/).first()).toBeVisible();
+  await expect(charts.getByRole("row", { name: /5 sales\s+300/ }).first()).toBeVisible();
 });

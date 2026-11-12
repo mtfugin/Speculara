@@ -59,6 +59,89 @@
   outline-offset: 3px;
 }
 
+/* Native dropdown lists ignore the transparent select background and paint their own
+   (white) popup, so the inherited light text vanished. Give the popup real colors. */
+select { color-scheme: dark; }
+select option,
+select optgroup {
+  background-color: var(--color-surface-highlight);
+  color: var(--color-ink);
+}
+select option:checked { background-color: color-mix(in srgb, var(--color-ink) 18%, var(--color-surface-highlight)); }
+
+/* Live dot on the current step of the activity log. */
+@keyframes log-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.7); }
+}
+.log-dot { animation: log-pulse 1.4s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) { .log-dot { animation: none; } }
+
+/* ---------- Run card: the live activity log while a profile is read ---------- */
+.run-card {
+  background: linear-gradient(180deg, color-mix(in srgb, var(--color-ink) 5%, var(--color-surface-highlight)), var(--color-surface-highlight));
+  border: var(--border-width) solid var(--color-border-default);
+  box-shadow: var(--shadow-xs);
+}
+.run-bar { position: absolute; inset: 0 0 auto 0; height: 2px; overflow: hidden; }
+.run-bar::after {
+  content: "";
+  position: absolute; inset: 0; width: 40%;
+  background: linear-gradient(90deg, transparent, var(--color-orange), transparent);
+  animation: run-sweep 1.8s ease-in-out infinite;
+}
+.run-bar[data-idle]::after { animation: none; opacity: 0; }
+@keyframes run-sweep { from { transform: translateX(-100%); } to { transform: translateX(260%); } }
+.run-ring {
+  width: 22px; height: 22px; border-radius: 9999px;
+  border: 2px solid color-mix(in srgb, var(--color-ink) 16%, transparent);
+  border-top-color: var(--color-orange);
+  animation: run-spin 0.9s linear infinite;
+}
+.run-ring[data-idle] { animation: none; border-top-color: color-mix(in srgb, var(--color-ink) 16%, transparent); }
+@keyframes run-spin { to { transform: rotate(360deg); } }
+.run-pill {
+  padding: 4px 10px; border-radius: 9999px;
+  background: color-mix(in srgb, var(--color-ink) 8%, transparent);
+  border: var(--border-width) solid var(--color-border-default);
+}
+.run-list {
+  position: relative;
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--color-ink) 28%, transparent) transparent;
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 12px, #000 calc(100% - 16px), transparent 100%);
+  mask-image: linear-gradient(to bottom, transparent 0, #000 12px, #000 calc(100% - 16px), transparent 100%);
+  padding-block: 10px;
+}
+.run-list::-webkit-scrollbar { width: 6px; }
+.run-list::-webkit-scrollbar-track { background: transparent; }
+.run-list::-webkit-scrollbar-thumb { background: color-mix(in srgb, var(--color-ink) 24%, transparent); border-radius: 9999px; }
+.run-step {
+  position: relative; display: flex; align-items: flex-start; gap: 12px;
+  padding: 6px 10px 6px 0; border-radius: 12px;
+  animation: run-in 260ms var(--ease-out) both;
+}
+/* The rail joining one step to the next. */
+.run-step:not(:last-child)::before {
+  content: ""; position: absolute; left: 9px; top: 28px; bottom: -8px; width: 2px;
+  background: color-mix(in srgb, var(--color-ink) 14%, transparent);
+}
+.run-node {
+  position: relative; z-index: 1; display: flex; align-items: center; justify-content: center;
+  width: 20px; height: 20px; flex-shrink: 0; border-radius: 9999px;
+}
+.run-step.is-done { color: var(--color-slate-600, color-mix(in srgb, var(--color-ink) 62%, transparent)); }
+.run-step.is-done .run-node {
+  background: color-mix(in srgb, var(--color-ink) 10%, transparent);
+  color: var(--color-ink);
+}
+.run-step.is-active { color: var(--color-ink); background: color-mix(in srgb, var(--color-orange) 9%, transparent); padding-left: 0; }
+.run-step.is-active .run-node { background: color-mix(in srgb, var(--color-orange) 22%, transparent); }
+@keyframes run-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) {
+  .run-bar::after, .run-ring, .run-step { animation: none; }
+}
+
 /* On dark (primary) backgrounds the focus ring turns white so it keeps 3:1 contrast. */
 .on-dark :is(button, a, input, textarea, select, summary, [tabindex]):focus-visible {
   outline-color: var(--color-white);
@@ -273,14 +356,19 @@
   transition: opacity 240ms var(--ease-standard);
 }
 .edge-blur i { position: absolute; inset: 0; }
-html[data-scrolling] .edge-blur i[data-water] { visibility: hidden; }
+/* The water lens fades instead of snapping, so it no longer pops in late after a scroll. */
+.edge-blur i[data-water] { opacity: 1; transition: opacity 240ms var(--ease-out); }
+html[data-scrolling] .edge-blur i[data-water] { opacity: 0; transition-duration: 80ms; }
+@media (prefers-reduced-motion: reduce) { .edge-blur i[data-water] { transition: none; } }
 .edge-blur--top { top: 0; opacity: 0; background: linear-gradient(to bottom, rgb(9 9 11 / 0.5), transparent); }
 .edge-blur--bottom { bottom: 0; opacity: 1; background: linear-gradient(to top, rgb(9 9 11 / 0.5), transparent); }
 html[data-scrolled] .edge-blur--top { opacity: 1; }
 html[data-at-end] .edge-blur--bottom { opacity: 0; }
 
 /* ---------- Rolling numbers: each digit scrolls through two full turns of 0 to 9, then settles ---------- */
-.roll { display: inline-block; white-space: nowrap; }
+.roll { display: inline-block; white-space: nowrap; line-height: 1; }
+/* Separators ("." "," "%") sit in the same 1em box as the digits, so their baseline matches instead of dropping below. */
+.roll-sep { display: inline-block; height: 1em; line-height: 1; vertical-align: top; }
 .roll-digit {
   position: relative;
   display: inline-block;
@@ -306,6 +394,39 @@ html[data-at-end] .edge-blur--bottom { opacity: 0; }
   position: absolute;
   inset: 0;
   opacity: 0;
+}
+
+/* ---------- Comment explorer ---------- */
+.cx-icon {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 32px; height: 32px; border-radius: 9999px; flex-shrink: 0;
+  background: color-mix(in srgb, var(--color-orange) 14%, transparent);
+  color: var(--color-orange);
+}
+.cx-toggle:hover .cx-icon { background: color-mix(in srgb, var(--color-orange) 24%, transparent); }
+.cx-search:focus-within { border-color: var(--color-ink); }
+.cx-pill[aria-pressed="true"] {
+  background: color-mix(in srgb, var(--color-ink) 14%, transparent);
+  border-color: var(--color-ink);
+}
+.cx-dot { width: 8px; height: 8px; border-radius: 9999px; display: inline-block; }
+.cx-link {
+  color: var(--color-ink); font-weight: 600; font-size: 14px;
+  text-decoration: underline; text-decoration-color: color-mix(in srgb, var(--color-ink) 35%, transparent);
+  text-underline-offset: 3px; min-height: 32px;
+}
+.cx-link:hover { text-decoration-color: var(--color-orange); }
+.cx-row { position: relative; display: flex; align-items: flex-start; gap: 12px; padding-left: 16px; overflow: hidden; }
+.cx-row.is-hidden { opacity: 0.55; }
+.cx-bar { position: absolute; inset: 0 auto 0 0; width: 3px; opacity: 0.85; }
+.cx-eye {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 36px; height: 36px; flex-shrink: 0; border-radius: 9999px; color: var(--color-slate-600);
+}
+.cx-eye:hover { color: var(--color-ink); background: color-mix(in srgb, var(--color-ink) 10%, transparent); }
+.cx-mark {
+  background: color-mix(in srgb, var(--color-orange) 30%, transparent);
+  color: inherit; border-radius: 3px; padding: 0 1px;
 }
 
 /* ---------- Line flow: faint grid, thin lines of light gliding across it ---------- */
@@ -611,9 +732,10 @@ html[data-at-end] .edge-blur--bottom { opacity: 0; }
   background: rgb(24 24 27 / 0.94);
   border: 1px solid rgb(255 255 255 / 0.12);
   box-shadow: 0 12px 32px rgb(0 0 0 / 0.5);
-  animation: rail-in 220ms var(--ease-standard, ease-out) both;
+  transition: opacity 220ms ease-out, transform 220ms ease-out;
 }
-@keyframes rail-in { from { opacity: 0; transform: translate(10px, -50%); } }
+/* Hidden above the first card and below the last one; always mounted so it fades instead of reloading. */
+.module-rail[data-hidden] { opacity: 0; transform: translate(10px, -50%); pointer-events: none; visibility: hidden; transition: opacity 220ms ease-out, transform 220ms ease-out, visibility 0s 220ms; }
 /* The droplet is two orange blobs under a goo filter. The head goes straight to the new icon; a smaller bubble trails behind
    and catches up a moment later, so the shape stretches, leaves a small bubble tail, then joins the head. No bounce. */
 .module-rail__drop {
@@ -669,8 +791,8 @@ html[data-at-end] .edge-blur--bottom { opacity: 0; }
 .module-rail__btn:hover .module-rail__tip,
 .module-rail__btn:focus-visible .module-rail__tip { opacity: 1; transform: none; }
 @media (max-width: 1023px) {
-  .module-rail { top: 12px; right: 50%; transform: translateX(50%); flex-direction: row; animation-name: rail-in-top; }
-  @keyframes rail-in-top { from { opacity: 0; transform: translate(50%, -10px); } }
+  .module-rail { top: 12px; right: 50%; transform: translateX(50%); flex-direction: row; }
+  .module-rail[data-hidden] { transform: translate(50%, -10px); }
   .module-rail__btn { width: 40px; height: 40px; }
   .module-rail { --step: 46px; }
   .module-rail__head, .module-rail__tail { width: 40px; height: 40px; }
@@ -688,3 +810,17 @@ html[data-at-end] .edge-blur--bottom { opacity: 0; }
 .module-unused { opacity: 0.55; border-style: dashed; background: transparent !important; }
 .module-unused:hover { opacity: 0.8; }
 .module-unused > span:first-child { filter: grayscale(1); background: rgb(161 161 166 / 0.14); color: var(--color-mute); }
+
+/* Responsible use notice on the profile link panel. */
+.profile-warning {
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  background: rgb(255 159 10 / 0.08);
+  border: var(--border-width) solid rgb(255 159 10 / 0.3);
+}
+
+/* Network that needs no sign in: a quiet tinted outline, not a filled chip. */
+.network-ok {
+  background: rgb(37 244 238 / 0.07);
+  border: var(--border-width) solid rgb(37 244 238 / 0.3);
+}

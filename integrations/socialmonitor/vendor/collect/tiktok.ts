@@ -170,7 +170,7 @@ export async function readPublic(
     let comments: CollectedComment[] = []
     if (needComments) {
       try {
-        comments = [...(await publicComments(it.id, opt.maxComments, get)).values()].map(toComment)
+        comments = [...(await publicComments(it.id, opt.maxComments, get, (n) => opt.log(`TikTok: post ${i + 1} of ${picked.length}, ${n.toLocaleString()} of ${(num(s.commentCount) ?? 0).toLocaleString()} comments so far…`), opt.replies !== false)).values()].map(toComment)
       } catch (e) {
         if (!last) throw e
         if (e instanceof TikTokWall) throw new Challenge('TikTok', e.message, NEXT)

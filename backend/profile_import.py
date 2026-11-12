@@ -45,7 +45,7 @@ def posts_to_frame(posts) -> pd.DataFrame:
     for post in posts:
         base = {"date": _day(post.posted_at), "post_id": post.id, "post_url": post.url or None}
         unknown = set(post.unavailable_metrics)
-        row = {**base, "category": post.type}
+        row = {**base, "category": post.type, "caption": (post.caption or "").strip() or None}
         for field in METRIC_FIELDS:
             row[field] = None if field in unknown else getattr(post, field)
         rows.append(row)

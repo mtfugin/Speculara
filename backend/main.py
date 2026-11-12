@@ -25,7 +25,7 @@ from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import Response
 from starlette.concurrency import run_in_threadpool
-from backend import ai_chat, profile_import
+from backend import ai_chat, briefing, profile_import
 from backend.analysis import MAX_BYTES, analyze, parse_file
 from backend.sense.api import router as sense_router
 
@@ -49,7 +49,9 @@ def health():
 # ---- Optional profile link analysis (off by default, this computer only) ----
 class ProfileUrl(BaseModel):
     url: str = Field(min_length=3, max_length=500)
-    limit: int = Field(20, ge=5, le=40)  # posts to read; a smaller number finishes sooner
+    limit: int = Field(20, ge=5, le=200)  # posts to read; a smaller number finishes sooner
+    max_comments: int = Field(20000, ge=0, le=20000)  # comments per post; 0 skips comments, the fastest choice
+    replies: bool = True  # read replies to comments too; off is faster
 
 
 class ProfileLogin(BaseModel):
@@ -87,6 +89,11 @@ async def profile_login_finish(request: Request):
     return await _collector(request).finish_login()
 
 
+@app.post('/api/profile/reset')
+async def profile_reset(request: Request):
+    return await _collector(request).reset()
+
+
 @app.post('/api/profile/cancel')
 async def profile_cancel(request: Request):
     return await _collector(request).cancel_collection()
@@ -102,8 +109,9 @@ async def profile_analyze(body: ProfileUrl, request: Request):
     if collector.status()['login_open']:
         raise HTTPException(409,'Finish signing in, then click Done signing in before analyzing.')
     try:
-        # Only pass the limit when it is not the default, so the collector keeps its one-argument call.
-        profile, posts = await collector.collect_profile(url, **({'limit': body.limit} if body.limit != 20 else {}))
+        # Only pass settings that are not the default, so the collector keeps its one-argument call.
+        options = {k: v for k, v in (('limit', body.limit), ('max_comments', body.max_comments), ('replies', body.replies)) if v != ProfileUrl.model_fields[k].default}
+        profile, posts = await collector.collect_profile(url, **options)
     except collector.CollectorError as exc:
         raise HTTPException(exc.status_code,str(exc)) from exc
     except Exception as exc:
@@ -139,6 +147,32 @@ async def ai_chat_endpoint(body: AIChat):
         raise HTTPException(422,str(exc)) from exc
     except ai_chat.AIUnavailable as exc:
         raise HTTPException(503,str(exc)) from exc
+
+class BriefIn(BaseModel):
+    analysis: dict
+    use_ai: bool = False
+
+
+class CommentsIn(BaseModel):
+    texts: list[str] = Field(max_length=150)
+    use_ai: bool = False
+
+
+@app.post('/api/brief')
+async def weekly_brief(body: BriefIn):
+    try:
+        return await briefing.write_brief(body.analysis, body.use_ai)
+    except ValueError as exc:
+        raise HTTPException(422,str(exc)) from exc
+
+
+@app.post('/api/comments/read')
+async def read_comments(body: CommentsIn):
+    try:
+        return await briefing.read_comments(body.texts, body.use_ai)
+    except ValueError as exc:
+        raise HTTPException(422,str(exc)) from exc
+
 
 @app.post('/api/analyze')
 async def upload(request: Request):

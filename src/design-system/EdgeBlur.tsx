@@ -84,7 +84,7 @@ export default function EdgeBlur() {
     const onScroll = () => {
       root.setAttribute("data-scrolling", "");
       window.clearTimeout(idle);
-      idle = window.setTimeout(() => root.removeAttribute("data-scrolling"), 160);
+      idle = window.setTimeout(() => root.removeAttribute("data-scrolling"), 100);
       if (!raf) raf = requestAnimationFrame(update);
     };
     update();

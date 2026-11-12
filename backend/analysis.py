@@ -32,7 +32,7 @@ from backend.calculations import calculate_correlations, calculate_ratios, compa
 
 METRICS = ('views', 'likes', 'saves', 'comments', 'sales')
 
-ALIASES = {'impressions':'views', 'purchases':'sales', 'orders':'sales', 'post_date':'date', 'timestamp':'date', 'comment':'text', 'review':'text', 'comment_text':'text', 'post_type':'category', 'post':'post_id'}
+ALIASES = {'impressions':'views', 'purchases':'sales', 'orders':'sales', 'post_date':'date', 'timestamp':'date', 'comment':'text', 'review':'text', 'comment_text':'text', 'comment_body':'text', 'comment_content':'text', 'comments_text':'text', 'review_text':'text', 'reviews':'text', 'feedback':'text', 'customer_feedback':'text', 'message':'text', 'messages':'text', 'remarks':'text', 'remark':'text', 'reply':'text', 'replies':'text', 'post_type':'category', 'post':'post_id'}
 
 MAX_ROWS = 20000
 
@@ -40,6 +40,37 @@ MAX_BYTES = 5 * 1024 * 1024
 
 
 
+
+
+
+_POS = {'love','loved','loves','great','good','amazing','excellent','happy','awesome','nice','best','beautiful','perfect','wow','thanks','thank','recommend','recommended','fantastic','cute','lovely','wonderful','worth','legit','satisfied','fast','congrats','congratulations','proud','impressive','brilliant','favorite','yummy','delicious','salamat','ganda','maganda','galing','magaling','astig','sulit','solid','gusto','mabait','masarap','nindot','lami','gwapo','maayo','ganahan','mabuhay','ayos'}
+
+_NEG = {'bad','hate','hated','poor','scam','broken','terrible','disappointed','disappointing','awful','worst','fake','slow','waste','useless','rude','late','damaged','ugly','boring','annoying','sad','angry','refund','complaint','problem','pangit','panget','sira','kadiri','bulok','bati','kapoy','nakakainis','dismaya','walang','hirap'}
+
+_NEGATORS = {"not","never","no","dont","don't","isnt","isn't","wasnt","wasn't","cant","can't","cannot","without","hindi","di","wala","dili","indi"}
+
+_EMOJI_POS = set('❤😍😊👍🔥🥰👏🎉😎✨💕💙💯')
+
+_EMOJI_NEG = set('😡😠👎😢😞🤮😤💔💩😭')
+
+_STOP = {'this','that','with','have','your','from','what','where','when','will','they','them','their','there','just','like','been','were','would','could','about','than','then','also','much','very','more','here','into','only','does','some','what','which','ang','mga','nga','kay','para','naman','lang','pero','sila','nila','siya'}
+
+
+def _clean_texts(series) -> list[str]:
+    return [t for t in series.dropna().astype(str).map(str.strip) if t]
+
+
+def _score_text(text: str):
+    """Word list score: positive words add one, negative words subtract one, and a negator just before a word flips it."""
+    tokens = re.findall(r"[a-z']+", text.lower().replace('’', "'"))
+    score = 0
+    for i, tok in enumerate(tokens):
+        value = 1 if tok in _POS else -1 if tok in _NEG else 0
+        if value and any(t in _NEGATORS for t in tokens[max(0, i - 2):i]):
+            value = -value
+        score += value
+    score += sum(1 for ch in text if ch in _EMOJI_POS) - sum(1 for ch in text if ch in _EMOJI_NEG)
+    return score, [t.strip("'") for t in tokens]
 
 
 def normalize_headers(headers):
@@ -236,6 +267,7 @@ def build_recommendations(df: pd.DataFrame, ratios: dict, rankings: dict, correl
 
     for item in recommendations:
         item['details'] = item['title'] + '. ' + item['evidence'] + ' ' + item['action']
+        item['technical'] = {'finding': item['title'], 'evidence': item['evidence'], 'action': item['action']}
         if item['title'] == 'Test the path from attention to purchase':
             item['title'] = 'Make buying easier'
             item['evidence'] = f"{_count(rate['numerator'])} sales were recorded alongside {_count(rate['denominator'])} views."
@@ -278,6 +310,20 @@ def analyze(frame: pd.DataFrame) -> dict:
 
     source_kind = 'synthetic' if len(labels) and labels.str.contains('synthetic', case=False).any() else 'uploaded'
 
+    # No column is named like comments: use the one free-text column when the file has exactly one clear candidate.
+    if 'text' not in df:
+        known = set(METRICS) | {'date', 'post_id', 'category', 'region', 'dataset_label', 'type'}
+        candidates = []
+        for col in df.columns:
+            if col in known or df[col].dtype.kind in 'biufM':
+                continue
+            vals = df[col].dropna().astype(str).str.strip()
+            vals = vals[vals.ne('')]
+            if len(vals) >= 3 and len(vals) >= 0.3 * len(df) and vals.str.len().mean() >= 20 and vals.str.contains(' ').mean() >= 0.7 and vals.nunique() >= 0.5 * len(vals):
+                candidates.append(col)
+        if len(candidates) == 1:
+            df = df.rename(columns={candidates[0]: 'text'})
+            warnings.append(f"Column '{candidates[0]}' looks like comments or reviews, so it was used for the comment check.")
     if source_kind == 'synthetic': warnings.append('Dataset includes records labeled synthetic. These are fictional examples, not observed campaign performance.')
 
     metrics = [m for m in METRICS if m in df]
@@ -352,46 +398,35 @@ def analyze(frame: pd.DataFrame) -> dict:
 
     forecast = forecast_daily(df[~text_only])
 
-    sentiment = {'available':False,'reason':'Include a text column with individual comments or reviews.'}
+    n_comments = totals.get('comments')
+    sentiment = {'available':False,'reason':(f"Your data counts {n_comments:g} comments, but not the words in them. Sentiment needs the comment text itself. For a collected profile, use Sign in for comments and collect again. For a file, add one comment per row in a column named text. " if n_comments else '') + 'No comment text was found. Your file has these columns: ' + ', '.join(map(str, df.columns)) + '. Add a column named text, comment, review or feedback with one comment per row.'}
 
     demand = {'available':False,'reason':'Include sales, saves, or individual text to measure observed demand signals.'}
 
-    if 'text' in df:
-
-        texts = df['text'].dropna().astype(str)
-
-        texts = texts[texts.str.strip().ne('')]
-
-        if len(texts):
-
-            positive = {'love','great','good','amazing','excellent','happy','awesome','salamat','ganda','maganda'}
-
-            negative = {'bad','hate','poor','scam','broken','terrible','disappointed','pangit','sira'}
-
-            counts = Counter({'positive':0,'neutral':0,'negative':0})
-
-            words = Counter()
-
-            inquiries = requests = 0
-
-            for text in texts:
-
-                tokens = re.findall(r"[a-z]+",text.lower())
-
-                score = len(set(tokens)&positive)-len(set(tokens)&negative)
-
-                if set(tokens)&{'not','never','no','hindi'}: score = 0
-
-                counts['positive' if score>0 else 'negative' if score<0 else 'neutral'] += 1
-
-                words.update(t for t in tokens if len(t)>3 and t not in {'this','that','with','have','your','from','what','where'})
-
-                inquiries += bool('?' in text or re.search(r'\b(how|where|when|magkano)\b',text,re.I))
-
-                requests += bool(re.search(r'\b(restock|more|please|pabili)\b',text,re.I))
-
-            sentiment = {'available':True,'reason':None,'notes':[],'method':'Small English/Filipino lexicon heuristic; negated text is neutral. Not validated NLP; misses sarcasm and context.','n':len(texts),'counts':dict(counts),'keywords':[{'word':w,'count':c} for w,c in words.most_common(12)]}
-
+    comment_texts = _clean_texts(df['text']) if 'text' in df else []
+    caption_texts = _clean_texts(df['caption']) if 'caption' in df else []
+    basis = 'comments' if comment_texts else 'captions' if caption_texts else None
+    texts = comment_texts or caption_texts
+    if texts:
+        counts = Counter({'positive':0,'neutral':0,'negative':0})
+        words = Counter()
+        scored = []
+        inquiries = requests = 0
+        for text in texts:
+            score, tokens = _score_text(text)
+            counts['positive' if score>0 else 'negative' if score<0 else 'neutral'] += 1
+            scored.append((score, text))
+            words.update(t for t in tokens if len(t)>3 and t not in _STOP)
+            if basis == 'comments':
+                inquiries += bool('?' in text or re.search(r'(how|where|when|magkano|pila|asa|unsa)',text,re.I))
+                requests += bool(re.search(r'(restock|more|please|pabili|palihug|paorder)',text,re.I))
+        examples = {
+            'positive': [t[:220] for sc, t in sorted((x for x in scored if x[0] > 0), key=lambda x: -x[0])[:3]],
+            'negative': [t[:220] for sc, t in sorted((x for x in scored if x[0] < 0), key=lambda x: x[0])[:3]],
+        }
+        notes = ['Comment text was not found, so this reads post captions only. It shows how the posts are worded, not how people reacted.'] if basis == 'captions' else []
+        sentiment = {'available':True,'reason':None,'basis':basis,'notes':notes,'method':'English, Filipino and Bisaya word list with negation and emoji. Not a trained model; it misses sarcasm and context.','n':len(texts),'counts':dict(counts),'keywords':[{'word':w,'count':c} for w,c in words.most_common(12)],'examples':examples}
+        if basis == 'comments':
             demand = {'available':True,'inquiries':inquiries,'requests':requests,'text_rows':len(texts),'reason':None,'notes':['Question/request text signals may overlap; they are not unique buyers or confirmed purchases.']}
 
     if 'sales' in totals or 'saves' in totals:
@@ -414,7 +449,21 @@ def analyze(frame: pd.DataFrame) -> dict:
 
     warnings.append('Rows are treated as independent records; verify grain and avoid repeated post totals across comment rows. No social account is connected.')
 
-    result = {'schema_version':2,'ratios':ratios,'periods':periods,'rankings':rankings,'source_kind':source_kind,'rows':len(df),'columns':list(df.columns),'metrics':list(totals),'missing':missing,'totals':totals,'warnings':warnings,'charts':charts,'correlation':correlations,'predict':forecast,'sentiment':sentiment,'demand':demand,'recommend':recommendations}
+    comments = []
+    if basis == 'comments':
+        for i, (_, row) in enumerate(df[df['text'].notna()].iterrows()):
+            text = str(row['text']).strip()
+            if not text:
+                continue
+            score, _tokens = _score_text(text)
+            comments.append({'id': f'c{i}', 'text': text[:2000], 'tone': 'pos' if score > 0 else 'neg' if score < 0 else 'neu', 'score': score,
+                             'post_id': None if pd.isna(row.get('post_id')) else str(row.get('post_id')),
+                             'post_type': None if pd.isna(row.get('category')) else str(row.get('category')),
+                             'posted_at': None if pd.isna(row.get('date')) else str(row.get('date'))})
+            if len(comments) >= 20000:
+                break
+
+    result = {'schema_version':2,'ratios':ratios,'periods':periods,'rankings':rankings,'source_kind':source_kind,'rows':len(df),'columns':list(df.columns),'metrics':list(totals),'missing':missing,'totals':totals,'warnings':warnings,'charts':charts,'correlation':correlations,'predict':forecast,'sentiment':sentiment,'comment_texts':[t[:300] for t in comment_texts[:150]],'comments':comments,'demand':demand,'recommend':recommendations}
 
     add_decision_fields(result, preview_frame, period_summary)
     return result

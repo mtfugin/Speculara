@@ -190,3 +190,9 @@ def test_collection_progress_stream_is_read_before_results(monkeypatch):
     monkeypatch.setattr(collector, "_process", lambda: proc)
     assert collector._invoke_sync({"action": "collect"}) == {"posts": []}
     assert not collector._lock.locked()
+
+
+def test_reset_with_nothing_running_is_a_no_op():
+    import asyncio
+    result = asyncio.run(collector.reset())
+    assert result == {"reset": False, "collection_cancelled": False, "sign_in_closed": False}

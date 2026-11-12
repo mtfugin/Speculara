@@ -44,9 +44,15 @@ class AnalysisTests(unittest.TestCase):
 
     def test_sentiment_is_lexicon_not_model(self):
         result = analyze(pd.DataFrame({'text':['love this','bad shipping','not good','where to buy?']}))
-        self.assertEqual(result['sentiment']['counts'], {'positive':1,'neutral':2,'negative':1})
+        self.assertEqual(result['sentiment']['counts'], {'positive':1,'neutral':1,'negative':2})  # 'not good' counts as negative now
         self.assertEqual(result['demand']['inquiries'],1)
-        self.assertIn('lexicon',result['sentiment']['method'].lower())
+        self.assertIn('word list',result['sentiment']['method'].lower())
+        self.assertEqual(result['sentiment']['basis'],'comments')
+
+    def test_captions_are_used_only_when_comment_text_is_missing(self):
+        result = analyze(pd.DataFrame({'views':[1,2,3],'caption':['Amazing new drop','Weekend sale','Not great timing']}))
+        self.assertEqual(result['sentiment']['basis'],'captions')
+        self.assertFalse(result['demand']['available'])
 
     def test_partial_daily_target_is_not_forecast(self):
         frame = pd.DataFrame({'date':pd.date_range('2026-01-01',periods=14).strftime('%Y-%m-%d'), 'views':range(100,114), 'sales':range(1,15)})

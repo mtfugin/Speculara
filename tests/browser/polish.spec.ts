@@ -29,7 +29,7 @@ test("polish stays honest, findings copy, and reset keeps the data", async ({ pa
   const sentiment = page.getByRole("region", { name: "Sentiment results" });
   await expect(sentiment.getByText("Needs more data", { exact: true })).toBeVisible();
   await expect(
-    sentiment.getByText("Add a text column with individual comments or reviews."),
+    sentiment.getByText(/No comment text was found/).first(),
   ).toBeVisible();
   const pending = page.waitForEvent("download");
   await summary.getByRole("button", { name: "Download report", exact: true }).click();

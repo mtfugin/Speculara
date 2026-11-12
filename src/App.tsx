@@ -5,8 +5,6 @@ import {
   plainChat,
   analysisReport,
   download,
-  ratioText,
-  periodText,
   relationshipSummary,
   friendlyUnavailable,
   calculationLabel,
@@ -25,8 +23,21 @@ import { Icon } from "./design-system/Icon";
 import { Illustration } from "./design-system/illustrations";
 import { Splash } from "./design-system/Splash";
 import { ChatBotIcon } from "./components/ui/chat-bot-icon";
+import { CommentReader, WeeklyBrief } from "./components/writers";
+import { CommentExplorer } from "./components/comment-explorer";
 import { AnalysisLoader } from "./design-system/AnalysisLoader";
-import { Card, Fact, H, Numbers, Pills, Well } from "./design-system/ui";
+import {
+  Card,
+  DataTable,
+  Fact,
+  FactGrid,
+  H,
+  NoteList,
+  Numbers,
+  Pills,
+  SubHead,
+  Well,
+} from "./design-system/ui";
 import { ForecastHero, ModuleTitle, SentimentBar, SignalBar, WordChips } from "./components/module-visuals";
 import { CollectionFacts, DownloadButtons, Emphasis, MetricTile, PostGallery, PreviewRows, ProfileHeader } from "./components/collected";
 import { RollingNumber, isRollable } from "./design-system/RollingNumber";
@@ -43,6 +54,8 @@ import {
   Sparkles,
   ChevronLeft,
   ChevronRight,
+  Check,
+  TriangleAlert,
 } from "lucide-react";
 
 import { moduleInfo, updatedLabel, priorityLabel, type ModuleKey } from "./polish";
@@ -403,43 +416,47 @@ function Predict() {
             />
           </Well>
           <Numbers>
-            <H>Model comparison</H>
-            <p>
-              Selected model: {f.selected_model}. Holdout dates:{" "}
-              {f.evaluation.holdout_dates.join(", ")}. Training dates before holdout:{" "}
-              {f.evaluation.train_days}.
-            </p>
-            <table className="w-full text-left">
-              <thead>
-                <tr>
-                  <th scope="col">Model</th>
-                  <th scope="col">MAE ({f.metric} count units)</th>
-                </tr>
-              </thead>
-              <tbody>
-                {Object.entries(f.evaluation.scores).map(([model, score]) => (
-                  <tr key={model}>
-                    <th scope="row">{model}</th>
-                    <td>{number(score)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            <p>
-              Held-out three-day MAE: {number(f.mae)} {f.metric}. {f.method} {f.notes.join(" ")}
-            </p>
-            <ul>
-              {f.points.map((p) => (
-                <li key={p.label}>
-                  {p.label}: {number(p.value)}
-                </li>
-              ))}
-            </ul>
+            <section>
+              <SubHead note="How the estimate was checked against days the model had not seen.">
+                Model comparison
+              </SubHead>
+              <FactGrid
+                items={[
+                  { label: "Model used", value: f.selected_model },
+                  { label: "Training days", value: number(f.evaluation.train_days) },
+                  { label: "Held-out dates", value: f.evaluation.holdout_dates.join(", ") },
+                  { label: `Typical error (${f.metric} per day)`, value: number(f.mae) },
+                ]}
+              />
+            </section>
+            <section>
+              <SubHead note={`Mean absolute error in ${f.metric}. Lower is better.`}>
+                Error by model
+              </SubHead>
+              <DataTable
+                columns={["Model", "Error (MAE)"]}
+                rows={Object.entries(f.evaluation.scores).map(([model, score]) => [
+                  model,
+                  number(score),
+                ])}
+                highlightRow={Object.keys(f.evaluation.scores).indexOf(f.selected_model)}
+              />
+            </section>
+            <section>
+              <SubHead>Daily estimates</SubHead>
+              <DataTable
+                columns={["Date", `Estimated ${f.metric}`]}
+                rows={f.points.map((p) => [p.label, number(p.value)])}
+              />
+            </section>
+            <NoteList items={[f.method, ...f.notes]} />
           </Numbers>
         </>
       ) : (
         <>
-          <Numbers>{f.reason}</Numbers>
+          <Numbers>
+            <p className="text-sm">{f.reason}</p>
+          </Numbers>
         </>
       )}
     </Card>
@@ -480,6 +497,7 @@ function DecisionOverview() {
           <Fact label="How to measure">{brief.measure}</Fact>
         </dl>
       </Card>
+      <WeeklyBrief analysis={a} />
       <Card label="Independent counts">
         <H sub="Attention, interest, questions and purchases recorded in this file.">Independent counts</H>
         <dl className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -529,7 +547,18 @@ function RecommendationItem({
           View supplied post (opens in new tab)
         </a>
       )}
-      {item.details && <Numbers>{item.details}</Numbers>}
+      {item.technical ? (
+        <Numbers>
+          <SubHead note="The original analysis behind this suggestion.">Technical detail</SubHead>
+          <dl className="space-y-3">
+            <Fact label="Finding">{item.technical.finding}</Fact>
+            <Fact label="Evidence">{item.technical.evidence}</Fact>
+            <Fact label="Suggested action">{item.technical.action}</Fact>
+          </dl>
+        </Numbers>
+      ) : (
+        item.details && <Numbers>{item.details}</Numbers>
+      )}
     </li>
   );
 }
@@ -567,75 +596,138 @@ function Calculations({ kind }: { kind: "charts" | "periods" }) {
     return (
       <Well className="mt-4">
         <H>Period comparisons</H>
-        <p className="text-sm whitespace-pre-line">
-          {Object.entries(a.periods)
-            .map(([metric, p]) => periodText(metric, p!))
-            .join("\n") ||
-            "Period comparisons unavailable: need dated numeric metrics and all 14 calendar dates."}
-        </p>
-        <p className="mt-2 text-xs">
-          Latest seven UTC calendar dates versus prior seven; missing dates are not zero activity.
+        {Object.keys(a.periods).length === 0 ? (
+          <p className="text-sm">
+            Period comparisons unavailable: need dated numeric metrics and all 14 calendar dates.
+          </p>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[34rem] text-left text-sm tabular-nums">
+              <thead>
+                <tr className="text-xs font-semibold uppercase tracking-wide text-slate-600">
+                  <th className="py-2 pr-4">Metric</th>
+                  <th className="py-2 pr-4">Previous 7 days</th>
+                  <th className="py-2 pr-4">Current 7 days</th>
+                  <th className="py-2 pr-4 text-right">Change</th>
+                </tr>
+              </thead>
+              <tbody>
+                {Object.entries(a.periods).map(([metric, p]) =>
+                  p!.available ? (
+                    <tr key={metric} className="border-t border-black/10 align-top">
+                      <th scope="row" className="py-3 pr-4 font-semibold capitalize text-ink">
+                        {metric}
+                      </th>
+                      <td className="py-3 pr-4">
+                        <div className="font-semibold text-ink">{number(p!.previous_total ?? 0)}</div>
+                        <div className="text-xs text-slate-600">
+                          {p!.previous_start} to {p!.previous_end}
+                        </div>
+                      </td>
+                      <td className="py-3 pr-4">
+                        <div className="font-semibold text-ink">{number(p!.current_total ?? 0)}</div>
+                        <div className="text-xs text-slate-600">
+                          {p!.current_start} to {p!.current_end}
+                        </div>
+                      </td>
+                      <td className="py-3 pr-4 text-right">
+                        <div className="font-semibold text-ink">
+                          {(p!.absolute_change ?? 0) > 0 ? "+" : ""}
+                          {number(p!.absolute_change ?? 0)}
+                        </div>
+                        <div className="text-xs text-slate-600">
+                          {p!.percent_change == null
+                            ? p!.percent_change_reason
+                            : `${p!.percent_change > 0 ? "+" : ""}${p!.percent_change.toFixed(1)}%`}
+                        </div>
+                      </td>
+                    </tr>
+                  ) : (
+                    <tr key={metric} className="border-t border-black/10 align-top">
+                      <th scope="row" className="py-3 pr-4 font-semibold capitalize text-ink">
+                        {metric}
+                      </th>
+                      <td colSpan={3} className="py-3 pr-4 text-slate-600">
+                        {p!.reason}
+                      </td>
+                    </tr>
+                  ),
+                )}
+              </tbody>
+            </table>
+          </div>
+        )}
+        <p className="mt-3 text-xs text-slate-600">
+          Latest seven UTC calendar dates versus prior seven. All 14 dates are needed; missing dates
+          are not zero activity.
         </p>
       </Well>
     );
   return (
     <>
-      <Well className="mt-4">
-        <H>Ratios</H>
-        {Object.entries(a.ratios).map(([k, r]) => (
-          <p className="mb-3 text-sm" key={k}>
-            {ratioText(k, r)}
-          </p>
-        ))}
-      </Well>
-      <Well className="mt-4">
-        <H>Rankings</H>
-        <p className="mb-3 text-xs">
-          Categories: 3 complete positive-view rows and 1,000 views. Posts: unique nonblank IDs and
-          at least 100 views. Exposure heuristics, not statistical significance. Top 10 by rate,
-          then label.
-        </p>
+      <section>
+        <SubHead note="Counts compared with views. Rows with missing or zero views are left out.">
+          Ratios
+        </SubHead>
+        <DataTable
+          columns={["Ratio", "Count", "Views", "Rate", "Rows used", "Left out"]}
+          rows={Object.entries(a.ratios).map(([k, r]) => [
+            calculationLabel(k),
+            r.available ? `${number(r.numerator ?? 0)} ${r.numerator_metric}` : "n/a",
+            r.available ? number(r.denominator ?? 0) : "n/a",
+            r.available ? `${r.percent!.toFixed(2)}%` : "n/a",
+            number(r.n),
+            number(r.excluded_rows + r.zero_view_rows),
+          ])}
+        />
+        <NoteList
+          items={[
+            ...Object.entries(a.ratios)
+              .filter(([, r]) => !r.available)
+              .map(([k, r]) => `${calculationLabel(k)}: ${r.reason}`),
+            ...Array.from(new Set(Object.values(a.ratios).flatMap((r) => r.notes))),
+          ]}
+        />
+      </section>
+      <section>
+        <SubHead note="Top 10 by rate, then label. A guide to exposure, not proof that one group is better.">
+          Rankings
+        </SubHead>
+        <NoteList
+          items={[
+            "Categories need 3 complete rows with positive views and 1,000 views in total.",
+            "Posts need a unique nonblank ID and at least 100 views.",
+          ]}
+        />
         {Object.entries(a.rankings).flatMap(([g, rs]) =>
           Object.entries(rs).map(([k, r]) => (
-            <div key={g + k} className="mb-4">
-              <h4 className="font-semibold">
+            <div key={g + k} className="mt-4">
+              <h5 className="mb-1 text-sm font-semibold text-ink">
                 {calculationLabel(g)}: {k.replace(/_/g, " ")}
-              </h4>
+              </h5>
               {!r.available ? (
-                <p className="text-sm">{r.reason}</p>
+                <p className="text-sm text-slate-600">{r.reason}</p>
               ) : (
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left text-xs">
-                    <thead>
-                      <tr>
-                        {["Label", "Numerator (count)", "Views", "Rate (%)", "Complete rows"].map(
-                          (h) => (
-                            <th scope="col" key={h}>
-                              {h}
-                            </th>
-                          ),
-                        )}
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {r.rows.map((x) => (
-                        <tr key={x.label}>
-                          <th scope="row">{x.label}</th>
-                          <td>{number(x.numerator)}</td>
-                          <td>{number(x.views)}</td>
-                          <td>{x.percent.toFixed(2)}</td>
-                          <td>{x.n}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+                <DataTable
+                  columns={["Label", "Count", "Views", "Rate", "Rows"]}
+                  rows={r.rows.map((x) => [
+                    x.label,
+                    number(x.numerator),
+                    number(x.views),
+                    `${x.percent.toFixed(2)}%`,
+                    x.n,
+                  ])}
+                />
               )}
-              <p className="text-xs">{r.excluded_groups} excluded groups.</p>
+              {r.excluded_groups > 0 && (
+                <p className="mt-1 text-xs text-slate-600">
+                  {r.excluded_groups} groups left out for too little data.
+                </p>
+              )}
             </div>
           )),
         )}
-      </Well>
+      </section>
     </>
   );
 }
@@ -760,9 +852,13 @@ function Charts() {
       )}
       <Numbers>
         <Calculations kind="charts" />
-        <p>
-          Each chart starts at zero. Date groups are daily UTC totals. Blank counts are excluded.
-        </p>
+        <NoteList
+          items={[
+            "Each chart starts at zero.",
+            "Date groups are daily UTC totals.",
+            "Blank counts are left out.",
+          ]}
+        />
       </Numbers>
     </Card>
   );
@@ -845,14 +941,25 @@ function Correlation() {
           <p className="mt-2 text-sm text-slate-600">Opposite movement is not automatically bad.</p>
         )}
         <Numbers>
-          <p>
-            Pearson r = {p.r}; unadjusted p = {p.p.toExponential(2)}; Spearman rho = {p.spearman_r};
-            unadjusted p = {p.spearman_p.toExponential(2)}; n = {p.n} complete pairs.
-          </p>
-          <p>
-            These statistics describe a pattern, not a cause. Small samples, outliers and repeated
-            observations can affect results. P-values are unadjusted.
-          </p>
+          <section>
+            <SubHead note={`Based on ${p.n} complete pairs of values.`}>
+              {calculationLabel(p.a)} and {p.b}
+            </SubHead>
+            <DataTable
+              columns={["Method", "Strength", "p-value (unadjusted)"]}
+              rows={[
+                ["Pearson r", p.r.toFixed(3), p.p.toExponential(2)],
+                ["Spearman rho", p.spearman_r.toFixed(3), p.spearman_p.toExponential(2)],
+              ]}
+            />
+          </section>
+          <NoteList
+            items={[
+              "These statistics describe a pattern, not a cause.",
+              "Small samples, outliers and repeated observations can affect results.",
+              "p-values are not adjusted for testing many pairs.",
+            ]}
+          />
         </Numbers>
       </li>
     );
@@ -900,14 +1007,14 @@ function Sentiment() {
   const posts = analysis.provenance?.posts;
   return (
     <Card label="Sentiment results">
-      <ModuleTitle module="sentiment" sub="Based on a simple word check">
+      <ModuleTitle module="sentiment" sub={s.available && s.basis === "captions" ? "Based on post captions, not comments" : "Based on a simple word check"}>
         How comments sound
       </ModuleTitle>
       <ModuleBrief module="sentiment" />
       {s.available ? (
         <>
           <p className="mb-4 text-sm text-slate-700">
-            Reads <strong className="font-bold text-ink underline decoration-orange/60 decoration-2 underline-offset-4">{s.n!.toLocaleString()} comments</strong>
+            Reads <strong className="font-bold text-ink underline decoration-orange/60 decoration-2 underline-offset-4">{s.n!.toLocaleString()} {s.basis === "captions" ? "captions" : "comments"}</strong>
             {posts ? (
               <>
                 {" "}
@@ -917,6 +1024,29 @@ function Sentiment() {
             , not just one.
           </p>
           <SentimentBar counts={s.counts!} total={s.n!} />
+          {s.basis === "captions" && (
+            <p className="mt-3 text-sm text-slate-700">
+              <Emphasis text="No comment text was collected, so this reads your own captions. Sign in for comments and collect again to see how people reacted." />
+            </p>
+          )}
+          {s.examples && (s.examples.positive.length > 0 || s.examples.negative.length > 0) && (
+            <div className="mt-5 grid gap-4 md:grid-cols-2">
+              {(["positive", "negative"] as const).map((tone) =>
+                s.examples![tone].length ? (
+                  <div key={tone}>
+                    <p className="text-sm font-semibold text-ink">{tone === "positive" ? "Most positive" : "Most negative"}</p>
+                    <ul className="mt-2 grid gap-2">
+                      {s.examples![tone].map((t, i) => (
+                        <li key={i} data-private className="well rounded-xl px-3 py-2 text-sm text-slate-700">
+                          {t}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ) : null,
+              )}
+            </div>
+          )}
           <p className="mt-5 text-sm font-semibold text-ink">Words people used most</p>
           <div className="mt-2">
             <WordChips words={s.keywords!} />
@@ -924,23 +1054,53 @@ function Sentiment() {
           <p className="mt-5 text-sm text-slate-700">
             <Emphasis text="Read the comments before deciding how to respond. This is a simple word check, not a trained model, and it can miss sarcasm and context." />
           </p>
+          {s.basis === "comments" && analysis.comments && analysis.comments.length > 0 && (
+            <CommentExplorer comments={analysis.comments} />
+          )}
+          {s.basis !== "captions" && analysis.comment_texts && analysis.comment_texts.length > 0 && (
+            <CommentReader texts={analysis.comment_texts} />
+          )}
           <Numbers>
-            <p>
+            <table className="w-full max-w-md text-left text-sm tabular-nums">
+              <thead>
+                <tr className="text-xs font-semibold uppercase tracking-wide text-slate-600">
+                  <th className="py-2 pr-4">Label</th>
+                  <th className="py-2 pr-4 text-right">Entries</th>
+                  <th className="py-2 text-right">Share</th>
+                </tr>
+              </thead>
+              <tbody>
+                {Object.entries(s.counts!).map(([k, v]) => (
+                  <tr key={k} className="border-t border-black/10">
+                    <th scope="row" className="py-2 pr-4 font-semibold text-ink">
+                      {calculationLabel(k)}
+                    </th>
+                    <td className="py-2 pr-4 text-right">{number(v)}</td>
+                    <td className="py-2 text-right text-slate-600">
+                      {s.n ? `${((v / s.n) * 100).toFixed(1)}%` : "n/a"}
+                    </td>
+                  </tr>
+                ))}
+                <tr className="border-t border-black/20 font-semibold text-ink">
+                  <th scope="row" className="py-2 pr-4">
+                    Total
+                  </th>
+                  <td className="py-2 pr-4 text-right">{number(s.n ?? 0)}</td>
+                  <td className="py-2 text-right">100%</td>
+                </tr>
+              </tbody>
+            </table>
+            <p className="mt-3 text-xs text-slate-600">
               {s.method} Labels describe {s.n} nonempty text entries, not everyone who saw your
               content.
             </p>
-            <ul>
-              {Object.entries(s.counts!).map(([k, v]) => (
-                <li key={k}>
-                  {calculationLabel(k)}: {number(v)}
-                </li>
-              ))}
-            </ul>
           </Numbers>
         </>
       ) : (
         <>
-          <Numbers>{s.reason}</Numbers>
+          <Numbers>
+            <p className="text-sm">{s.reason}</p>
+          </Numbers>
         </>
       )}
     </Card>
@@ -990,19 +1150,34 @@ function Demand() {
           </p>
           <Numbers>
             <Calculations kind="periods" />
-            <p>{d.notes?.join(" ")}</p>
-            <p>
-              Dataset totals: {d.sales == null ? "sales not supplied" : `${number(d.sales)} sales`};{" "}
-              {d.saves == null ? "saves not supplied" : `${number(d.saves)} saves`}. Question and
-              request counts can overlap and are not unique buyers.
-            </p>
+            <section>
+              <SubHead note="All rows in your data, not only the latest week.">Dataset totals</SubHead>
+              <FactGrid
+                items={[
+                  {
+                    label: "Sales",
+                    value: d.sales == null ? "Not supplied" : number(d.sales),
+                  },
+                  {
+                    label: "Saves",
+                    value: d.saves == null ? "Not supplied" : number(d.saves),
+                  },
+                ]}
+              />
+            </section>
+            <NoteList
+              items={[
+                ...(d.notes ?? []),
+                "Question and request counts can overlap and are not unique buyers.",
+              ]}
+            />
           </Numbers>
         </>
       ) : (
         <>
           <Numbers>
             <Calculations kind="periods" />
-            {d.reason}
+            {d.reason && <p className="text-sm text-slate-700">{d.reason}</p>}
           </Numbers>
         </>
       )}
@@ -1022,6 +1197,98 @@ const VIEWS: Record<Key, () => ReactNode> = {
 };
 
 /* ---------- Optional profile link (off unless the server enables it; this computer only) ---------- */
+function InstagramLogo({ size = 18 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <defs>
+        <linearGradient id="ig-grad" x1="2" y1="22" x2="22" y2="2" gradientUnits="userSpaceOnUse">
+          <stop stopColor="#FFD600" />
+          <stop offset=".35" stopColor="#FF7A00" />
+          <stop offset=".65" stopColor="#FF0069" />
+          <stop offset="1" stopColor="#7638FA" />
+        </linearGradient>
+      </defs>
+      <rect x="3" y="3" width="18" height="18" rx="5.5" stroke="url(#ig-grad)" strokeWidth="2" />
+      <circle cx="12" cy="12" r="4.2" stroke="url(#ig-grad)" strokeWidth="2" />
+      <circle cx="17.2" cy="6.8" r="1.2" fill="url(#ig-grad)" />
+    </svg>
+  );
+}
+
+function FacebookLogo({ size = 18 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true">
+      <circle cx="12" cy="12" r="10" fill="#1877F2" />
+      <path
+        fill="#fff"
+        d="M13.4 21.9v-7.6h2.5l.4-3h-2.9V9.4c0-.9.3-1.4 1.5-1.4h1.5V5.3c-.3 0-1.2-.1-2.2-.1-2.2 0-3.7 1.3-3.7 3.8v2.3H8v3h2.5v7.6z"
+      />
+    </svg>
+  );
+}
+
+function TikTokLogo({ size = 18 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true">
+      <path
+        fill="#25F4EE"
+        transform="translate(-1 -1)"
+        d="M19.6 8.1a5.4 5.4 0 0 1-3.3-1.1 5.4 5.4 0 0 1-2.1-3.7h-3.2v11.6a2.6 2.6 0 1 1-2.6-2.6c.3 0 .5 0 .8.1V9.1a5.9 5.9 0 1 0 5 5.8V9.4a8.6 8.6 0 0 0 5.4 1.8z"
+      />
+      <path
+        fill="#FE2C55"
+        transform="translate(1 1)"
+        d="M19.6 8.1a5.4 5.4 0 0 1-3.3-1.1 5.4 5.4 0 0 1-2.1-3.7h-3.2v11.6a2.6 2.6 0 1 1-2.6-2.6c.3 0 .5 0 .8.1V9.1a5.9 5.9 0 1 0 5 5.8V9.4a8.6 8.6 0 0 0 5.4 1.8z"
+      />
+      <path
+        fill="#fff"
+        d="M19.6 8.1a5.4 5.4 0 0 1-3.3-1.1 5.4 5.4 0 0 1-2.1-3.7h-3.2v11.6a2.6 2.6 0 1 1-2.6-2.6c.3 0 .5 0 .8.1V9.1a5.9 5.9 0 1 0 5 5.8V9.4a8.6 8.6 0 0 0 5.4 1.8z"
+      />
+    </svg>
+  );
+}
+
+const fmtElapsed = (ms: number) => {
+  const s = Math.max(0, Math.round(ms / 1000));
+  return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
+};
+
+/* ---------- Collection settings: how much to read before Analyze ---------- */
+type CollectSettings = { posts: number; comments: number; replies: boolean };
+const ALL_COMMENTS = 20000;
+const PRESETS: { id: string; label: string; note: string; s: CollectSettings }[] = [
+  { id: "fast", label: "Fast", note: "A quick look", s: { posts: 10, comments: 20, replies: false } },
+  { id: "balanced", label: "Balanced", note: "Good detail", s: { posts: 20, comments: 100, replies: true } },
+  { id: "complete", label: "Complete", note: "Every comment", s: { posts: 40, comments: ALL_COMMENTS, replies: true } },
+];
+const SETTINGS_KEY = "speculara:collect:v1";
+const POST_CHOICES = [5, 10, 20, 40, 100, 200];
+const COMMENT_CHOICES: [number, string][] = [
+  [0, "Skip comments (fastest)"],
+  [10, "Up to 10 per post"],
+  [20, "Up to 20 per post"],
+  [50, "Up to 50 per post"],
+  [100, "Up to 100 per post"],
+  [500, "Up to 500 per post"],
+  [ALL_COMMENTS, "Every comment (slowest)"],
+];
+function loadSettings(): CollectSettings {
+  try {
+    const v = JSON.parse(window.localStorage.getItem(SETTINGS_KEY) || "null");
+    if (v && POST_CHOICES.includes(v.posts) && COMMENT_CHOICES.some(([n]) => n === v.comments) && typeof v.replies === "boolean") return v;
+  } catch {
+    /* no saved choice: use the default */
+  }
+  return PRESETS[1].s;
+}
+/* A rough guide only: each post costs a few seconds, plus a few more for every 50 comments. */
+function estimate(c: CollectSettings) {
+  const perPost = 5 + (c.comments > 0 ? Math.ceil(Math.min(c.comments, 500) / 50) * 3 * (c.replies ? 1.4 : 1) : 0);
+  const secs = c.posts * perPost;
+  const label = secs < 90 ? "about a minute" : `about ${Math.round(secs / 60)} min`;
+  return c.comments > 500 ? `${label} or more` : label;
+}
+
 function ProfileLink({
   disabled,
   onAnalyzed,
@@ -1032,18 +1299,50 @@ function ProfileLink({
   const base = (import.meta.env.VITE_API_BASE_URL ?? "").replace(/\/$/, "");
   const [enabled, setEnabled] = useState(false);
   const [url, setUrl] = useState("");
-  const [allowed, setAllowed] = useState(false);
+  const detected = /facebook\.com/i.test(url) ? "facebook" : /instagram\.com/i.test(url) ? "instagram" : /tiktok\.com/i.test(url) ? "tiktok" : null;
   const [working, setWorking] = useState(false);
   const [signingIn, setSigningIn] = useState(false);
   const [msg, setMsg] = useState("");
   const [collecting, setCollecting] = useState(false);
-  const [progress, setProgress] = useState("");
+  /* Activity log: every new step the server reports is kept, with the time it happened. */
+  const [log, setLog] = useState<{ at: number; text: string }[]>([]);
+  const [now, setNow] = useState(() => Date.now());
+  const logList = useRef<HTMLOListElement>(null);
+  /* Live counters ("... 250 of 900 comments so far") update one line in place instead of adding a line each time. */
+  const setProgress = (text: string) =>
+    setLog((l) => {
+      const last = l[l.length - 1];
+      if (last?.text === text) return l;
+      const key = (t: string) => t.replace(/\d[\d,]*/g, "#");
+      if (last && /so far/.test(text) && key(last.text) === key(text)) return [...l.slice(0, -1), { at: last.at, text }];
+      return [...l.slice(-59), { at: Date.now(), text }];
+    });
   const [cancelling, setCancelling] = useState(false);
   const [retry, setRetry] = useState<{ limit: number; smaller: boolean } | null>(null);
+  const [settings, setSettings] = useState<CollectSettings>(loadSettings);
+  const [tune, setTune] = useState(false);
+  const preset = PRESETS.find((p) => p.s.posts === settings.posts && p.s.comments === settings.comments && p.s.replies === settings.replies);
+  useEffect(() => {
+    try {
+      window.localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+    } catch {
+      /* storage blocked: the choice just will not be remembered */
+    }
+  }, [settings]);
   const progressRow = useRef<HTMLDivElement>(null);
   /* Keep the progress line and Cancel in the middle of the window, clear of the edge blur. */
   useEffect(() => {
     if (collecting) progressRow.current?.scrollIntoView({ block: "center", behavior: "smooth" });
+  }, [collecting]);
+  /* Keep the newest log line in view, and tick the elapsed clock once a second. */
+  useEffect(() => {
+    const el = logList.current;
+    if (el) el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
+  }, [log]);
+  useEffect(() => {
+    if (!collecting) return;
+    const id = window.setInterval(() => setNow(Date.now()), 1000);
+    return () => window.clearInterval(id);
   }, [collecting]);
   /* While a collection runs, ask the server what it is doing every second and a half. */
   useEffect(() => {
@@ -1061,6 +1360,16 @@ function ProfileLink({
       window.clearInterval(id);
     };
   }, [collecting, base]);
+  /* One at a time: a reload or a new tab drops any job left over from the old page, and closing the page
+     does the same, so the collector is never stuck "busy" with nobody watching. */
+  useEffect(() => {
+    const reset = () => {
+      fetch(`${base}/api/profile/reset`, { method: "POST", keepalive: true }).catch(() => {});
+    };
+    reset();
+    window.addEventListener("pagehide", reset);
+    return () => window.removeEventListener("pagehide", reset);
+  }, [base]);
   useEffect(() => {
     let alive = true;
     fetch(`${base}/api/health`)
@@ -1092,10 +1401,12 @@ function ProfileLink({
     setCollecting(true);
     setCancelling(false);
     setRetry(null);
+    setLog([]);
+    setNow(Date.now());
     setProgress("Opening the collection browser…");
     setMsg("");
     try {
-      const data = await call("analyze", { url: url.trim(), limit }, 240000);
+      const data = await call("analyze", { url: url.trim(), limit, max_comments: settings.comments, replies: settings.replies }, 180000 + 45000 * limit);
       if (data.schema_version !== 2) throw new Error("Unsupported analysis schema; version 2 required.");
       onAnalyzed(data, url.trim().replace(/^https?:\/\/(www\.)?/, ""));
     } catch (e) {
@@ -1137,59 +1448,75 @@ function ProfileLink({
   };
   const busy = disabled || working;
   return (
-    <details className="mt-3 text-sm">
-      <summary className="min-h-[var(--size-target)] content-center rounded-lg py-2 font-semibold text-ink">
+    <section aria-labelledby="profile-link-title" className="mt-6 border-t border-border-default pt-5 text-sm">
+      <h3 id="profile-link-title" className="mb-3 font-semibold text-ink">
         Analyze a profile link (this computer only)
-      </summary>
-      <div className="space-y-3 pb-2">
-        <p className="text-slate-600">
-          Reads public post counts and comments from an Instagram, Facebook or TikTok profile
-          through a browser on this computer. You sign in inside the window that opens, not inside
-          Speculara. Nothing is saved.
-        </p>
-        <label className="flex min-h-11 items-start gap-2 text-ink">
-          <input
-            type="checkbox"
-            checked={allowed}
-            onChange={(e) => setAllowed(e.target.checked)}
-            className="mt-1 h-5 w-5 accent-[var(--color-ink)]"
-          />
-          I own this profile or have permission to analyze it, and I will follow the platform’s rules.
-        </label>
-        <div className="flex flex-wrap gap-2">
-          {(["instagram", "facebook"] as const).map((n) => (
-            <button
-              key={n}
-              type="button"
-              disabled={busy || signingIn || !allowed}
-              onClick={() =>
-                run(async () => {
-                  const r = await call("login", { network: n });
-                  setSigningIn(true);
-                  setMsg(r.message ?? "Sign in in the browser window, then click Done signing in.");
-                })
-              }
-              className="ctl min-h-11 rounded-xl px-3 font-semibold text-ink"
-            >
-              Sign in to {n === "instagram" ? "Instagram" : "Facebook"}
-            </button>
-          ))}
-          {signingIn && (
-            <button
-              type="button"
-              disabled={working}
-              onClick={() =>
-                run(async () => {
-                  await call("login/finish");
-                  setSigningIn(false);
-                  setMsg("Signed in. Now paste a profile link and analyze.");
-                })
-              }
-              className="btn-primary min-h-11 rounded-xl px-3 font-semibold"
-            >
-              Done signing in
-            </button>
-          )}
+      </h3>
+      <div className="space-y-3">
+        <div role="note" className="profile-warning flex items-start gap-3 rounded-2xl p-4 text-slate-700">
+          <TriangleAlert size={18} strokeWidth={2} aria-hidden="true" className="mt-0.5 shrink-0 text-orange" />
+          <p>
+            <strong className="font-semibold text-ink">Use this responsibly.</strong> Only analyze your own
+            profile, or one you have permission to analyze, and follow each platform’s rules. Do not use it
+            to collect data in bulk or to track other people. It reads posts through a browser on this
+            computer, and you sign in in that window, never inside Speculara. Nothing is sent to a server. The result stays in this browser, even after a reload, until you click Clear data.
+          </p>
+        </div>
+        <div className="space-y-2">
+          <div className="flex flex-wrap gap-2">
+            {(!detected || detected === "tiktok") && (
+              <span className="network-ok inline-flex min-h-11 items-center gap-2 rounded-xl px-3 font-semibold text-ink">
+                <TikTokLogo />
+                TikTok supported
+                <span className="text-xs font-normal text-slate-600">no sign in needed</span>
+              </span>
+            )}
+            {(["instagram", "facebook"] as const)
+              .filter((n) => !detected || detected === n)
+              .map((n) => (
+                <button
+                  key={n}
+                  type="button"
+                  disabled={busy || signingIn}
+                  onClick={() =>
+                    run(async () => {
+                      const r = await call("login", { network: n });
+                      setSigningIn(true);
+                      setMsg(r.message ?? "Sign in in the browser window, then click Done signing in.");
+                    })
+                  }
+                  className="ctl inline-flex min-h-11 items-center gap-2 rounded-xl px-3 font-semibold text-ink"
+                >
+                  {n === "instagram" ? <InstagramLogo /> : <FacebookLogo />}
+                  Sign in to {n === "instagram" ? "Instagram" : "Facebook"}
+                </button>
+              ))}
+            {signingIn && (
+              <button
+                type="button"
+                disabled={working}
+                onClick={() =>
+                  run(async () => {
+                    await call("login/finish");
+                    setSigningIn(false);
+                    setMsg("Signed in. Now analyze the profile.");
+                  })
+                }
+                className="btn-primary min-h-11 rounded-xl px-3 font-semibold"
+              >
+                Done signing in
+              </button>
+            )}
+          </div>
+          <p className="text-xs text-slate-600">
+            {detected === "facebook"
+              ? "Facebook only shows posts to signed in people, so sign in once first. The browser remembers it for next time."
+              : detected === "tiktok"
+                ? "TikTok profiles are read without signing in."
+                : detected === "instagram"
+                ? "Optional. Post counts load without signing in. Sign in once to also read comment text."
+                : "Facebook needs a sign in. Instagram only needs one for comment text. TikTok needs none."}
+          </p>
         </div>
         <label className="block font-semibold text-ink" htmlFor="profile-url">
           Profile link
@@ -1203,27 +1530,151 @@ function ProfileLink({
           autoComplete="off"
           className="well block min-h-11 w-full min-w-0 rounded-xl bg-transparent px-3 text-sm"
         />
+        <fieldset className="space-y-2">
+          <legend className="mb-2 block font-semibold text-ink">How thorough should it be?</legend>
+          <div role="group" aria-label="Speed preset" className="grid gap-2 sm:grid-cols-3">
+            {PRESETS.map((p) => (
+              <button
+                key={p.id}
+                type="button"
+                aria-pressed={preset?.id === p.id}
+                disabled={busy}
+                onClick={() => setSettings(p.s)}
+                className="ctl cx-pill flex min-h-14 flex-col items-start justify-center rounded-xl px-3 py-2 text-left"
+              >
+                <span className="font-semibold text-ink">{p.label}</span>
+                <span className="text-xs text-slate-600">{p.note}</span>
+              </button>
+            ))}
+          </div>
+          <p className="text-sm text-slate-700" aria-live="polite">
+            <span className="font-semibold text-ink">{preset ? preset.label : "Custom"}:</span> {settings.posts} posts,{" "}
+            {settings.comments === 0 ? "no comments" : settings.comments === ALL_COMMENTS ? "every comment" : `up to ${settings.comments} comments each`}
+            {settings.comments > 0 && (settings.replies ? ", with replies" : ", no replies")}. Takes {estimate(settings)}.
+          </p>
+          <button
+            type="button"
+            aria-expanded={tune}
+            aria-controls="collect-tune"
+            onClick={() => setTune((t) => !t)}
+            className="cx-link"
+          >
+            {tune ? "Hide fine tuning" : "Fine tune"}
+          </button>
+          {tune && (
+            <div id="collect-tune" className="well grid gap-3 rounded-xl p-3 sm:grid-cols-2">
+              <label className="block text-sm font-semibold text-ink" htmlFor="post-count">
+                Posts to read
+                <select
+                  id="post-count"
+                  value={settings.posts}
+                  disabled={busy}
+                  onChange={(e) => setSettings({ ...settings, posts: Number(e.target.value) })}
+                  className="well mt-1 block min-h-11 w-full rounded-xl bg-transparent px-3 text-sm font-normal"
+                >
+                  {POST_CHOICES.map((n) => (
+                    <option key={n} value={n}>
+                      Latest {n}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="block text-sm font-semibold text-ink" htmlFor="comment-cap">
+                Comments
+                <select
+                  id="comment-cap"
+                  value={settings.comments}
+                  disabled={busy}
+                  onChange={(e) => setSettings({ ...settings, comments: Number(e.target.value) })}
+                  className="well mt-1 block min-h-11 w-full rounded-xl bg-transparent px-3 text-sm font-normal"
+                >
+                  {COMMENT_CHOICES.map(([n, label]) => (
+                    <option key={n} value={n}>
+                      {label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="flex min-h-11 items-center gap-3 text-sm text-ink sm:col-span-2">
+                <input
+                  type="checkbox"
+                  checked={settings.replies && settings.comments > 0}
+                  disabled={busy || settings.comments === 0}
+                  onChange={(e) => setSettings({ ...settings, replies: e.target.checked })}
+                  className="size-4 accent-[var(--color-orange)]"
+                />
+                <span>
+                  <span className="font-semibold">Include replies to comments</span>
+                  <span className="block text-xs text-slate-600">TikTok only. Turning it off is faster.</span>
+                </span>
+              </label>
+              <p className="text-xs text-slate-600 sm:col-span-2">
+                Fewer posts and fewer comments finish sooner and put less load on the platform. The time shown is a rough guide; it depends on how many comments your posts really have.
+              </p>
+            </div>
+          )}
+        </fieldset>
         <button
           type="button"
-          disabled={busy || signingIn || !allowed || url.trim().length < 3}
-          onClick={() => analyze(10)}
+          disabled={busy || signingIn || url.trim().length < 3}
+          onClick={() => analyze(settings.posts)}
           className="btn-primary min-h-11 w-full rounded-xl px-4 font-semibold"
         >
           Analyze this profile
         </button>
         {collecting && (
-          <div ref={progressRow} className="flex flex-wrap items-center gap-3">
-            <p role="status" className="min-w-0 flex-1 text-slate-700">
-              {cancelling ? "Cancelling. The browser is closing…" : progress}
-            </p>
-            <button
-              type="button"
-              disabled={cancelling}
-              onClick={cancel}
-              className="ctl min-h-11 rounded-xl px-3 font-semibold text-ink"
-            >
-              Cancel
-            </button>
+          <div ref={progressRow} className="run-card relative overflow-hidden rounded-2xl p-5">
+            <div className="run-bar" aria-hidden="true" data-idle={cancelling || undefined} />
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <span className="run-ring" aria-hidden="true" data-idle={cancelling || undefined} />
+                <div>
+                  <p className="font-semibold leading-tight text-ink">Reading the profile</p>
+                  <p className="text-xs text-slate-600">
+                    {log.length} {log.length === 1 ? "step" : "steps"} so far
+                  </p>
+                </div>
+              </div>
+              <span className="run-pill text-xs font-medium tabular-nums text-ink" aria-hidden="true">
+                {fmtElapsed(now - (log[0]?.at ?? now))}
+              </span>
+            </div>
+            <ol ref={logList} aria-label="Activity log" className="run-list mt-4 max-h-56 overflow-y-auto pr-2">
+              {log.map((entry, i) => {
+                const last = i === log.length - 1;
+                const active = last && !cancelling;
+                return (
+                  <li
+                    key={`${entry.at}-${i}`}
+                    aria-current={last ? "step" : undefined}
+                    className={`run-step ${active ? "is-active" : "is-done"}`}
+                  >
+                    <span className="run-node" aria-hidden="true">
+                      {active ? <span className="log-dot size-2 rounded-full bg-orange" /> : <Check size={12} strokeWidth={3} />}
+                    </span>
+                    <span className="min-w-0 flex-1 text-sm leading-snug">{entry.text}</span>
+                    <span className="shrink-0 pt-0.5 text-xs tabular-nums text-slate-600">
+                      {fmtElapsed(entry.at - log[0].at)}
+                    </span>
+                  </li>
+                );
+              })}
+            </ol>
+            <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-border-default pt-4">
+              <p role="status" className="min-w-0 flex-1 text-xs text-slate-600">
+                {cancelling
+                  ? "Cancelling. The browser is closing…"
+                  : "Keep this window open. Large profiles can take several minutes."}
+              </p>
+              <button
+                type="button"
+                disabled={cancelling}
+                onClick={cancel}
+                className="ctl min-h-11 rounded-xl px-3 font-semibold text-ink"
+              >
+                Cancel
+              </button>
+            </div>
           </div>
         )}
         {!collecting && msg && (
@@ -1244,7 +1695,7 @@ function ProfileLink({
           </div>
         )}
       </div>
-    </details>
+    </section>
   );
 }
 
@@ -1624,12 +2075,37 @@ function Chat() {
   );
 }
 
+/* ---------- Saved dataset ----------
+   The last dataset stays in this browser (never sent anywhere) so a reload does not lose it.
+   It is removed only when the person clicks Clear data. */
+const SAVED_KEY = "speculara:dataset:v1";
+type SavedDataset = { analysis: Analysis; source: { label: string; demo: boolean } | null; updatedAt: number | null };
+function loadSaved(): SavedDataset | null {
+  try {
+    const raw = window.localStorage.getItem(SAVED_KEY);
+    if (!raw) return null;
+    const saved = JSON.parse(raw) as SavedDataset;
+    return saved?.analysis?.schema_version === 2 ? saved : null;
+  } catch {
+    return null;
+  }
+}
+function writeSaved(saved: SavedDataset | null) {
+  try {
+    if (saved) window.localStorage.setItem(SAVED_KEY, JSON.stringify(saved));
+    else window.localStorage.removeItem(SAVED_KEY);
+  } catch {
+    /* storage full or blocked: the dataset still works for this visit, it just will not survive a reload */
+  }
+}
+
 /* ---------- App ---------- */
 export default function App() {
-  const [picked, setPicked] = useState<Key | null>(null);
-  const [tab, setTab] = useState<Key | null>(null);
+  const [saved] = useState(loadSaved);
+  const [picked, setPicked] = useState<Key | null>(saved ? "recommend" : null);
+  const [tab, setTab] = useState<Key | null>(saved ? "charts" : null);
   const [err, setErr] = useState("");
-  const [analysis, setAnalysis] = useState<Analysis | null>(null);
+  const [analysis, setAnalysis] = useState<Analysis | null>(saved?.analysis ?? null);
   /* The hero dashboard measures the synthetic demo until a dataset is loaded. It is separate from the dataset
      the modules use, never replaces it, and is skipped in automated browsers (add ?preview=1 to force it). */
   const [preview, setPreview] = useState<{ data: Analysis; label: string } | null>(null);
@@ -1663,13 +2139,17 @@ export default function App() {
       alive = false;
     };
   }, []);
-  const [source, setSource] = useState<{ label: string; demo: boolean } | null>(null);
+  const [source, setSource] = useState<{ label: string; demo: boolean } | null>(saved?.source ?? null);
   const [busy, setBusy] = useState(false);
   const [nudge, setNudge] = useState(false);
   /* The rail follows the module card on screen: which one is crossing the middle of the window, or none. */
   const [inView, setInView] = useState<Key | null>(null);
   /* Only modules that have a card on the page get an icon, in page order. */
   const [present, setPresent] = useState<Key[]>([]);
+  /* After a click on the rail the droplet goes straight to that icon and ignores the cards passed on the way. */
+  const railLock = useRef(0);
+  /* The rail shows only from the first module card to the last one, gaps between them included. */
+  const [railOn, setRailOn] = useState(false);
   useEffect(() => {
     let raf = 0;
     const find = () => {
@@ -1682,7 +2162,11 @@ export default function App() {
         const r = el.getBoundingClientRect();
         if (r.top <= mid && r.bottom >= mid) hit = el.dataset.module as Key;
       }
-      setInView((prev) => (prev === hit ? prev : hit));
+      /* Keep the last module when the middle of the window is between two cards, so the rail never unmounts mid scroll. */
+      if (hit && Date.now() > railLock.current) setInView((prev) => (prev === hit ? prev : hit));
+      const els = document.querySelectorAll<HTMLElement>("[data-module]");
+      const on = els.length > 0 && els[0].getBoundingClientRect().top <= mid && els[els.length - 1].getBoundingClientRect().bottom >= mid;
+      setRailOn((prev) => (prev === on ? prev : on));
       setPresent((prev) => (prev.join() === here.join() ? prev : here));
     };
     const onMove = () => {
@@ -1701,7 +2185,11 @@ export default function App() {
     };
   }, []);
   const [dragging, setDragging] = useState(false);
-  const [updatedAt, setUpdatedAt] = useState<number | null>(null);
+  const [updatedAt, setUpdatedAt] = useState<number | null>(saved?.updatedAt ?? null);
+  /* Keep the dataset across reloads; Clear data (analysis becomes null) removes it. */
+  useEffect(() => {
+    writeSaved(analysis ? { analysis, source, updatedAt } : null);
+  }, [analysis, source, updatedAt]);
   const [viewRevision, setViewRevision] = useState(0);
   const [notice, setNotice] = useState("");
   /* Notices are toasts: they appear bottom left and dismiss themselves. */
@@ -1843,10 +2331,6 @@ export default function App() {
     setTimeout(() => document.getElementById("result")?.focus(), 0);
   };
 
-  const others = ORDER.filter((k) => k !== picked);
-  const active = tab && tab !== picked ? tab : others[0];
-  const Primary = picked ? VIEWS[picked] : null;
-  const Secondary = VIEWS[active];
   const colors = [INK, WINE, INK, WINE, INK, WINE];
   const locked = !analysis || busy;
 
@@ -1872,7 +2356,7 @@ export default function App() {
             }
           />
           <div className="mx-auto max-w-[var(--layout-app)] px-[var(--layout-gutter)]">
-          <section id="data" aria-label="Add your data" className="scroll-mt-6 pt-14">
+          <section id="data" aria-label="Add your data" className="scroll-mt-6 pb-16 pt-14 sm:pb-20">
         <div ref={listRef} id="start" className="upload-card mx-auto min-w-0 max-w-3xl scroll-mt-6 rounded-3xl p-5 sm:p-8">
           <div className="relative flex flex-wrap items-start justify-between gap-x-6 gap-y-3">
             <div className="min-w-0">
@@ -2097,7 +2581,10 @@ export default function App() {
                       setPicked(k);
                       setTab(null);
                       setTimeout(
-                        () => document.getElementById("result")?.scrollIntoView({ behavior: "smooth" }),
+                        () =>
+                          (document.querySelector(`[data-module="${k}"]`) ?? document.getElementById("result"))?.scrollIntoView({
+                            behavior: "smooth",
+                          }),
                         50,
                       );
                     }}
@@ -2114,12 +2601,12 @@ export default function App() {
             </ul>
           </section>
 
-          {analysis && inView && (() => {
-            const items = present.filter((k) => moduleInfo(k, analysis).status !== "Needs more data");
-            const index = items.indexOf(inView);
+          {analysis && present.length > 0 && (() => {
+            const items = ORDER.filter((k) => present.includes(k));
+            const index = inView ? items.indexOf(inView) : -1;
             if (!items.length) return null;
             return (
-              <nav aria-label="Modules" className="module-rail" style={{ ["--i" as string]: Math.max(0, index) }}>
+              <nav aria-label="Modules" className="module-rail" data-hidden={railOn ? undefined : true} aria-hidden={railOn ? undefined : true} style={{ ["--i" as string]: Math.max(0, index) }}>
                 <svg aria-hidden="true" focusable="false" width="0" height="0" style={{ position: "absolute" }}>
                   <filter id="rail-goo" colorInterpolationFilters="sRGB">
                     <feGaussianBlur in="SourceGraphic" stdDeviation="5" result="blur" />
@@ -2138,10 +2625,13 @@ export default function App() {
                     aria-label={`Go to ${META[k].tab}`}
                     title={META[k].tab}
                     onClick={() => {
+                      setInView(k); /* the droplet starts moving at once and the rail stays mounted */
+                      railLock.current = Date.now() + 1400;
+                      window.setTimeout(() => window.dispatchEvent(new Event("scroll")), 1450);
                       const card = document.querySelector<HTMLElement>(`[data-module="${k}"]`);
                       card?.scrollIntoView({ behavior: "smooth", block: "start" });
                     }}
-                    className={`module-rail__btn ${inView === k ? "is-active" : ""}`}
+                    className={`module-rail__btn ${inView === k ? "is-active" : ""} ${moduleInfo(k, analysis).status === "Needs more data" ? "opacity-60" : ""}`}
                   >
                     <Icon name={k} size="md" />
                     <span className="module-rail__tip" aria-hidden="true">
@@ -2259,37 +2749,20 @@ export default function App() {
           )}
           <div id="result" tabIndex={-1} className="scroll-mt-24">
             {analysis && <DecisionOverview key={`overview-${revision}`} />}
-            {Primary ? (
-              <>
-                <h2 className="sr-only">{META[picked!].title}</h2>
-                <div className="result-arrive" data-module={picked!}>
-                  <Primary key={`primary-${revision}-${viewRevision}-${picked}`} />
-                </div>
-                <div className="mt-10">
-                  <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-slate-600">
-                    Explore the others
-                  </p>
-                  <div
-                    className="mb-3 flex flex-wrap gap-3 p-2"
-                    role="group"
-                    aria-label="Analysis options"
-                  >
-                    {others.map((k) => (
-                      <button
-                        key={k}
-                        aria-pressed={k === active}
-                        onClick={() => setTab(k)}
-                        className={`min-h-[var(--size-target)] min-w-[var(--size-target)] max-w-full rounded-xl px-4 py-2.5 text-sm font-medium transition focus-visible:outline-2 focus-visible:outline-sky ${k === active ? "ctl is-selected font-semibold text-ink selection-pop" : "ctl text-slate-600 hover:text-ink"}`}
-                      >
-                        {META[k].tab}
-                      </button>
-                    ))}
-                  </div>
-                  <div className="result-arrive" data-module={active}>
-                    <Secondary key={`secondary-${revision}-${viewRevision}-${active}`} />
-                  </div>
-                </div>
-              </>
+            {analysis && !locked ? (
+              <div className="grid gap-12">
+                {ORDER.map((k) => {
+                  const V = VIEWS[k];
+                  return (
+                    <section key={k} aria-label={META[k].title} data-module={k} className="min-w-0 scroll-mt-24">
+                      <h2 className="sr-only">{META[k].title}</h2>
+                      <div className="result-arrive">
+                        <V key={`module-${k}-${revision}-${viewRevision}`} />
+                      </div>
+                    </section>
+                  );
+                })}
+              </div>
             ) : (
               <div className="well rounded-3xl p-8 text-center text-slate-600">
                 {locked

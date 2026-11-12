@@ -137,7 +137,7 @@ async function readComments(
     await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 60000 })
     await pause(3000, 6000)
     await checkWall(page)
-    await readScroll(page, 3)
+    await readScroll(page, 15)
   })
   const out = new Map<string, CollectedComment>()
   for (const c of findAll<RawComment>(

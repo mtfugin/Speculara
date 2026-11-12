@@ -127,6 +127,12 @@ async def collector_login_finish(request: Request):
     return await collector.finish_login()
 
 
+@app.post("/api/collector/reset")
+async def collector_reset(request: Request):
+    _require_local(request)
+    return await collector.reset()
+
+
 @app.post("/api/collector/cancel")
 async def collector_cancel(request: Request):
     _require_local(request)

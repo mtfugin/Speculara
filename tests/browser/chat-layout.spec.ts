@@ -23,7 +23,7 @@ for (const loaded of [false, true]) {
       const dialog = page.getByRole("dialog");
       const input = dialog.getByRole("textbox", { name: "Your question" });
       // Let the open animation settle: bounding boxes include transforms.
-      await page.evaluate(() => Promise.all(document.getAnimations().filter((a) => a.timeline === document.timeline && a.effect?.getComputedTiming().iterations !== Infinity).map((a) => a.finished)));
+      await page.evaluate(() => Promise.all(document.getAnimations().filter((a) => a.timeline === document.timeline && a.effect?.getComputedTiming().iterations !== Infinity).map((a) => a.finished.catch(() => undefined))));
       const box = (await dialog.boundingBox())!;
       expect(box.y).toBeGreaterThanOrEqual(8);
       expect(box.y + box.height).toBeLessThanOrEqual(size.height - 70);

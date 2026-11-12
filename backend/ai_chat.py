@@ -125,24 +125,17 @@ def plain_text(text: str) -> str:
     return re.sub(r"\n{3,}", "\n\n", text).strip()
 
 
-async def answer(message: str, analysis: dict) -> str:
+async def generate(system: str, prompt: str, max_tokens: int = 1000) -> str:
+    """One call to the model. Shared by the chat, the weekly brief and the comment reader."""
     if not ai_enabled():
         raise AIUnavailable(GENERIC_ERROR)
-    message = (message or "").strip()[:MAX_MESSAGE]
-    if not message:
-        raise ValueError("Ask a question first.")
-    if is_probe(message):
-        return DEFLECT
     model = os.getenv("GEMMA_MODEL", "gemma-4-31b-it")
     if not re.fullmatch(r"gemma-[a-zA-Z0-9.-]+", model):
         raise AIUnavailable(GENERIC_ERROR)
-    payload = json.dumps(compact_context(analysis), ensure_ascii=False, default=str)
-    if len(payload) > MAX_CONTEXT_CHARS:
-        raise ValueError("This analysis is too large to summarize.")
     body = {
-        "systemInstruction": {"parts": [{"text": SYSTEM}]},
-        "contents": [{"role": "user", "parts": [{"text": f"Analysis JSON:\n{payload}\n\nQuestion: {message}"}]}],
-        "generationConfig": {"maxOutputTokens": 1000, "thinkingConfig": {"thinkingLevel": "minimal"}},
+        "systemInstruction": {"parts": [{"text": system}]},
+        "contents": [{"role": "user", "parts": [{"text": prompt}]}],
+        "generationConfig": {"maxOutputTokens": max_tokens, "thinkingConfig": {"thinkingLevel": "minimal"}},
     }
     url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent"
     try:
@@ -153,10 +146,6 @@ async def answer(message: str, analysis: dict) -> str:
                     break
     except httpx.RequestError:
         raise AIUnavailable(GENERIC_ERROR) from None
-    if response.status_code in (401, 403):
-        raise AIUnavailable(GENERIC_ERROR)
-    if response.status_code == 429:
-        raise AIUnavailable(GENERIC_ERROR)
     if response.status_code >= 400:
         raise AIUnavailable(GENERIC_ERROR)
     candidates = response.json().get("candidates") or []
@@ -164,4 +153,19 @@ async def answer(message: str, analysis: dict) -> str:
     text = "".join(p.get("text", "") for p in parts if not p.get("thought")).strip()
     if not text:
         raise AIUnavailable(GENERIC_ERROR)
+    return text
+
+
+async def answer(message: str, analysis: dict) -> str:
+    if not ai_enabled():
+        raise AIUnavailable(GENERIC_ERROR)
+    message = (message or "").strip()[:MAX_MESSAGE]
+    if not message:
+        raise ValueError("Ask a question first.")
+    if is_probe(message):
+        return DEFLECT
+    payload = json.dumps(compact_context(analysis), ensure_ascii=False, default=str)
+    if len(payload) > MAX_CONTEXT_CHARS:
+        raise ValueError("This analysis is too large to summarize.")
+    text = await generate(SYSTEM, "Analysis JSON:\n" + payload + "\n\nQuestion: " + message, 1000)
     return scrub_reply(plain_text(text))

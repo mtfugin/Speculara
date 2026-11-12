@@ -15,6 +15,8 @@ export interface CollectOptions {
   /** Read comment text (false when the signed-in gap has not passed yet). */
   comments: boolean
   maxComments: number
+  /** Read replies to comments too (TikTok). Off is faster. */
+  replies?: boolean
   /** Set by the collector when it read through the signed-in session: only then does the gap start. */
   usedSession: boolean
   log: (line: string) => void

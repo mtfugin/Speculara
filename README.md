@@ -70,7 +70,7 @@ An owner can analyze an Instagram, Facebook or TikTok profile instead of uploadi
 2. Start the backend with `ENABLE_PROFILE_COLLECTOR=1`. Requests from other computers are refused.
 3. In the app, open **Analyze a profile link**, tick the permission box, sign in inside the browser window that opens (Instagram and Facebook), click **Done signing in**, paste the profile link and analyze.
 
-Collected posts become the same table an upload produces (one row per post, one row per comment with only its text, unknown metrics left blank), so every module, chart, report and the chat work unchanged. Nothing is saved by Speculara, and the sign-in lives in a browser profile under `backend/.socialmonitor`, which is git-ignored. Tests fake the collector; the live collectors have not been exercised in this repository's tests.
+Collected posts become the same table an upload produces (one row per post, one row per comment with only its text, unknown metrics left blank), so every module, chart, report and the chat work unchanged. Speculara's server saves nothing; the last result is kept in the browser only (localStorage) so a reload does not lose it, until Clear data is clicked. The sign-in lives in a browser profile under `backend/.socialmonitor`, which is git-ignored. Tests fake the collector; the live collectors have not been exercised in this repository's tests.
 
 The imported `backend/app` API (its own Gemma research, Supabase history and its own endpoints) is still separate and is not started by default; only its collector is reused above. See `backend/README.md` and `backend/requirements-extras.txt`.
 

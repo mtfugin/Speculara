@@ -144,7 +144,7 @@ async function readComments(
 ): Promise<CollectedComment[]> {
   const out = new Map<string, CollectedComment>()
   let cursor = ''
-  for (let i = 0; i < 6 && out.size < opt.maxComments; i++) {
+  for (let i = 0; i < 400 && out.size < opt.maxComments; i++) {
     await pause()
     const r = await api<{
       comments?: RawComment[]
@@ -169,6 +169,7 @@ async function readComments(
         media_url: imageIn({ g: c.giphy_media_info, m: c.media }, /url|still|first_frame/i),
       })
     }
+    opt.log(`Instagram: ${out.size.toLocaleString()} comments so far…`)
     cursor = r.data?.next_min_id ?? ''
     if (!cursor) break
   }

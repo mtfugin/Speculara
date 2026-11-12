@@ -6,7 +6,8 @@ test('primary buttons keep readable labels in every interaction state',async({pa
  await page.getByRole('button', {name:'Try synthetic demo data'}).click();
  await expect(page.getByRole('region', {name:'Dataset summary'})).toContainText('42 rows', {timeout:30000});
  await page.getByRole('button', {name:'Open chat',exact:true}).click();
- const buttons=await page.locator('.btn-primary:visible').all();
+ // Enabled buttons only: a disabled button (for example Analyze this profile before a link is pasted) cannot take focus.
+ const buttons=await page.locator('.btn-primary:visible:not([disabled])').all();
  expect(buttons.length).toBeGreaterThanOrEqual(1);
  const rgb=(s:string)=>s.match(/[\d.]+/g)!.slice(0,3).map(Number);
  for(const button of buttons) {
@@ -18,7 +19,8 @@ test('primary buttons keep readable labels in every interaction state',async({pa
   await page.waitForTimeout(300); // let the colour transition settle before measuring
   const c=await button.evaluate(el=>{const s=getComputedStyle(el);return {fg:s.color,bg:s.backgroundColor,outline:s.outlineStyle,focus:el.matches(':focus-visible'),active:el.matches(':active')};});
   expect(contrast(rgb(c.fg),rgb(c.bg)),`${state}: ${c.bg}`).toBeGreaterThanOrEqual(7);
-  if(state==='focus') { expect(c.focus).toBe(true); expect(c.outline).toBe('solid'); }
+  const label=await button.evaluate(el=>`${(el.textContent||'').trim().slice(0,40)} | inert:${!!el.closest('[inert]')} | aria-hidden:${!!el.closest('[aria-hidden=true]')}`);
+  if(state==='focus') { expect(c.focus,`focus-visible on "${label}"`).toBe(true); expect(c.outline,`outline on "${label}"`).toBe('solid'); }
   if(state==='active') expect(c.active).toBe(true);
   if(state==='active') { await page.mouse.move(0,0); await page.mouse.up(); }
  }
@@ -48,7 +50,7 @@ test('first focusable control has a visible composited focus ring and the locked
  await page.goto('/', {waitUntil:'domcontentloaded'});
  const list=page.getByRole('list',{name:'Questions'});
  const target=page.locator('#upload');
- await page.evaluate(()=>Promise.all(document.getAnimations().filter(a=>a.timeline===document.timeline&&a.effect?.getComputedTiming().iterations!==Infinity).map(a=>a.finished))); // entrance animations change opacity
+ await page.evaluate(()=>Promise.all(document.getAnimations().filter(a=>a.timeline===document.timeline&&a.effect?.getComputedTiming().iterations!==Infinity).map(a=>a.finished.catch(() => undefined)))); // entrance animations change opacity
  await page.keyboard.press('Tab');
  await target.focus();
  const sample=await target.evaluate(el=>{

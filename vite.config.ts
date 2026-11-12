@@ -1,4 +1,4 @@
-import { defineConfig } from "vite";
+﻿import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import path from "node:path";
@@ -19,7 +19,10 @@ export default defineConfig({
       input: {
         main: path.resolve(import.meta.dirname, "index.html"),
         sense: path.resolve(import.meta.dirname, "sense.html"),
+        onepager: path.resolve(import.meta.dirname, "sense-onepager.html"),
+        slides: path.resolve(import.meta.dirname, "slides.html"),
       },
     },
   },
 });
+

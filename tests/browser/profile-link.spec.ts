@@ -5,7 +5,7 @@ test("profile link box is hidden unless the server enables it", async ({ page })
   await expect(page.getByText("Analyze a profile link")).toHaveCount(0);
 });
 
-test("profile link needs consent, then shows the normal preview", async ({ page }) => {
+test("profile link analyzes the pasted link and shows the normal preview", async ({ page }) => {
   let analyzed: any = null;
   await page.route("**/api/health", (route) =>
     route.fulfill({ json: { status: "ok", ai: false, profile: true } }),
@@ -22,12 +22,8 @@ test("profile link needs consent, then shows the normal preview", async ({ page 
   await page.goto("/");
   await page.getByText("Analyze a profile link").click();
   const analyze = page.getByRole("button", { name: "Analyze this profile" });
-  const signIn = page.getByRole("button", { name: "Sign in to Instagram" });
-  await page.getByLabel("Profile link").fill("https://www.instagram.com/someone");
-  await expect(analyze).toBeDisabled();
-  await expect(signIn).toBeDisabled();
-  await page.getByRole("checkbox", { name: /I own this profile/ }).check();
-  await expect(analyze).toBeEnabled();
+  await page.getByRole("textbox", { name: "Profile link", exact: true }).fill("https://www.instagram.com/someone");
+  await expect(analyze).toBeEnabled(); // there is no consent checkbox in the new panel
   await analyze.click();
   await expect(page.getByRole("region", { name: /preview|dataset/i }).first()).toBeVisible({ timeout: 30000 });
   expect(analyzed.url).toBe("https://www.instagram.com/someone");
@@ -40,8 +36,7 @@ test("profile errors are shown in plain words", async ({ page }) => {
   );
   await page.goto("/");
   await page.getByText("Analyze a profile link").click();
-  await page.getByLabel("Profile link").fill("https://example.com/x");
-  await page.getByRole("checkbox", { name: /I own this profile/ }).check();
+  await page.getByRole("textbox", { name: "Profile link", exact: true }).fill("https://example.com/x");
   await page.getByRole("button", { name: "Analyze this profile" }).click();
   await expect(page.getByRole("status").filter({ hasText: "Use an Instagram" })).toBeVisible();
 });
@@ -50,8 +45,7 @@ async function openProfile(page: import("@playwright/test").Page) {
   await page.route("**/api/health", (route) => route.fulfill({ json: { status: "ok", ai: false, profile: true } }));
   await page.goto("/");
   await page.getByText("Analyze a profile link").click();
-  await page.getByLabel("Profile link").fill("https://www.tiktok.com/@examplebrand");
-  await page.getByRole("checkbox", { name: /I own this profile/ }).check();
+  await page.getByRole("textbox", { name: "Profile link", exact: true }).fill("https://www.tiktok.com/@examplebrand");
 }
 
 test("while collecting: live progress, Cancel, then a neutral cancelled message", async ({ page }) => {
@@ -72,7 +66,7 @@ test("while collecting: live progress, Cancel, then a neutral cancelled message"
   });
   await openProfile(page);
   await page.getByRole("button", { name: "Analyze this profile" }).click();
-  await expect(page.getByRole("status").filter({ hasText: "Reading post 3 of up to 20" })).toBeVisible();
+  await expect(page.getByRole("list", { name: "Activity log" })).toContainText("Reading post 3 of up to 20");
   await page.getByRole("button", { name: "Cancel" }).click();
   await expect(page.getByRole("status").filter({ hasText: "Cancelled. Nothing was kept." })).toBeVisible();
   expect(cancelled).toBe(true);
@@ -91,7 +85,7 @@ test("a timeout offers Try again and Try with fewer posts, which asks for 5", as
   await expect(page.getByRole("status").filter({ hasText: "took too long" })).toBeVisible();
   await expect(page.getByRole("button", { name: "Try again" })).toBeVisible();
   await page.getByRole("button", { name: "Try with fewer posts (5)" }).click();
-  await expect.poll(() => limits).toEqual([10, 5]);
+  await expect.poll(() => limits).toEqual([20, 5]); // the default preset reads 20 posts; the smaller retry reads 5
 });
 
 test("a profile that was not found shows the message without a retry button", async ({ page }) => {

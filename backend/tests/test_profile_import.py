@@ -182,7 +182,7 @@ class ProfileRouteTests(unittest.TestCase):
         with patch.dict(os.environ, {"ENABLE_PROFILE_COLLECTOR": "1"}), patch.object(collector, "collect_profile", fake):
             self.assertEqual(client.post("/api/profile/analyze", json={"url": "https://www.tiktok.com/@examplebrand", "limit": 10}).status_code, 200)
             self.assertEqual(client.post("/api/profile/analyze", json={"url": "https://www.tiktok.com/@examplebrand", "limit": 3}).status_code, 422)
-            self.assertEqual(client.post("/api/profile/analyze", json={"url": "https://www.tiktok.com/@examplebrand", "limit": 41}).status_code, 422)
+            self.assertEqual(client.post("/api/profile/analyze", json={"url": "https://www.tiktok.com/@examplebrand", "limit": 201}).status_code, 422)
         self.assertEqual(seen, [10])
 
     def test_comments_over_the_cap_are_counted_but_not_all_kept(self):

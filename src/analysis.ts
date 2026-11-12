@@ -55,6 +55,7 @@ export type Recommendation = {
   evidence: string;
   action: string;
   details?: string;
+  technical?: { finding: string; evidence: string; action: string };
   success_metric?: string;
   post_id?: string;
   post_url?: string;
@@ -264,6 +265,19 @@ export type Analysis = {
         points: { label: string; value: number }[];
       };
 
+  comment_texts?: string[];
+
+  /** Every collected comment with its word-check tone, for the comment explorer. */
+  comments?: {
+    id: string;
+    text: string;
+    tone: "pos" | "neg" | "neu";
+    score: number;
+    post_id?: string | null;
+    post_type?: string | null;
+    posted_at?: string | null;
+  }[];
+
   sentiment: State & {
     notes?: string[];
 
@@ -274,6 +288,10 @@ export type Analysis = {
     counts?: Record<string, number>;
 
     keywords?: { word: string; count: number }[];
+
+    basis?: "comments" | "captions";
+
+    examples?: { positive: string[]; negative: string[] };
   };
 
   demand: State & {

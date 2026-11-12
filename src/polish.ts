@@ -86,7 +86,7 @@ export function moduleInfo(key: ModuleKey, a: Analysis | null): ModuleInfo {
             finding: `${format(top[1])} text entries were labeled ${top[0]} by the simple word check.`,
             why: hints[key],
           }
-        : missing;
+        : { ...missing, finding: s.available ? missing.finding : s.reason };
     }
     case "demand":
       return a.demand.available

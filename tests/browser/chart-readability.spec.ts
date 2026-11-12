@@ -15,7 +15,7 @@ test('phone chart labels, full values and comfortable wrapped controls', async (
       await page.evaluate(scale => document.documentElement.style.fontSize = `${16 * scale}px`, scale);
       await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
       // Bounding boxes include transforms, so wait for entrance animations to finish.
-      await page.evaluate(() => Promise.all(document.getAnimations().filter((a) => a.timeline === document.timeline && a.effect?.getComputedTiming().iterations !== Infinity).map((a) => a.finished)));
+      await page.evaluate(() => Promise.all(document.getAnimations().filter((a) => a.timeline === document.timeline && a.effect?.getComputedTiming().iterations !== Infinity).map((a) => a.finished.catch(() => undefined))));
       for (const group of await page.getByRole('group', { name: 'Analysis options', exact: true }).all()) {
         expect(await group.evaluate(el => el.scrollWidth <= el.clientWidth)).toBe(true);
         for (const button of await group.getByRole('button').all()) {
@@ -65,8 +65,9 @@ test('prediction dates remain exact and sparse without losing estimates', async 
   await page.goto('/', { waitUntil: 'domcontentloaded' });
   await page.getByRole('button', { name: 'Try synthetic demo data' }).click();
   await expect(page.getByRole('region', { name: 'Dataset summary' })).toContainText('42 rows', { timeout: 30000 });
-  await page.getByRole('group', { name: 'Analysis options' }).filter({ has: page.getByRole('button', { name: 'Predict', exact: true }) }).getByRole('button', { name: 'Predict', exact: true }).click();
+  // Every module now has its own section on the page, so there is no option group to click first.
   const result = page.getByRole('region', { name: 'Predict results' });
+  await result.scrollIntoViewIfNeeded();
   const chart = result.getByRole('img');
   await expect(chart.locator('[data-chart-bar]')).toHaveCount(7);
   await expect(chart.locator('[data-chart-tick]').first()).toHaveText('Oct 13');

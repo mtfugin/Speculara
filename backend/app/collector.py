@@ -133,6 +133,24 @@ async def cancel_collection() -> dict:
     return {"cancelled": True, "stopped": stopped, "message": "Cancelled." if stopped else "Cancelling. The browser is closing."}
 
 
+async def reset() -> dict:
+    """Free the collector: cancel a running collection and close an open sign-in window.
+
+    The page calls this when it loads and when it unloads, so a reload or a new tab never leaves the
+    one-at-a-time lock held by a job nobody is watching.
+    """
+    collecting = _collection_process is not None and _collection_process.poll() is None
+    signing_in = _login_process is not None and _login_process.poll() is None
+    if collecting:
+        await cancel_collection()
+    if signing_in:
+        # Graceful close, so the saved browser session is kept.
+        await finish_login()
+    # Give the lock a moment to be released by the job that just stopped.
+    await asyncio.to_thread(_done.wait, 10)
+    return {"reset": collecting or signing_in, "collection_cancelled": collecting, "sign_in_closed": signing_in}
+
+
 def _process() -> subprocess.Popen:
     node = shutil.which("node")
     if not node or not status()["installed"]:
@@ -162,7 +180,7 @@ def _invoke_sync(payload: dict) -> dict:
         def timeout():
             expired.set()
             _terminate_owned_worker(proc)
-        timer = threading.Timer(210, timeout)
+        timer = threading.Timer(150 + 45 * max(5, min(200, int(payload.get('limit') or 20))), timeout)
         timer.daemon = True
         timer.start()
         result = None
@@ -250,7 +268,7 @@ async def start_login(network: str) -> dict:
     return {"opened": True, "message": "Sign in in the browser window, then click Done signing in here."}
 
 
-COMMENT_CAP = 40
+COMMENT_CAP = 20000  # effectively every comment the browser read
 
 
 def normalize(data: dict, canonical_url: str, network: str, handle: str) -> tuple[ProfileInfo, list[Post]]:
@@ -306,7 +324,8 @@ def normalize(data: dict, canonical_url: str, network: str, handle: str) -> tupl
                        followers=int(followers) if isinstance(followers, (int, float)) and followers >= 0 else None, sources=sources, collector="socialmonitor", unavailable_metrics=sorted(missing)), posts
 
 
-async def collect_profile(raw_url: str, limit: int = 20) -> tuple[ProfileInfo, list[Post]]:
+async def collect_profile(raw_url: str, limit: int = 20, max_comments: int = 20000, replies: bool = True) -> tuple[ProfileInfo, list[Post]]:
     canonical, network, handle = profile_url(raw_url)
-    result = await asyncio.to_thread(_invoke_sync, {"action": "collect", "url": canonical, "limit": max(5, min(40, int(limit)))})
+    result = await asyncio.to_thread(_invoke_sync, {"action": "collect", "url": canonical, "limit": max(5, min(200, int(limit))),
+                                                    "max_comments": max(0, min(20000, int(max_comments))), "replies": bool(replies)})
     return normalize(result, canonical, network, handle)

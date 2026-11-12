@@ -38,7 +38,9 @@ export function RollingNumber({ value, className = "" }: { value: string; classN
             <span className="roll-real">{ch}</span>
           </span>
         ) : (
-          <span key={k}>{ch}</span>
+          <span key={k} className="roll-sep">
+            {ch}
+          </span>
         ),
       )}
     </span>

@@ -186,35 +186,37 @@ export async function publicPosts(
 }
 
 /** Every comment and reply of a post the public pages show, up to `max`. */
-export async function publicComments(postId: string, max = 500, get: Get = nodeGet) {
+export async function publicComments(postId: string, max = 500, get: Get = nodeGet, onPage?: (n: number) => void, replies = true) {
   const out = new Map<string, RawComment>()
   const add = (c: RawComment) => {
     out.set(c.cid, c)
     for (const r of c.reply_comment ?? []) out.set(r.cid, { ...r, reply_id: r.reply_id ?? c.cid })
   }
   let cursor = 0
-  for (let page = 0; page < 10 && out.size < max; page++) {
+  for (let page = 0; page < 400 && out.size < max; page++) {
     const d = parseJson<CommentPage>(
       await get(
         `https://www.tiktok.com/api/comment/list/?aid=1988&aweme_id=${postId}&count=50&cursor=${cursor}`,
       ),
     )
     for (const c of d.comments ?? []) add(c)
+    onPage?.(out.size)
     if (!d.has_more || !d.comments?.length) break
     cursor = d.cursor ?? cursor + 50
   }
   // The list carries one reply per comment at most; the rest come from the reply list.
-  for (const c of [...out.values()]) {
+  for (const c of replies ? [...out.values()] : []) {
     if (out.size >= max) break
     if ((c.reply_comment_total ?? 0) <= (c.reply_comment?.length ?? 0)) continue
     let at = 0
-    for (let page = 0; page < 5 && out.size < max; page++) {
+    for (let page = 0; page < 40 && out.size < max; page++) {
       const d = parseJson<CommentPage>(
         await get(
           `https://www.tiktok.com/api/comment/list/reply/?aid=1988&item_id=${postId}&comment_id=${c.cid}&count=50&cursor=${at}`,
         ),
       )
       for (const r of d.comments ?? []) out.set(r.cid, { ...r, reply_id: r.reply_id ?? c.cid })
+      onPage?.(out.size)
       if (!d.has_more || !d.comments?.length) break
       at = d.cursor ?? at + 50
     }

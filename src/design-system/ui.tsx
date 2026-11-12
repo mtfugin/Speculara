@@ -47,12 +47,109 @@ export function KeyNumber({ label, value, note, muted = false }: { label: string
 
 export function Numbers({ children }: { children: ReactNode }) {
   return (
-    <details className="mt-4 text-sm">
-      <summary className="min-h-[var(--size-target)] content-center rounded-lg py-2 font-semibold text-ink">
+    <details className="group panel mt-4 rounded-2xl text-sm">
+      <summary className="flex min-h-[var(--size-target)] cursor-pointer list-none items-center justify-between gap-3 rounded-2xl px-4 py-2 font-semibold text-ink [&::-webkit-details-marker]:hidden">
         See the numbers
+        <svg
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden="true"
+          className="shrink-0 transition-transform group-open:rotate-180"
+        >
+          <path d="M6 9l6 6 6-6" />
+        </svg>
       </summary>
-      <div className="mt-3 space-y-3 text-slate-700">{children}</div>
+      <div className="space-y-6 border-t border-border-default px-4 py-4 text-slate-700">{children}</div>
     </details>
+  );
+}
+
+/** Small heading for a block inside "See the numbers". */
+export function SubHead({ children, note }: { children: ReactNode; note?: ReactNode }) {
+  return (
+    <div className="mb-2">
+      <h4 className="font-sans text-base font-semibold text-ink">{children}</h4>
+      {note && <p className="mt-0.5 text-xs text-slate-600">{note}</p>}
+    </div>
+  );
+}
+
+/** Label and value pairs in a tidy grid, for facts such as dates, counts and methods. */
+export function FactGrid({ items }: { items: { label: string; value: ReactNode }[] }) {
+  return (
+    <dl className="tabular grid gap-x-6 gap-y-3 sm:grid-cols-2">
+      {items.map((i) => (
+        <Fact key={i.label} label={i.label}>
+          {i.value}
+        </Fact>
+      ))}
+    </dl>
+  );
+}
+
+/** Plain table for evidence. First column is the row header; other columns align right (numbers). */
+export function DataTable({
+  columns,
+  rows,
+  highlightRow,
+}: {
+  columns: string[];
+  rows: ReactNode[][];
+  highlightRow?: number;
+}) {
+  return (
+    <div className="overflow-x-auto">
+      <table className="tabular w-full min-w-[18rem] text-left text-sm">
+        <thead>
+          <tr className="text-xs font-semibold uppercase tracking-wide text-slate-600">
+            {columns.map((c, i) => (
+              <th key={c} scope="col" className={`py-2 ${i === 0 ? "pr-4" : "px-3 text-right"}`}>
+                {c}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((r, ri) => (
+            <tr
+              key={ri}
+              className={`border-t border-border-default ${ri === highlightRow ? "font-semibold text-ink" : ""}`}
+            >
+              {r.map((cell, ci) =>
+                ci === 0 ? (
+                  <th key={ci} scope="row" className="py-2 pr-4 font-semibold text-ink">
+                    {cell}
+                  </th>
+                ) : (
+                  <td key={ci} className="px-3 py-2 text-right">
+                    {cell}
+                  </td>
+                ),
+              )}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+/** Short caveats as a quiet bulleted list. */
+export function NoteList({ items }: { items: string[] }) {
+  const clean = items.filter(Boolean);
+  if (!clean.length) return null;
+  return (
+    <ul className="list-disc space-y-1 pl-5 text-xs text-slate-600">
+      {clean.map((n) => (
+        <li key={n}>{n}</li>
+      ))}
+    </ul>
   );
 }
 

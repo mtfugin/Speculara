@@ -51,19 +51,22 @@ export async function execute(input, deps, emit = () => {}) {
       return { browser: await page.title() }
     }
     const notes = []
+    const postCap = Math.min(200, Math.max(5, Number(input.limit) || 20))
+    // Comments per post: 0 skips comments (fastest), otherwise up to this many. Unset means every comment.
+    const maxComments = input.max_comments === undefined ? 20000 : Math.max(0, Math.min(20000, Number(input.max_comments) || 0))
     let read = 0
     const options = {
-      range: 'all', limit: Math.min(40, Math.max(5, Number(input.limit) || 20)),
-      known: new Set(), due: new Map(), comments: true,
-      maxComments: 40, usedSession: false,
+      range: 'all', limit: postCap,
+      known: new Set(), due: new Map(), comments: maxComments > 0,
+      maxComments, replies: input.replies !== false, usedSession: false,
       log: (line) => {
         notes.push(line); console.error(line)
-        emit({ event: 'progress', message: /comments read/.test(line) ? `Reading post ${++read} of up to ${Math.min(40, Math.max(5, Number(input.limit) || 20))}…` : line })
+        emit({ event: 'progress', message: /comments read/.test(line) ? `Reading post ${++read} of up to ${postCap}…` : line })
       },
     }
     const session = await signedIn(context, profile.network)
     if (profile.network === 'facebook' && !session) throw new Error('Facebook requires sign-in. Use Sign in for comments, then close the sign-in window and retry.')
-    const timeout = new Promise((_, reject) => { timer = setTimeout(() => reject(new Error('Collection timed out. Try a profile with fewer posts or sign in and retry.')), 180000) })
+    const timeout = new Promise((_, reject) => { timer = setTimeout(() => reject(new Error('Collection timed out. Try a profile with fewer posts or sign in and retry.')), 120000 + 45000 * postCap) })
     emit({ event: 'progress', message: 'Loading posts and comment samples…' })
     const cancelled = (deps.cancelled || new Promise(() => {})).then(() => { throw new Error('Collection cancelled.') })
     const posts = await Promise.race([collectors[profile.network].collect(page, profile, options), timeout, cancelled])

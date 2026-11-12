@@ -32,8 +32,7 @@ async function collected(page: Page) {
   });
   await page.goto("/");
   await page.getByText("Analyze a profile link").click();
-  await page.getByLabel("Profile link").fill("https://www.tiktok.com/@examplebrand");
-  await page.getByRole("checkbox", { name: /I own this profile/ }).check();
+  await page.getByRole("textbox", { name: "Profile link", exact: true }).fill("https://www.tiktok.com/@examplebrand");
   await page.getByRole("button", { name: "Analyze this profile" }).click();
 }
 
@@ -86,7 +85,7 @@ test("metric tiles: the same size for numbers and Not Supplied, and long values 
   await expect.poll(() => fit.locator(".fit__in").evaluate((el) => getComputedStyle(el).animationName)).toBe("fit-slide");
 });
 
-test("module rail: only modules with data, follows the card on screen, droplet moves, unused question cards are grey", async ({ page }) => {
+test("module rail: lists every module, dims the ones without data, follows the section on screen, droplet moves", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 800 });
   await page.goto("/");
   await page.getByRole("button", { name: "Try synthetic demo data" }).click();
@@ -95,24 +94,28 @@ test("module rail: only modules with data, follows the card on screen, droplet m
   const sentimentCard = page.getByRole("button", { name: /What do you want to get sentiment of\?/ });
   await expect(sentimentCard).toHaveClass(/module-unused/);
   await expect(page.getByRole("button", { name: /What do you want to get charts of\?/ })).not.toHaveClass(/module-unused/);
-  // no module card on screen yet, so no rail
-  await expect(page.getByRole("navigation", { name: "Modules" })).toHaveCount(0);
+  // the module sections are not in the middle of the window yet, so the rail is tucked away
+  await expect(page.locator("nav.module-rail")).toHaveAttribute("data-hidden", "true");
   await page.getByRole("button", { name: /What do you want to get charts of\?/ }).click();
   await page.locator('[data-module="charts"]').scrollIntoViewIfNeeded();
   await page.evaluate(() => document.querySelector('[data-module="charts"]')!.scrollIntoView({ block: "center" }));
   const rail = page.getByRole("navigation", { name: "Modules" });
   await expect(rail).toBeVisible();
-  // only modules that have a card on the page (the chosen one and the one under "Explore the others")
-  await expect(rail.getByRole("button")).toHaveCount(2);
-  for (const missing of ["Correlation", "Demand", "Sentiment"]) await expect(rail.getByRole("button", { name: `Go to ${missing}` })).toHaveCount(0);
+  // every module has its own section now, so all six are listed; the ones this data cannot answer are dimmed
+  await expect(rail.getByRole("button")).toHaveCount(6);
+  await expect(rail.getByRole("button", { name: "Go to Sentiment" })).toHaveClass(/opacity-60/);
+  await expect(rail.getByRole("button", { name: "Go to Charts" })).not.toHaveClass(/opacity-60/);
   await expect(rail.getByRole("button", { name: "Go to Charts" })).toHaveAttribute("aria-pressed", "true");
   const drop = rail.locator(".module-rail__head");
   await expect(rail.locator(".module-rail__drop")).toHaveAttribute("data-on", "true");
+  // Charts is the third icon, so wait for the droplet to settle there before taking its position
+  await expect.poll(() => drop.evaluate((el) => new DOMMatrix(getComputedStyle(el).transform).m42)).toBeGreaterThan(0);
   const y1 = await drop.evaluate((el) => new DOMMatrix(getComputedStyle(el).transform).m42);
-  // scroll to the second card: the highlight and the droplet move to it
+  // scroll to another section: the highlight and the droplet move to it
   const other = await page.evaluate(() => [...document.querySelectorAll("[data-module]")].map((e) => (e as HTMLElement).dataset.module));
-  expect(other.length).toBe(2);
-  await page.evaluate((k) => document.querySelector(`[data-module="${k}"]`)!.scrollIntoView({ block: "center" }), other[1]);
+  expect(other.length).toBe(6);
+  const next = other.find((k) => k !== "charts")!;
+  await page.evaluate((k) => document.querySelector(`[data-module="${k}"]`)!.scrollIntoView({ block: "center" }), next);
   await expect(rail.locator(".module-rail__btn.is-active")).toHaveCount(1);
   await expect(rail.locator(".module-rail__btn.is-active")).not.toHaveAttribute("title", "Charts");
   await expect.poll(() => drop.evaluate((el) => new DOMMatrix(getComputedStyle(el).transform).m42)).not.toBe(y1);
@@ -123,9 +126,9 @@ test("module rail: only modules with data, follows the card on screen, droplet m
   const easing = await rail.locator(".module-rail__head").evaluate((el) => getComputedStyle(el).transitionTimingFunction);
   expect(easing).not.toMatch(/-?\d\.\d*[1-9]\)?$/); // cubic-bezier(0.4, 0, 0.2, 1): every control value within 0 to 1
   expect(easing).toBe("cubic-bezier(0.4, 0, 0.2, 1)");
-  // and the rail leaves when no module card is on screen
+  // and the rail tucks away again when the sections are not in the middle of the window
   await page.evaluate(() => window.scrollTo(0, 0));
-  await expect(page.getByRole("navigation", { name: "Modules" })).toHaveCount(0);
+  await expect(page.locator("nav.module-rail")).toHaveAttribute("data-hidden", "true");
 });
 
 test("scrolling stays light: the water lens rests while the page moves and returns after", async ({ page }) => {
@@ -134,11 +137,30 @@ test("scrolling stays light: the water lens rests while the page moves and retur
   await page.waitForTimeout(500);
   const water = page.locator('[data-edge-blur="top"] i[data-water]');
   await expect(page.locator("html")).not.toHaveAttribute("data-scrolling", "");
-  await page.evaluate(() => window.scrollTo(0, 400));
-  await expect(page.locator("html")).toHaveAttribute("data-scrolling", "");
-  expect(await water.evaluate((el) => getComputedStyle(el).visibility)).toBe("hidden");
+  // scrolling marks the page for ~100ms, so read it in the same moment as the scroll
+  // (watched with an observer, so a slow machine cannot miss the short window)
+  const marked = await page.evaluate(
+    () =>
+      new Promise<boolean>((resolve) => {
+        const root = document.documentElement;
+        const watch = new MutationObserver(() => {
+          if (root.hasAttribute("data-scrolling")) {
+            watch.disconnect();
+            resolve(true);
+          }
+        });
+        watch.observe(root, { attributes: true, attributeFilter: ["data-scrolling"] });
+        window.scrollTo(0, 400);
+        setTimeout(() => resolve(false), 2000);
+      }),
+  );
+  expect(marked).toBe(true);
   await expect(page.locator("html")).not.toHaveAttribute("data-scrolling", "", { timeout: 2000 });
-  expect(await water.evaluate((el) => getComputedStyle(el).visibility)).toBe("visible");
+  // while marked, the lens fades out (opacity, not visibility); when the page rests it returns
+  await page.evaluate(() => document.documentElement.setAttribute("data-scrolling", ""));
+  await expect.poll(() => water.evaluate((el) => getComputedStyle(el).opacity)).toBe("0");
+  await page.evaluate(() => document.documentElement.removeAttribute("data-scrolling"));
+  await expect.poll(() => water.evaluate((el) => getComputedStyle(el).opacity)).toBe("1");
   // two blur layers plus the lens, not five
   expect(await page.locator('[data-edge-blur="top"] i:not([data-water])').count()).toBe(2);
 });
