@@ -34,11 +34,11 @@ export function Fact({ label, children, className = "" }: { label: string; child
 }
 
 /** A key number: big tabular figure, small label, quiet note. */
-export function KeyNumber({ label, value, note }: { label: string; value: ReactNode; note?: string }) {
+export function KeyNumber({ label, value, note, muted = false }: { label: string; value: ReactNode; note?: string; muted?: boolean }) {
   return (
     <div className="tabular min-w-0 border-t border-border-default pt-3">
       <dt className="text-sm font-semibold text-ink">{label}</dt>
-      <dd className="mt-1 font-display text-2xl font-bold leading-tight text-ink [overflow-wrap:anywhere] sm:text-3xl">{value}</dd>
+      <dd className={muted ? "mt-1 font-display text-xl font-semibold leading-tight text-slate-600 sm:text-2xl" : "mt-1 font-display text-2xl font-bold leading-tight text-ink [overflow-wrap:anywhere] sm:text-3xl"}>{value}</dd>
       {note && <dd className="mt-1 text-sm text-slate-600">{note}</dd>}
     </div>
   );

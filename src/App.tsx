@@ -456,6 +456,7 @@ function DecisionOverview() {
               key={stage.key}
               label={stage.label}
               value={stage.value == null ? "Not supplied" : stage.value.toLocaleString()}
+              muted={stage.value == null}
               note={stage.note}
             />
           ))}
@@ -1719,11 +1720,21 @@ export default function App() {
                   }}
                 />
               </div>
-              {candidate && (
-                <section
-                  aria-labelledby="upload-preview-title"
-                  className="well mt-5 min-w-0 rounded-2xl p-4"
-                >
+              {locked && (
+                <p className="mt-2 px-2 text-center text-xs text-slate-600">
+                  Upload data or try the synthetic demo to unlock modules.
+                </p>
+              )}
+            </div>
+          </section>
+
+          {candidate && (
+            <section
+              aria-labelledby="upload-preview-title"
+              className="surface focus-in mb-10 min-w-0 rounded-2xl p-5 sm:p-6"
+            >
+              <div className="grid gap-8 lg:grid-cols-[1.3fr_1fr]">
+                <div className="min-w-0">
                   <h2
                     id="upload-preview-title"
                     tabIndex={-1}
@@ -1792,7 +1803,9 @@ export default function App() {
                       Row preview is unavailable for this response.
                     </p>
                   )}
-                  <h3 className="mt-4 font-semibold text-ink">What this file supports</h3>
+                </div>
+                <div className="min-w-0">
+                  <h3 className="font-display text-lg font-semibold text-ink">What this file supports</h3>
                   <ul className="mt-3 space-y-3">
                     {ORDER.map((key) => {
                       const info = moduleInfo(key, candidate.data);
@@ -1829,15 +1842,10 @@ export default function App() {
                       Cancel
                     </button>
                   </div>
-                </section>
-              )}
-              {locked && (
-                <p className="mt-2 px-2 text-center text-xs text-slate-600">
-                  Upload data or try the synthetic demo to unlock modules.
-                </p>
-              )}
-            </div>
-          </section>
+                </div>
+              </div>
+            </section>
+          )}
 
           <section aria-labelledby="modules-title" className="pb-12">
             <h2 id="modules-title" className="font-display text-2xl font-bold text-ink md:text-3xl">

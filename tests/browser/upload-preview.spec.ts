@@ -59,6 +59,8 @@ test("preview stages columns, five rows and six truthful statuses before confirm
   await expect(p).toContainText("Add a text column with individual comments or reviews.");
   await expect(p.getByRole("link")).toHaveCount(0);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  // Bounding boxes include transforms, so let the entrance animation finish first.
+  await page.evaluate(() => Promise.all(document.getAnimations().map((a) => a.finished)));
   for (const button of await p.getByRole("button").all())
     expect((await button.boundingBox())!.height).toBeGreaterThanOrEqual(44);
   await p.getByRole("button", { name: "Use this dataset", exact: true }).click();

@@ -74,6 +74,10 @@ Collected posts become the same table an upload produces (one row per post, one 
 
 The imported `backend/app` API (its own Gemma research, Supabase history and its own endpoints) is still separate and is not started by default; only its collector is reused above. See `backend/README.md` and `backend/requirements-extras.txt`.
 
+## Brand and design system
+
+Logo family, tokens, components, icons, patterns, illustrations and the motion specification are documented in [docs/brand](docs/brand/README.md). Run the app and open `/?brand` for the live brand sheet. Colors are never changed by brand work.
+
 ## Verify
 
 ```powershell
