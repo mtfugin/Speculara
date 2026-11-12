@@ -1,27 +1,25 @@
 import {test, expect} from '@playwright/test';
 function luminance(c:number[]) { return c.map(v=>v/255).map(v=>v<=0.04045?v/12.92:((v+0.055)/1.055)**2.4).reduce((s,v,i)=>s+v*[.2126,.7152,.0722][i],0); }
 function contrast(a:number[],b:number[]) { const x=luminance(a), y=luminance(b);return (Math.max(x,y)+.05)/(Math.min(x,y)+.05); }
-test('live primary gradients keep readable labels in every interaction state',async({page})=>{
+test('primary buttons keep readable labels in every interaction state',async({page})=>{
  await page.goto('/', {waitUntil:'domcontentloaded'});
  await page.getByRole('button', {name:'Try synthetic demo data'}).click();
  await expect(page.getByRole('region', {name:'Dataset summary'})).toContainText('42 rows', {timeout:30000});
  await page.getByRole('button', {name:'Open chat',exact:true}).click();
- const buttons=await page.locator('.neu-btn:visible').all();
+ const buttons=await page.locator('.btn-primary:visible').all();
  expect(buttons.length).toBeGreaterThanOrEqual(3);
+ const rgb=(s:string)=>s.match(/[\d.]+/g)!.slice(0,3).map(Number);
  for(const button of buttons) {
  for(const state of ['default','hover','focus','active']) {
   await page.mouse.move(0,0);
   if(state==='hover'||state==='active') await button.hover();
   if(state==='focus') { await page.keyboard.press('Tab'); await button.focus(); }
   if(state==='active') await page.mouse.down();
-  const colors=await button.evaluate(el=>{const s=getComputedStyle(el);return {fg:s.color,bg:s.backgroundImage,outline:s.outlineStyle,focus:el.matches(':focus-visible'),active:el.matches(':active')};});
-  const rgb=(s:string)=>s.match(/[\d.]+/g)!.slice(0,3).map(Number);
-  const stops=colors.bg.match(/rgba?\([^)]+\)/g) || [];
-  expect(stops.length,`${state} must inspect actual computed gradient`).toBeGreaterThanOrEqual(2);
-  for(const stop of stops) expect(contrast(rgb(colors.fg),rgb(stop)),`${state}: ${stop}`).toBeGreaterThanOrEqual(7);
-  if(state==='focus') { expect(colors.focus).toBe(true); expect(colors.outline).toBe('solid'); }
-  if(state==='active') expect(colors.active).toBe(true);
-  console.log(state,colors);
+  await page.waitForTimeout(300); // let the colour transition settle before measuring
+  const c=await button.evaluate(el=>{const s=getComputedStyle(el);return {fg:s.color,bg:s.backgroundColor,outline:s.outlineStyle,focus:el.matches(':focus-visible'),active:el.matches(':active')};});
+  expect(contrast(rgb(c.fg),rgb(c.bg)),`${state}: ${c.bg}`).toBeGreaterThanOrEqual(7);
+  if(state==='focus') { expect(c.focus).toBe(true); expect(c.outline).toBe('solid'); }
+  if(state==='active') expect(c.active).toBe(true);
   if(state==='active') { await page.mouse.move(0,0); await page.mouse.up(); }
  }
  }
@@ -41,16 +39,18 @@ test('focus survives outline-none and sky outline utilities; secondary meets AAA
 test('reduced motion disables animations and transitions',async({page})=>{
  await page.emulateMedia({reducedMotion:'reduce'});
  await page.goto('/', {waitUntil:'domcontentloaded'});
- const motion=await page.locator('.neu-btn').last().evaluate(el=>{const s=getComputedStyle(el);return [s.transitionDuration,s.animationName];});
- expect(motion).toEqual(['0s','none']);
+ const motion=await page.locator('.btn-primary').last().evaluate(el=>{const s=getComputedStyle(el);return {t:parseFloat(s.transitionDuration),a:s.animationName};});
+ expect(motion.t).toBeLessThan(0.001);
+ expect(motion.a).toBe('none');
 });
 
-test('initial locked module list has a visible composited focus ring',async({page})=>{
+test('first focusable control has a visible composited focus ring and the locked module cards are disabled',async({page})=>{
  await page.goto('/', {waitUntil:'domcontentloaded'});
- const list=page.locator('ul.neu-scroll[tabindex="0"]');
+ const list=page.getByRole('list',{name:'Questions'});
+ const target=page.locator('#upload');
  await page.keyboard.press('Tab');
- await list.focus();
- const sample=await list.evaluate(el=>{
+ await target.focus();
+ const sample=await target.evaluate(el=>{
   const style=getComputedStyle(el);
   let opacity=1;
   for(let node:Element|null=el;node;node=node.parentElement) opacity*=Number(getComputedStyle(node).opacity);

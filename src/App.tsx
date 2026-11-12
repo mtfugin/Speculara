@@ -20,6 +20,8 @@ import {
 } from "./analysis";
 
 import { chartTicks, niceMax } from "./chart-presentation";
+import { Logo } from "./design-system/Logo";
+import { Icon } from "./design-system/Icon";
 
 import { moduleInfo, updatedLabel, priorityLabel, type ModuleKey } from "./polish";
 
@@ -97,7 +99,7 @@ function ModuleBrief({ module }: { module: Key }) {
           aria-label={`Copy ${META[module].tab} finding`}
           disabled={copying}
           onClick={() => void copy()}
-          className="neu-sm min-h-11 rounded-xl px-3 text-sm text-ink"
+          className="ctl min-h-11 rounded-xl px-3 text-sm text-ink"
         >
           {copying ? "Copying..." : "Copy finding"}
         </button>
@@ -132,26 +134,6 @@ function UpdatedAt({ at }: { at: number }) {
 }
 
 /* ---------- primitives ---------- */
-function Logo({ size = 36 }: { size?: number }) {
-  const fills = [INK, SKY, INK, SKY, INK, SKY];
-  return (
-    <svg width={size} height={size} viewBox="-50 -50 100 100" aria-label="Speculara logo">
-      <circle r="48" fill={CREAM} stroke={INK} strokeWidth="3" />
-      {fills.map((f, i) => (
-        <path
-          key={i}
-          transform={`rotate(${i * 60})`}
-          d="M0 -44 L26 -38 L8 -2 Z"
-          fill={f}
-          stroke={CREAM}
-          strokeWidth="1.5"
-        />
-      ))}
-      <circle r="9" fill={CREAM} stroke={INK} strokeWidth="2" />
-      <circle cx="-14" cy="-26" r="3" fill="var(--color-surface-highlight)" opacity=".7" />
-    </svg>
-  );
-}
 
 function Card({
   children,
@@ -163,7 +145,7 @@ function Card({
   label?: string;
 }) {
   return (
-    <section aria-label={label} className={`neu rounded-3xl p-4 sm:p-6 ${className}`}>
+    <section aria-label={label} className={`surface rounded-3xl p-4 sm:p-6 ${className}`}>
       {children}
     </section>
   );
@@ -179,7 +161,7 @@ function Numbers({ children }: { children: ReactNode }) {
   );
 }
 const Well = ({ children, className = "" }: { children: ReactNode; className?: string }) => (
-  <div className={`neu-in rounded-2xl p-3 sm:p-4 ${className}`}>{children}</div>
+  <div className={`well rounded-2xl p-3 sm:p-4 ${className}`}>{children}</div>
 );
 const H = ({ children, sub }: { children: ReactNode; sub?: string }) => (
   <div className="mb-3">
@@ -204,7 +186,7 @@ function Pills<T extends string>({
           key={i}
           aria-pressed={i === value}
           onClick={() => onChange(i)}
-          className={`min-h-[var(--size-target)] min-w-[var(--size-target)] max-w-full rounded-full px-4 py-2 text-sm transition focus-visible:outline-2 focus-visible:outline-sky ${i === value ? "neu-in font-semibold text-ink" : "neu-sm text-slate-600 hover:text-ink"}`}
+          className={`min-h-[var(--size-target)] min-w-[var(--size-target)] max-w-full rounded-full px-4 py-2 text-sm transition focus-visible:outline-2 focus-visible:outline-sky ${i === value ? "ctl is-selected font-semibold text-ink" : "ctl text-slate-600 hover:text-ink"}`}
         >
           {i === "post_id" ? "Post" : calculationLabel(i)}
         </button>
@@ -227,7 +209,7 @@ function Query({
   const [draft, setDraft] = useState(value);
   return (
     <form
-      className="neu-in flex flex-col gap-2 rounded-2xl p-2 sm:flex-row sm:items-center sm:pl-4"
+      className="well flex flex-col gap-2 rounded-2xl p-2 sm:flex-row sm:items-center sm:pl-4"
       onSubmit={(e) => {
         e.preventDefault();
         onChange(draft.trim() || value);
@@ -239,7 +221,7 @@ function Query({
         onChange={(e) => setDraft(e.target.value)}
         className="min-h-[var(--size-target)] min-w-0 flex-1 bg-transparent px-2 text-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
       />
-      <button className="neu-btn min-h-11 rounded-xl px-5 py-2.5 text-sm font-medium text-white">
+      <button className="btn-primary min-h-11 rounded-xl px-5 py-2.5 text-sm font-medium text-white">
         {cta}
       </button>
     </form>
@@ -254,7 +236,7 @@ const Explain = ({ children }: { children: ReactNode }) => (
 );
 
 const Stat = ({ l, v, c = INK }: { l: string; v: string | number; c?: string }) => (
-  <div className="neu-in rounded-2xl p-3 text-center">
+  <div className="well rounded-2xl p-3 text-center">
     <p
       className="font-display text-lg font-bold [overflow-wrap:anywhere] sm:text-xl"
       style={{ color: c }}
@@ -288,7 +270,7 @@ const Split = ({
         {rl} {100 - lv}%
       </span>
     </div>
-    <div className="neu-in flex h-3 overflow-hidden rounded-full">
+    <div className="well flex h-3 overflow-hidden rounded-full">
       <i style={{ width: `${lv}%`, background: l }} />
       <i style={{ width: `${100 - lv}%`, background: r ?? WINE }} />
     </div>
@@ -365,8 +347,7 @@ function BarChart({
                       v === top
                         ? `linear-gradient(180deg,var(--color-action-primary-start),var(--color-chart-primary))`
                         : "var(--color-chart-secondary)",
-                    boxShadow: "var(--shadow-chart)",
-                  }}
+                                      }}
                 />
               </div>
             ))}
@@ -513,7 +494,7 @@ function DecisionOverview() {
             ["Try next", brief.try_next],
             ["How to measure", brief.measure],
           ].map(([label, value]) => (
-            <div key={label} className="min-w-0 rounded-2xl neu-in p-4">
+            <div key={label} className="min-w-0 rounded-2xl well p-4">
               <dt className="font-semibold text-ink">{label}</dt>
               <dd className="mt-2 break-words text-sm leading-6 text-slate-700">{value}</dd>
             </div>
@@ -527,7 +508,7 @@ function DecisionOverview() {
         <p className="mb-4 text-sm text-slate-700">{FUNNEL_NOTE}</p>
         <dl className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {funnelStages(a).map((stage) => (
-            <div key={stage.key} className="min-w-0 rounded-2xl neu-in p-4">
+            <div key={stage.key} className="min-w-0 rounded-2xl well p-4">
               <dt className="font-semibold text-ink">{stage.label}</dt>
               <dd className="mt-2 break-words text-xl font-semibold text-ink">
                 {stage.value == null ? "Not supplied" : stage.value.toLocaleString()}
@@ -574,7 +555,7 @@ function RecommendationItem({
   index: number;
 }) {
   return (
-    <li className="neu-in rounded-2xl p-4">
+    <li className="well rounded-2xl p-4">
       <p className="mb-2 text-xs font-semibold text-wine">{priorityLabel(index)}</p>
       <p className="font-display font-semibold text-ink">
         {index + 1}. {item.title}
@@ -776,7 +757,7 @@ function Charts() {
                   />
                   <div className="mt-4 flex flex-wrap items-center justify-between gap-3 pr-16">
                     <button
-                      className="neu-sm min-h-11 rounded-xl px-4"
+                      className="ctl min-h-11 rounded-xl px-4"
                       disabled={page === 0}
                       onClick={() => setPage(page - 1)}
                     >
@@ -786,7 +767,7 @@ function Charts() {
                       Page {page + 1} of {Math.max(1, Math.ceil(rows.length / pageSize))}
                     </span>
                     <button
-                      className="neu-sm min-h-11 rounded-xl px-4"
+                      className="ctl min-h-11 rounded-xl px-4"
                       disabled={(page + 1) * pageSize >= rows.length}
                       onClick={() => setPage(page + 1)}
                     >
@@ -896,7 +877,7 @@ function Correlation() {
   const renderPair = (p: Analysis["correlation"][number], index: number) => {
     const summary = relationshipSummary(p);
     return (
-      <li key={p.a + p.b} className="neu-in stagger-in tabular rounded-2xl p-4" style={{ ["--i" as string]: index }}>
+      <li key={p.a + p.b} className="well stagger-in tabular rounded-2xl p-4" style={{ ["--i" as string]: index }}>
         <div className="flex flex-wrap items-center justify-between gap-2">
           <span className="inline-flex items-center gap-2 text-sm font-semibold text-ink">
             <DirectionIcon r={p.r} />
@@ -1168,7 +1149,7 @@ function ProfileLink({
                   setMsg(r.message ?? "Sign in in the browser window, then click Done signing in.");
                 })
               }
-              className="neu-sm min-h-11 rounded-xl px-3 font-semibold text-ink"
+              className="ctl min-h-11 rounded-xl px-3 font-semibold text-ink"
             >
               Sign in to {n === "instagram" ? "Instagram" : "Facebook"}
             </button>
@@ -1184,7 +1165,7 @@ function ProfileLink({
                   setMsg("Signed in. Now paste a profile link and analyze.");
                 })
               }
-              className="neu-btn min-h-11 rounded-xl px-3 font-semibold text-white"
+              className="btn-primary min-h-11 rounded-xl px-3 font-semibold text-white"
             >
               Done signing in
             </button>
@@ -1200,7 +1181,7 @@ function ProfileLink({
           placeholder="https://www.instagram.com/yourprofile"
           inputMode="url"
           autoComplete="off"
-          className="neu-in block min-h-11 w-full min-w-0 rounded-xl bg-transparent px-3 text-sm"
+          className="well block min-h-11 w-full min-w-0 rounded-xl bg-transparent px-3 text-sm"
         />
         <button
           type="button"
@@ -1214,7 +1195,7 @@ function ProfileLink({
               onAnalyzed(data, url.trim().replace(/^https?:\/\/(www\.)?/, ""));
             })
           }
-          className="neu-btn min-h-11 w-full rounded-xl px-4 font-semibold text-white"
+          className="btn-primary min-h-11 w-full rounded-xl px-4 font-semibold text-white"
         >
           Analyze this profile
         </button>
@@ -1358,7 +1339,7 @@ function Chat() {
         <div
           role="dialog"
           aria-label="Ask about your analysis"
-          className={`neu flex h-[min(30rem,calc(100dvh-6rem))] w-[calc(100vw-2rem)] flex-col overflow-hidden rounded-3xl sm:w-96 ${closing ? "popover-out" : "popover-in"}`}
+          className={`overlay flex h-[min(30rem,calc(100dvh-5.5rem))] w-[calc(100vw-2rem)] flex-col overflow-hidden rounded-3xl sm:w-96 ${closing ? "popover-out" : "popover-in"}`}
         >
           <div className="flex shrink-0 items-center justify-between px-3">
             <p className="font-display font-bold text-ink">Ask Speculara</p>
@@ -1380,7 +1361,7 @@ function Chat() {
             <button
               onClick={close}
               aria-label="Close chat"
-              className="neu-sm grid h-11 w-11 place-items-center rounded-full text-ink"
+              className="ctl grid h-11 w-11 place-items-center rounded-full text-ink"
             >
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" aria-hidden="true">
                 <path d="M6 6l12 12M18 6L6 18" />
@@ -1389,7 +1370,7 @@ function Chat() {
           </div>
           <div
             ref={messages}
-            className="neu-in neu-scroll mx-3 min-h-0 flex-1 space-y-2 overflow-y-auto overscroll-contain rounded-2xl p-3 text-sm"
+            className="well neu-scroll mx-3 min-h-0 flex-1 space-y-2 overflow-y-auto overscroll-contain rounded-2xl p-3 text-sm"
             aria-live="polite"
           >
             {msgs.map((m, i) => (
@@ -1420,7 +1401,7 @@ function Chat() {
               <button
                 key={question}
                 onClick={() => send(question)}
-                className="neu-sm min-h-11 min-w-0 rounded-full px-2 py-2 text-left text-xs leading-snug text-ink"
+                className="ctl min-h-11 min-w-0 rounded-full px-2 py-2 text-left text-xs leading-snug text-ink"
               >
                 {label}
               </button>
@@ -1439,9 +1420,9 @@ function Chat() {
               onChange={(e) => setText(e.target.value)}
               placeholder="Ask about your results"
               aria-label="Your question"
-              className="neu-in min-h-11 min-w-0 flex-1 rounded-xl bg-transparent px-3 text-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
+              className="well min-h-11 min-w-0 flex-1 rounded-xl bg-transparent px-3 text-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
             />
-            <button className="neu-btn min-h-11 rounded-xl px-4 text-sm text-white">Send</button>
+            <button className="btn-primary min-h-11 rounded-xl px-4 text-sm text-white">Send</button>
           </form>
         </div>
       )}
@@ -1457,7 +1438,7 @@ function Chat() {
         }}
         aria-label={open ? "Close chat" : "Open chat"}
         aria-expanded={open}
-        className="neu-btn grid h-14 w-14 place-items-center rounded-full text-white"
+        className="btn-primary grid h-14 w-14 place-items-center rounded-full text-white"
       >
         <svg
           width="26"
@@ -1640,82 +1621,41 @@ export default function App() {
   return (
     <Results.Provider value={analysis}>
       <div className="min-h-screen pb-24">
-        <header className="sticky top-0 z-20 bg-mist/90 px-3 pt-3 backdrop-blur">
-          <div className="neu mx-auto flex max-w-5xl items-center gap-3 rounded-2xl px-4 py-2.5 sm:px-5">
-            <span className="neu-sm grid h-11 w-11 shrink-0 place-items-center rounded-full">
+        <header className="sticky top-0 z-[var(--z-header)] border-b border-border-default bg-white/90 backdrop-blur">
+          <div className="mx-auto flex h-16 max-w-[var(--layout-app)] items-center gap-3 px-[var(--layout-gutter)]">
+            <a href="#top" className="inline-flex min-h-11 items-center rounded-lg" aria-label="Speculara home">
               <Logo size={32} />
-            </span>
-            <span className="font-display text-xl font-bold tracking-tight text-ink">
-              Speculara
-            </span>
-            <span className="ml-auto hidden text-xs text-slate-600 md:block">
-              Social media analysis for marketing teams
+            </a>
+            <span className="ml-auto hidden text-sm text-slate-600 md:block">
+              Honest numbers. Plain words.
             </span>
           </div>
         </header>
 
-        <main id="main" className="mx-auto max-w-5xl px-4 sm:px-5">
-          <section className="grid items-center gap-8 py-8 md:grid-cols-[1fr_1.1fr] md:py-10">
-            <div>
-              <h1 className="font-display text-3xl font-bold leading-tight text-ink md:text-4xl">
+        <main id="main" className="mx-auto max-w-[var(--layout-app)] px-[var(--layout-gutter)]">
+          <section id="top" className="grid items-center gap-10 py-10 md:grid-cols-[1.05fr_1fr] md:py-16">
+            <div className="min-w-0">
+              <h1 className="font-display text-4xl font-bold leading-[1.1] text-ink md:text-5xl">
                 Turn views, saves, and sales into the next decision.
               </h1>
-              <p className="mt-3 max-w-md text-slate-700">
+              <p className="mt-4 max-w-lg text-lg text-slate-700">
                 Upload your CSV or Excel export. Get measured findings, clear limits, and a next
                 action grounded in views, saves and sales.
               </p>
+              <ul className="mt-6 flex flex-wrap gap-x-5 gap-y-2 text-sm font-medium text-ink">
+                {["Plain-English answers", "Nothing is saved", "No account needed"].map((t) => (
+                  <li key={t} className="inline-flex items-center gap-1.5">
+                    <Icon name="check" size="sm" />
+                    {t}
+                  </li>
+                ))}
+              </ul>
             </div>
 
-            <div
-              ref={listRef}
-              className={`neu min-w-0 rounded-[2rem] p-4 transition ${nudge ? "ring-2 ring-sky" : ""}`}
-            >
-              <p className="px-2 pt-1 text-xs font-semibold uppercase tracking-widest text-slate-600">
-                Scroll and choose
-              </p>
-              {nudge && (
-                <p
-                  role="status"
-                  className="mx-2 mt-2 rounded-xl bg-sky/20 px-3 py-2 text-sm font-medium text-ink"
-                >
-                  Analyzed {source?.label}. Choose any module to explore.
-                </p>
-              )}
-              <div className="relative">
-                <ul
-                  className={`neu-scroll mt-2 h-64 snap-y snap-mandatory rounded-xl focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink overflow-y-scroll px-2 py-1 sm:h-72`}
-                  aria-label="Questions"
-                  tabIndex={0}
-                >
-                  {ORDER.map((k, i) => (
-                    <li key={k} className="stagger-in snap-center" style={{ ["--i" as string]: i }}>
-                      <button
-                        disabled={locked}
-                        aria-pressed={picked === k}
-                        onClick={() => {
-                          setPicked(k);
-                          setTab(null);
-                          setTimeout(
-                            () =>
-                              document
-                                .getElementById("result")
-                                ?.scrollIntoView({ behavior: "smooth" }),
-                            50,
-                          );
-                        }}
-                        className={`my-2 block min-h-14 w-full rounded-2xl px-4 py-4 text-center font-display text-base font-semibold leading-snug transition focus-visible:outline-2 focus-visible:outline-sky sm:text-lg ${picked === k ? "neu-in" : "neu-sm enabled:hover:-translate-y-0.5"}`}
-                        style={{ color: colors[i] }}
-                      >
-                        <span className="block">{META[k].q}</span>
-                        <span className="mt-2 block">
-                          <StatusBadge module={k} analysis={analysis} />
-                        </span>
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-              <div className="mt-3 px-1" aria-busy={busy}>
+            <div ref={listRef} className="surface min-w-0 rounded-2xl p-5 sm:p-6">
+              <h2 className="font-display text-xl font-bold text-ink">Start with your data</h2>
+              <p className="mt-1 text-sm text-slate-600">Upload a file, or try the demo first.</p>
+              <div className="mt-4" aria-busy={busy}>
                 <label htmlFor="upload" className="mb-2 block text-sm font-semibold text-ink">
                   Upload your dataset
                 </label>
@@ -1730,7 +1670,7 @@ export default function App() {
                     if (file) void analyzeFile(file);
                     e.target.value = "";
                   }}
-                  className="neu-in block min-h-11 min-w-0 w-full rounded-xl p-3 text-sm file:mr-3 file:rounded-lg file:border-0 file:bg-ink file:px-3 file:py-2 file:text-white"
+                  className="well block min-h-11 min-w-0 w-full rounded-xl p-3 text-sm file:mr-3 file:rounded-lg file:border-0 file:bg-ink file:px-3 file:py-2 file:text-white"
                 />
                 <p id="upload-help" className="mt-2 text-sm text-slate-600">
                   CSV (UTF-8) or XLSX first sheet. Up to 5 MB, 20,000 rows, 50 columns. No account
@@ -1748,7 +1688,7 @@ export default function App() {
                   type="button"
                   disabled={busy}
                   onClick={() => void loadDemo()}
-                  className="neu-sm mt-3 min-h-11 w-full rounded-xl text-sm font-semibold text-ink"
+                  className="ctl mt-3 min-h-11 w-full rounded-xl text-sm font-semibold text-ink"
                 >
                   Try synthetic demo data
                 </button>
@@ -1791,7 +1731,7 @@ export default function App() {
               {candidate && (
                 <section
                   aria-labelledby="upload-preview-title"
-                  className="neu-in mt-5 min-w-0 rounded-2xl p-4"
+                  className="well mt-5 min-w-0 rounded-2xl p-4"
                 >
                   <h2
                     id="upload-preview-title"
@@ -1883,7 +1823,7 @@ export default function App() {
                       type="button"
                       disabled={busy}
                       onClick={() => commitDataset(candidate.data, candidate.label)}
-                      className="neu-btn min-h-11 rounded-xl px-4 text-sm text-white"
+                      className="btn-primary min-h-11 rounded-xl px-4 text-sm text-white"
                     >
                       Use this dataset
                     </button>
@@ -1893,7 +1833,7 @@ export default function App() {
                         setCandidate(null);
                         document.getElementById("upload")?.focus();
                       }}
-                      className="neu-sm min-h-11 rounded-xl px-4 text-sm text-ink"
+                      className="ctl min-h-11 rounded-xl px-4 text-sm text-ink"
                     >
                       Cancel
                     </button>
@@ -1908,8 +1848,45 @@ export default function App() {
             </div>
           </section>
 
+          <section aria-labelledby="modules-title" className="pb-12">
+            <h2 id="modules-title" className="font-display text-2xl font-bold text-ink md:text-3xl">
+              What do you want to know?
+            </h2>
+            <p className="mt-1 text-slate-600">Pick a question. Each one turns your numbers into a plain answer.</p>
+            {nudge && (
+              <p role="status" className="chip mt-4 inline-block px-3 py-2 text-sm">
+                Analyzed {source?.label}. Choose any module to explore.
+              </p>
+            )}
+            <ul aria-label="Questions" className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {ORDER.map((k, i) => (
+                <li key={k} className="stagger-in" style={{ ["--i" as string]: i }}>
+                  <button
+                    disabled={locked}
+                    aria-pressed={picked === k}
+                    onClick={() => {
+                      setPicked(k);
+                      setTab(null);
+                      setTimeout(
+                        () => document.getElementById("result")?.scrollIntoView({ behavior: "smooth" }),
+                        50,
+                      );
+                    }}
+                    className={`ctl flex h-full min-h-[var(--size-target)] w-full flex-col items-start gap-3 rounded-2xl p-4 text-left ${picked === k ? "is-selected" : ""}`}
+                  >
+                    <span className="grid h-10 w-10 place-items-center rounded-xl bg-ink/10 text-ink">
+                      <Icon name={k} size="lg" />
+                    </span>
+                    <span className="font-display text-lg font-semibold leading-snug">{META[k].q}</span>
+                    <StatusBadge module={k} analysis={analysis} />
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </section>
+
           {busy && !analysis && (
-            <div aria-hidden="true" className="neu skeleton-pulse mb-6 space-y-3 rounded-3xl p-5">
+            <div aria-hidden="true" className="surface skeleton-pulse mb-6 space-y-3 rounded-3xl p-5">
               <div className="skeleton-bar h-5 w-2/3" />
               <div className="skeleton-bar h-4 w-1/2" />
               <div className="grid grid-cols-3 gap-3">
@@ -1922,7 +1899,7 @@ export default function App() {
           {analysis && (
             <section
               key={`summary-${revision}-${viewRevision}`}
-              className="neu result-arrive mb-6 rounded-3xl p-5"
+              className="surface result-arrive mb-6 rounded-3xl p-5"
               aria-label="Dataset summary"
               id="dataset-summary"
               tabIndex={-1}
@@ -1941,13 +1918,13 @@ export default function App() {
                 </div>
                 <div className="flex flex-wrap gap-3">
                   <button
-                    className="neu-btn min-h-11 rounded-xl px-4 text-sm text-white"
+                    className="btn-primary min-h-11 rounded-xl px-4 text-sm text-white"
                     onClick={() => exportResults("report")}
                   >
                     Download report
                   </button>
                   <button
-                    className="neu-sm min-h-11 rounded-xl px-4 text-sm text-ink"
+                    className="ctl min-h-11 rounded-xl px-4 text-sm text-ink"
                     onClick={() => exportResults("json")}
                   >
                     Results JSON
@@ -1956,12 +1933,12 @@ export default function App() {
                     type="button"
                     disabled={busy}
                     onClick={resetView}
-                    className="neu-sm min-h-11 rounded-xl px-4 text-sm text-ink"
+                    className="ctl min-h-11 rounded-xl px-4 text-sm text-ink"
                   >
                     Reset view
                   </button>
                   <button
-                    className="neu-sm min-h-11 rounded-xl px-4 text-sm text-wine"
+                    className="ctl min-h-11 rounded-xl px-4 text-sm text-wine"
                     disabled={busy}
                     onClick={() => {
                       setCandidate(null);
@@ -2041,7 +2018,7 @@ export default function App() {
                         key={k}
                         aria-pressed={k === active}
                         onClick={() => setTab(k)}
-                        className={`min-h-[var(--size-target)] min-w-[var(--size-target)] max-w-full rounded-xl px-4 py-2.5 text-sm font-medium transition focus-visible:outline-2 focus-visible:outline-sky ${k === active ? "neu-in font-semibold text-ink selection-pop" : "neu-sm text-slate-600 hover:text-ink"}`}
+                        className={`min-h-[var(--size-target)] min-w-[var(--size-target)] max-w-full rounded-xl px-4 py-2.5 text-sm font-medium transition focus-visible:outline-2 focus-visible:outline-sky ${k === active ? "ctl is-selected font-semibold text-ink selection-pop" : "ctl text-slate-600 hover:text-ink"}`}
                       >
                         {META[k].tab}
                       </button>
@@ -2053,7 +2030,7 @@ export default function App() {
                 </div>
               </>
             ) : (
-              <div className="neu-in rounded-3xl p-8 text-center text-slate-600">
+              <div className="well rounded-3xl p-8 text-center text-slate-600">
                 {locked
                   ? "Your results appear here after uploading a dataset or loading the synthetic demo."
                   : "Choose a question above to see your first result here."}
@@ -2067,7 +2044,7 @@ export default function App() {
             </p>
             <ul className="flex flex-wrap gap-3">
               {MARKETS.map((m) => (
-                <li key={m} className="neu-sm rounded-full px-4 py-2 text-sm font-medium text-ink">
+                <li key={m} className="ctl rounded-full px-4 py-2 text-sm font-medium text-ink">
                   {m}
                 </li>
               ))}
@@ -2076,7 +2053,7 @@ export default function App() {
 
           <footer
             id="docs"
-            className="neu mt-10 scroll-mt-24 rounded-3xl p-5 text-sm text-slate-700 sm:p-6"
+            className="surface mt-10 scroll-mt-24 rounded-3xl p-5 text-sm text-slate-700 sm:p-6"
           >
             <p className="font-semibold text-ink">About your results</p>
             <p className="mt-1">

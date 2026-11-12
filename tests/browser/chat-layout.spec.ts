@@ -96,26 +96,22 @@ test("nonmodal chat keyboard and pointer focus paths", async ({ page }) => {
   await dialog.getByRole("button", { name: "Close chat", exact: true }).click();
   await expect(launcher).toBeFocused();
   await launcher.click();
-  const list = page.getByRole("list", { name: "Questions" });
-  for (let i = 0; i < 5 && !(await list.evaluate((el) => el === document.activeElement)); i++) {
+  const upload = page.locator("#upload");
+  for (let i = 0; i < 8 && !(await upload.evaluate((el) => el === document.activeElement)); i++) {
     await page.keyboard.press("Tab");
   }
   await expect(dialog).toBeVisible();
-  await expect(list).toBeFocused();
+  await expect(upload).toBeFocused();
   await page.keyboard.press("Escape");
   await expect(dialog).toHaveCount(0);
   await expect(launcher).toBeFocused();
 });
 
-test("initial module list scrolls by keyboard and primary modules expose selection", async ({
-  page,
-}) => {
+test("module cards start locked and expose selection once data is loaded", async ({ page }) => {
   await page.goto("/");
   const list = page.getByRole("list", { name: "Questions" });
-  await expect(list).toHaveAttribute("tabindex", "0");
-  await list.focus();
-  await page.keyboard.press("End");
-  await expect.poll(() => list.evaluate((el) => el.scrollTop)).toBeGreaterThan(0);
+  await expect(list.getByRole("button")).toHaveCount(6);
+  for (const card of await list.getByRole("button").all()) await expect(card).toBeDisabled();
   await page.getByRole("button", { name: "Try synthetic demo data" }).click();
   await expect(page.getByRole("region", { name: "Dataset summary" })).toContainText("42 rows", {
     timeout: 30000,

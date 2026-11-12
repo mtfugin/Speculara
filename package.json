@@ -23,6 +23,11 @@
     "test:analysis": "node --test tests/analysis-panels.test.mjs"
   },
   "dependencies": {
+    "@fontsource-variable/manrope": "^5.3.0",
+    "@fontsource-variable/sora": "^5.3.0",
+    "@fontsource/jetbrains-mono": "^5.3.0",
+    "gsap": "^3.15.1",
+    "lucide-react": "^1.72.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },

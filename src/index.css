@@ -1,69 +1,139 @@
-@import url("https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=Manrope:wght@400;500;600&display=swap");
+/* Speculara design system styles. Every value comes from tokens.css (generated from tokens/speculara.json).
+   Colors are unchanged; this file owns shape, space, type, elevation and motion. */
+@import "@fontsource-variable/sora/index.css";
+@import "@fontsource-variable/manrope/index.css";
+@import "@fontsource/jetbrains-mono/400.css";
 @import "tailwindcss";
 @import "./tokens.css";
 
+/* ---------- Base ---------- */
 @layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    scroll-padding-top: 5rem;
+  }
   body {
     background: var(--color-surface-page);
     color: var(--color-text-primary);
     font-family: var(--font-sans);
+    font-size: var(--text-base);
+    line-height: var(--text-base--line-height);
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
   }
-  .no-bar::-webkit-scrollbar {
-    display: none;
+  h1, h2, h3, h4 {
+    font-family: var(--font-display);
+    letter-spacing: var(--tracking-tight);
+    text-wrap: balance;
   }
+  code, kbd, samp, .mono {
+    font-family: var(--font-mono);
+    font-size: 0.92em;
+  }
+  .no-bar::-webkit-scrollbar { display: none; }
+  button, summary { cursor: pointer; }
+  button:disabled, input:disabled { cursor: not-allowed; opacity: 0.55; }
+  summary { min-height: var(--size-target); padding-block: 10px; }
+  th, td { padding-inline-end: 12px; font-variant-numeric: tabular-nums; }
+  .skip-link {
+    position: fixed;
+    top: 8px;
+    left: 8px;
+    z-index: var(--z-skip);
+    padding: 12px;
+    background: var(--color-white);
+    color: var(--color-ink);
+    border-radius: var(--radius-xl);
+    transform: translateY(-200%);
+  }
+  .skip-link:focus { transform: translateY(0); }
 }
 
+/* Focus is always visible. Unlayered so it wins over utility classes. */
+:is(button, a, input, textarea, select, summary, [tabindex]):focus-visible {
+  outline: var(--border-focus-width) solid var(--color-focus);
+  outline-offset: 3px;
+}
+
+/* ---------- Surfaces: structure comes from space and 1px lines, not shadows ---------- */
 @layer components {
-  .neu {
+  .surface {
+    background: var(--color-surface-highlight);
+    border: var(--border-width) solid var(--color-border-default);
+    box-shadow: var(--shadow-xs);
+  }
+  .well {
     background: var(--color-surface-page);
-    box-shadow:
-      var(--shadow-raised);
+    border: var(--border-width) solid var(--color-border-default);
   }
-  .neu-sm {
-    background: var(--color-surface-page);
-    box-shadow:
-      var(--shadow-small);
+  .overlay {
+    background: var(--color-surface-highlight);
+    border: var(--border-width) solid var(--color-border-default);
+    box-shadow: var(--shadow-md);
   }
-  .neu-sm:active {
-    box-shadow:
-      var(--shadow-pressed);
-  }
-  .neu-in {
-    background: var(--color-surface-page);
-    box-shadow:
-      var(--shadow-inset);
-  }
-  .neu-btn {
-    background: linear-gradient(145deg, var(--color-action-primary-start), var(--color-action-primary));
-    box-shadow:
-      var(--shadow-small);
+
+  /* ---------- Controls ---------- */
+  .ctl {
+    background: var(--color-surface-highlight);
+    border: var(--border-width) solid var(--color-border-default);
+    color: var(--color-ink);
     transition:
-      transform var(--motion-fast),
-      box-shadow var(--motion-fast);
+      transform var(--motion-instant) var(--ease-enter),
+      border-color var(--motion-micro) var(--ease-standard),
+      background-color var(--motion-micro) var(--ease-standard);
   }
-  .neu-btn:hover {
-    background: linear-gradient(145deg, var(--color-action-hover-start), var(--color-action-hover-end));
+  .ctl:hover:not(:disabled) { border-color: var(--color-ink); }
+  .ctl:active:not(:disabled) { transform: scale(0.97); }
+  .ctl.is-selected,
+  .ctl[aria-pressed="true"] {
+    background: color-mix(in srgb, var(--color-ink) 9%, var(--color-white));
+    border-color: var(--color-ink);
+    color: var(--color-ink);
+  }
+  .btn-primary {
+    background: var(--color-action-primary);
+    border: var(--border-width) solid var(--color-action-primary);
+    color: var(--color-text-on-action);
+    font-weight: var(--font-weight-semibold);
+    transition:
+      transform var(--motion-instant) var(--ease-enter),
+      background-color var(--motion-micro) var(--ease-standard);
+  }
+  .btn-primary:hover:not(:disabled) {
+    background: var(--color-primary);
+    border-color: var(--color-primary);
     color: var(--color-text-on-action);
   }
-  .neu-btn:active {
-    transform: scale(0.97);
-    box-shadow: var(--shadow-action-pressed);
+  .btn-primary:active:not(:disabled) { transform: scale(0.97); }
+  .chip {
+    background: color-mix(in srgb, var(--color-ink) 9%, var(--color-white));
+    color: var(--color-ink);
+    border-radius: 9999px;
+    font-weight: var(--font-weight-semibold);
   }
-}
-@media (prefers-reduced-motion: reduce) {
-  * {
-    transition: none !important;
-    animation: none !important;
-    scroll-behavior: auto !important;
+  .tabular { font-variant-numeric: tabular-nums; }
+
+  .neu-scroll {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-border-strong) transparent;
+  }
+  .neu-scroll::-webkit-scrollbar { width: 10px; }
+  .neu-scroll::-webkit-scrollbar-track { background: transparent; }
+  .neu-scroll::-webkit-scrollbar-thumb {
+    background: var(--color-border-default);
+    border-radius: 99px;
+    border: 2px solid transparent;
+    background-clip: content-box;
   }
 }
 
+/* ---------- Motion identity: "coming into focus" ----------
+   Entrances ease out, exits are about 20% shorter, no bounce in everyday UI.
+   Only transform and opacity move. Reduced motion removes movement (see bottom). */
 @keyframes result-arrive {
   from { opacity: 0; transform: translateY(8px); }
   to { opacity: 1; transform: translateY(0); }
 }
-
-/* No overshoot: everyday UI settles instead of bouncing. */
 @keyframes selection-pop {
   0% { transform: scale(0.98); }
   100% { transform: scale(1); }
@@ -84,22 +154,31 @@
   0%, 100% { opacity: 0.55; }
   50% { opacity: 1; }
 }
+@keyframes ring-drift {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+@keyframes focus-in {
+  from { opacity: 0; transform: scale(0.96); }
+  to { opacity: 1; transform: scale(1); }
+}
 
 @layer components {
   .result-arrive { animation: result-arrive var(--motion-arrive) var(--ease-out) both; }
   .selection-pop { animation: selection-pop var(--motion-select) var(--ease-out) both; }
-  /* Rows reveal ~30ms apart; the index is capped so long lists never feel slow. */
+  .focus-in { animation: focus-in var(--motion-component) var(--ease-enter) both; }
+  /* Rows reveal 30ms apart; the index is capped so long lists never feel slow. */
   .stagger-in {
     animation: result-arrive var(--motion-arrive) var(--ease-out) both;
     animation-delay: calc(min(var(--i, 0), 8) * var(--motion-stagger));
   }
-  /* Bars grow from the baseline with transform only (no layout animation). */
+  /* Bars grow from the baseline with transform only. */
   .bar-grow {
     transform-origin: bottom;
     animation: bar-grow var(--motion-arrive) var(--ease-out) both;
     animation-delay: calc(min(var(--i, 0), 12) * var(--motion-stagger));
   }
-  /* Chat opens from, and closes toward, its launcher at the bottom right. */
+  /* The chat opens from, and closes toward, its launcher. */
   .popover-in {
     transform-origin: bottom right;
     animation: popover-in var(--motion-select) var(--ease-out) both;
@@ -109,75 +188,15 @@
     animation: popover-out var(--motion-exit) var(--ease-out) both;
   }
   .skeleton-pulse { animation: skeleton-pulse 1.4s ease-in-out infinite; }
-  .skeleton-bar { border-radius: 0.5rem; background: var(--color-track); }
-  .neu-sm {
-    transition: transform var(--motion-fast) var(--ease-out), box-shadow var(--motion-fast) var(--ease-out);
-  }
-  .neu-sm:active:not(:disabled) { transform: scale(0.97); }
-  .tabular { font-variant-numeric: tabular-nums; }
-}
-h1, h2, h3 { text-wrap: balance; }
-@layer components {
-  .neu-scroll {
-    scrollbar-width: thin;
-    scrollbar-color: var(--color-ink) var(--color-track);
-  }
-  .neu-scroll::-webkit-scrollbar {
-    width: 12px;
-  }
-  .neu-scroll::-webkit-scrollbar-track {
-    background: var(--color-track);
-    border-radius: 99px;
-    box-shadow:
-      inset 2px 2px 4px var(--color-shadow-dark),
-      inset -2px -2px 4px #fff;
-  }
-  .neu-scroll::-webkit-scrollbar-thumb {
-    background: linear-gradient(180deg, var(--color-sky), var(--color-ink));
-    border-radius: 99px;
-    border: 3px solid var(--color-track);
-  }
-}
-@layer base {
-  button,
-  summary {
-    cursor: pointer;
-  }
-  button:disabled,
-  input:disabled {
-    cursor: not-allowed;
-    opacity: 0.55;
-  }
-  :focus-visible {
-    outline: 3px solid var(--color-ink);
-    outline-offset: 4px;
-  }
-  summary {
-    min-height: var(--size-target);
-    padding-block: 10px;
-  }
-  th,
-  td {
-    padding-inline-end: 12px;
-    font-variant-numeric: tabular-nums;
-  }
-  .skip-link {
-    position: fixed;
-    top: 8px;
-    left: 8px;
-    z-index: 100;
-    padding: 12px;
-    background: white;
-    color: var(--color-ink);
-    transform: translateY(-200%);
-  }
-  .skip-link:focus {
-    transform: translateY(0);
-  }
+  .skeleton-bar { border-radius: var(--radius-md); background: var(--color-track); }
+  .ring-drift { animation: ring-drift var(--motion-ambient) linear infinite; transform-origin: center; }
 }
 
-/* Unlayered, control-scoped focus wins over Tailwind outline-none/sky utilities. */
-:is(button, a, input, textarea, summary, [tabindex]):focus-visible {
-  outline: 3px solid var(--color-focus);
-  outline-offset: 4px;
+/* One central reduced-motion strategy: no movement, no loops, state changes stay instant and visible. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    transition-duration: 0.01ms !important;
+    animation: none !important;
+    scroll-behavior: auto !important;
+  }
 }

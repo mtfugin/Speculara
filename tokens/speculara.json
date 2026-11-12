@@ -311,57 +311,30 @@
     }
   },
   "elevation": {
-    "raised": {
+    "xs": {
       "$type": "string",
-      "$value": "9px 9px 18px #cbd3dd, -9px -9px 18px #ffffff",
+      "$value": "0 1px 2px rgba(30, 39, 97, 0.06)",
       "$extensions": {
         "speculara": {
-          "css": "--shadow-raised"
+          "css": "--shadow-xs"
         }
       }
     },
-    "small": {
+    "sm": {
       "$type": "string",
-      "$value": "5px 5px 10px #cbd3dd, -5px -5px 10px #ffffff",
+      "$value": "0 1px 3px rgba(30, 39, 97, 0.08), 0 1px 2px rgba(30, 39, 97, 0.04)",
       "$extensions": {
         "speculara": {
-          "css": "--shadow-small"
+          "css": "--shadow-sm"
         }
       }
     },
-    "inset": {
+    "md": {
       "$type": "string",
-      "$value": "inset 5px 5px 10px #cbd3dd, inset -5px -5px 10px #ffffff",
+      "$value": "0 12px 32px rgba(30, 39, 97, 0.12), 0 2px 6px rgba(30, 39, 97, 0.06)",
       "$extensions": {
         "speculara": {
-          "css": "--shadow-inset"
-        }
-      }
-    },
-    "pressed": {
-      "$type": "string",
-      "$value": "inset 3px 3px 6px #cbd3dd, inset -3px -3px 6px #ffffff",
-      "$extensions": {
-        "speculara": {
-          "css": "--shadow-pressed"
-        }
-      }
-    },
-    "action-pressed": {
-      "$type": "string",
-      "$value": "inset 3px 3px 6px rgba(0, 0, 0, 0.25)",
-      "$extensions": {
-        "speculara": {
-          "css": "--shadow-action-pressed"
-        }
-      }
-    },
-    "chart": {
-      "$type": "string",
-      "$value": "2px 2px 5px rgba(41, 52, 143, 0.25)",
-      "$extensions": {
-        "speculara": {
-          "css": "--shadow-chart"
+          "css": "--shadow-md"
         }
       }
     }
@@ -370,6 +343,7 @@
     "display": {
       "$type": "fontFamily",
       "$value": [
+        "Sora Variable",
         "Sora",
         "sans-serif"
       ],
@@ -382,6 +356,7 @@
     "sans": {
       "$type": "fontFamily",
       "$value": [
+        "Manrope Variable",
         "Manrope",
         "system-ui",
         "sans-serif"
@@ -403,6 +378,19 @@
           "speculara": {
             "css": "--font-size-chart-label"
           }
+        }
+      }
+    },
+    "mono": {
+      "$type": "fontFamily",
+      "$value": [
+        "JetBrains Mono",
+        "ui-monospace",
+        "monospace"
+      ],
+      "$extensions": {
+        "speculara": {
+          "css": "--font-mono"
         }
       }
     }
@@ -488,6 +476,679 @@
       "$extensions": {
         "speculara": {
           "css": "--ease-out"
+        }
+      }
+    },
+    "instant": {
+      "$type": "duration",
+      "$value": {
+        "value": 120,
+        "unit": "ms"
+      },
+      "$extensions": {
+        "speculara": {
+          "css": "--motion-instant"
+        }
+      }
+    },
+    "micro": {
+      "$type": "duration",
+      "$value": {
+        "value": 200,
+        "unit": "ms"
+      },
+      "$extensions": {
+        "speculara": {
+          "css": "--motion-micro"
+        }
+      }
+    },
+    "standard": {
+      "$type": "duration",
+      "$value": {
+        "value": 280,
+        "unit": "ms"
+      },
+      "$extensions": {
+        "speculara": {
+          "css": "--motion-standard"
+        }
+      }
+    },
+    "component": {
+      "$type": "duration",
+      "$value": {
+        "value": 380,
+        "unit": "ms"
+      },
+      "$extensions": {
+        "speculara": {
+          "css": "--motion-component"
+        }
+      }
+    },
+    "page": {
+      "$type": "duration",
+      "$value": {
+        "value": 480,
+        "unit": "ms"
+      },
+      "$extensions": {
+        "speculara": {
+          "css": "--motion-page"
+        }
+      }
+    },
+    "sequence": {
+      "$type": "duration",
+      "$value": {
+        "value": 900,
+        "unit": "ms"
+      },
+      "$extensions": {
+        "speculara": {
+          "css": "--motion-sequence"
+        }
+      }
+    },
+    "brand": {
+      "$type": "duration",
+      "$value": {
+        "value": 1400,
+        "unit": "ms"
+      },
+      "$extensions": {
+        "speculara": {
+          "css": "--motion-brand"
+        }
+      }
+    },
+    "ambient": {
+      "$type": "duration",
+      "$value": {
+        "value": 2400,
+        "unit": "ms"
+      },
+      "$extensions": {
+        "speculara": {
+          "css": "--motion-ambient"
+        }
+      }
+    },
+    "ease-standard": {
+      "$type": "string",
+      "$value": "cubic-bezier(0.2, 0, 0, 1)",
+      "$extensions": {
+        "speculara": {
+          "css": "--ease-standard"
+        }
+      }
+    },
+    "ease-enter": {
+      "$type": "string",
+      "$value": "cubic-bezier(0, 0, 0.2, 1)",
+      "$extensions": {
+        "speculara": {
+          "css": "--ease-enter"
+        }
+      }
+    },
+    "ease-exit": {
+      "$type": "string",
+      "$value": "cubic-bezier(0.4, 0, 1, 1)",
+      "$extensions": {
+        "speculara": {
+          "css": "--ease-exit"
+        }
+      }
+    },
+    "ease-emphasis": {
+      "$type": "string",
+      "$value": "cubic-bezier(0.34, 1.56, 0.64, 1)",
+      "$extensions": {
+        "speculara": {
+          "css": "--ease-emphasis"
+        }
+      }
+    }
+  },
+  "type": {
+    "xs": {
+      "$type": "dimension",
+      "$value": {
+        "value": 12,
+        "unit": "px"
+      },
+      "$extensions": {
+        "speculara": {
+          "css": "--text-xs"
+        }
+      }
+    },
+    "xs-line": {
+      "$type": "dimension",
+      "$value": {
+        "value": 16,
+        "unit": "px"
+      },
+      "$extensions": {
+        "speculara": {
+          "css": "--text-xs--line-height"
+        }
+      }
+    },
+    "sm": {
+      "$type": "dimension",
+      "$value": {
+        "value": 14,
+        "unit": "px"
+      },
+      "$extensions": {
+        "speculara": {
+          "css": "--text-sm"
+        }
+      }
+    },
+    "sm-line": {
+      "$type": "dimension",
+      "$value": {
+        "value": 20,
+        "unit": "px"
+      },
+      "$extensions": {
+        "speculara": {
+          "css": "--text-sm--line-height"
+        }
+      }
+    },
+    "base": {
+      "$type": "dimension",
+      "$value": {
+        "value": 16,
+        "unit": "px"
+      },
+      "$extensions": {
+        "speculara": {
+          "css": "--text-base"
+        }
+      }
+    },
+    "base-line": {
+      "$type": "dimension",
+      "$value": {
+        "value": 24,
+        "unit": "px"
+      },
+      "$extensions": {
+        "speculara": {
+          "css": "--text-base--line-height"
+        }
+      }
+    },
+    "lg": {
+      "$type": "dimension",
+      "$value": {
+        "value": 18,
+        "unit": "px"
+      },
+      "$extensions": {
+        "speculara": {
+          "css": "--text-lg"
+        }
+      }
+    },
+    "lg-line": {
+      "$type": "dimension",
+      "$value": {
+        "value": 28,
+        "unit": "px"
+      },
+      "$extensions": {
+        "speculara": {
+          "css": "--text-lg--line-height"
+        }
+      }
+    },
+    "xl": {
+      "$type": "dimension",
+      "$value": {
+        "value": 20,
+        "unit": "px"
+      },
+      "$extensions": {
+        "speculara": {
+          "css": "--text-xl"
+        }
+      }
+    },
+    "xl-line": {
+      "$type": "dimension",
+      "$value": {
+        "value": 28,
+        "unit": "px"
+      },
+      "$extensions": {
+        "speculara": {
+          "css": "--text-xl--line-height"
+        }
+      }
+    },
+    "2xl": {
+      "$type": "dimension",
+      "$value": {
+        "value": 24,
+        "unit": "px"
+      },
+      "$extensions": {
+        "speculara": {
+          "css": "--text-2xl"
+        }
+      }
+    },
+    "2xl-line": {
+      "$type": "dimension",
+      "$value": {
+        "value": 32,
+        "unit": "px"
+      },
+      "$extensions": {
+        "speculara": {
+          "css": "--text-2xl--line-height"
+        }
+      }
+    },
+    "3xl": {
+      "$type": "dimension",
+      "$value": {
+        "value": 32,
+        "unit": "px"
+      },
+      "$extensions": {
+        "speculara": {
+          "css": "--text-3xl"
+        }
+      }
+    },
+    "3xl-line": {
+      "$type": "dimension",
+      "$value": {
+        "value": 40,
+        "unit": "px"
+      },
+      "$extensions": {
+        "speculara": {
+          "css": "--text-3xl--line-height"
+        }
+      }
+    },
+    "4xl": {
+      "$type": "dimension",
+      "$value": {
+        "value": 40,
+        "unit": "px"
+      },
+      "$extensions": {
+        "speculara": {
+          "css": "--text-4xl"
+        }
+      }
+    },
+    "4xl-line": {
+      "$type": "dimension",
+      "$value": {
+        "value": 48,
+        "unit": "px"
+      },
+      "$extensions": {
+        "speculara": {
+          "css": "--text-4xl--line-height"
+        }
+      }
+    },
+    "5xl": {
+      "$type": "dimension",
+      "$value": {
+        "value": 56,
+        "unit": "px"
+      },
+      "$extensions": {
+        "speculara": {
+          "css": "--text-5xl"
+        }
+      }
+    },
+    "5xl-line": {
+      "$type": "dimension",
+      "$value": {
+        "value": 60,
+        "unit": "px"
+      },
+      "$extensions": {
+        "speculara": {
+          "css": "--text-5xl--line-height"
+        }
+      }
+    }
+  },
+  "weight": {
+    "normal": {
+      "$type": "number",
+      "$value": 400,
+      "$extensions": {
+        "speculara": {
+          "css": "--font-weight-normal"
+        }
+      }
+    },
+    "medium": {
+      "$type": "number",
+      "$value": 500,
+      "$extensions": {
+        "speculara": {
+          "css": "--font-weight-medium"
+        }
+      }
+    },
+    "semibold": {
+      "$type": "number",
+      "$value": 600,
+      "$extensions": {
+        "speculara": {
+          "css": "--font-weight-semibold"
+        }
+      }
+    },
+    "bold": {
+      "$type": "number",
+      "$value": 700,
+      "$extensions": {
+        "speculara": {
+          "css": "--font-weight-bold"
+        }
+      }
+    }
+  },
+  "tracking": {
+    "tight": {
+      "$type": "string",
+      "$value": "-0.02em",
+      "$extensions": {
+        "speculara": {
+          "css": "--tracking-tight"
+        }
+      }
+    },
+    "normal": {
+      "$type": "string",
+      "$value": "0em",
+      "$extensions": {
+        "speculara": {
+          "css": "--tracking-normal"
+        }
+      }
+    },
+    "wide": {
+      "$type": "string",
+      "$value": "0.06em",
+      "$extensions": {
+        "speculara": {
+          "css": "--tracking-wide"
+        }
+      }
+    }
+  },
+  "radius": {
+    "xs": {
+      "$type": "dimension",
+      "$value": {
+        "value": 4,
+        "unit": "px"
+      },
+      "$extensions": {
+        "speculara": {
+          "css": "--radius-xs"
+        }
+      }
+    },
+    "sm": {
+      "$type": "dimension",
+      "$value": {
+        "value": 6,
+        "unit": "px"
+      },
+      "$extensions": {
+        "speculara": {
+          "css": "--radius-sm"
+        }
+      }
+    },
+    "md": {
+      "$type": "dimension",
+      "$value": {
+        "value": 8,
+        "unit": "px"
+      },
+      "$extensions": {
+        "speculara": {
+          "css": "--radius-md"
+        }
+      }
+    },
+    "lg": {
+      "$type": "dimension",
+      "$value": {
+        "value": 8,
+        "unit": "px"
+      },
+      "$extensions": {
+        "speculara": {
+          "css": "--radius-lg"
+        }
+      }
+    },
+    "xl": {
+      "$type": "dimension",
+      "$value": {
+        "value": 10,
+        "unit": "px"
+      },
+      "$extensions": {
+        "speculara": {
+          "css": "--radius-xl"
+        }
+      }
+    },
+    "2xl": {
+      "$type": "dimension",
+      "$value": {
+        "value": 16,
+        "unit": "px"
+      },
+      "$extensions": {
+        "speculara": {
+          "css": "--radius-2xl"
+        }
+      }
+    },
+    "3xl": {
+      "$type": "dimension",
+      "$value": {
+        "value": 16,
+        "unit": "px"
+      },
+      "$extensions": {
+        "speculara": {
+          "css": "--radius-3xl"
+        }
+      }
+    }
+  },
+  "border": {
+    "width": {
+      "$type": "dimension",
+      "$value": {
+        "value": 1,
+        "unit": "px"
+      },
+      "$extensions": {
+        "speculara": {
+          "css": "--border-width"
+        }
+      }
+    },
+    "focus": {
+      "$type": "dimension",
+      "$value": {
+        "value": 3,
+        "unit": "px"
+      },
+      "$extensions": {
+        "speculara": {
+          "css": "--border-focus-width"
+        }
+      }
+    }
+  },
+  "layout": {
+    "app": {
+      "$type": "dimension",
+      "$value": {
+        "value": 1120,
+        "unit": "px"
+      },
+      "$extensions": {
+        "speculara": {
+          "css": "--layout-app"
+        }
+      }
+    },
+    "reading": {
+      "$type": "dimension",
+      "$value": {
+        "value": 680,
+        "unit": "px"
+      },
+      "$extensions": {
+        "speculara": {
+          "css": "--layout-reading"
+        }
+      }
+    },
+    "gutter": {
+      "$type": "dimension",
+      "$value": {
+        "value": 20,
+        "unit": "px"
+      },
+      "$extensions": {
+        "speculara": {
+          "css": "--layout-gutter"
+        }
+      }
+    }
+  },
+  "z": {
+    "header": {
+      "$type": "number",
+      "$value": 20,
+      "$extensions": {
+        "speculara": {
+          "css": "--z-header"
+        }
+      }
+    },
+    "overlay": {
+      "$type": "number",
+      "$value": 30,
+      "$extensions": {
+        "speculara": {
+          "css": "--z-overlay"
+        }
+      }
+    },
+    "modal": {
+      "$type": "number",
+      "$value": 40,
+      "$extensions": {
+        "speculara": {
+          "css": "--z-modal"
+        }
+      }
+    },
+    "toast": {
+      "$type": "number",
+      "$value": 50,
+      "$extensions": {
+        "speculara": {
+          "css": "--z-toast"
+        }
+      }
+    },
+    "skip": {
+      "$type": "number",
+      "$value": 100,
+      "$extensions": {
+        "speculara": {
+          "css": "--z-skip"
+        }
+      }
+    }
+  },
+  "icon": {
+    "sm": {
+      "$type": "dimension",
+      "$value": {
+        "value": 16,
+        "unit": "px"
+      },
+      "$extensions": {
+        "speculara": {
+          "css": "--size-icon-sm"
+        }
+      }
+    },
+    "md": {
+      "$type": "dimension",
+      "$value": {
+        "value": 20,
+        "unit": "px"
+      },
+      "$extensions": {
+        "speculara": {
+          "css": "--size-icon-md"
+        }
+      }
+    },
+    "lg": {
+      "$type": "dimension",
+      "$value": {
+        "value": 24,
+        "unit": "px"
+      },
+      "$extensions": {
+        "speculara": {
+          "css": "--size-icon-lg"
+        }
+      }
+    },
+    "xl": {
+      "$type": "dimension",
+      "$value": {
+        "value": 32,
+        "unit": "px"
+      },
+      "$extensions": {
+        "speculara": {
+          "css": "--size-icon-xl"
+        }
+      }
+    },
+    "stroke": {
+      "$type": "number",
+      "$value": 1.75,
+      "$extensions": {
+        "speculara": {
+          "css": "--icon-stroke"
         }
       }
     }
