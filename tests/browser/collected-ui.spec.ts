@@ -86,20 +86,41 @@ test("metric tiles: the same size for numbers and Not Supplied, and long values 
   await expect.poll(() => fit.locator(".fit__in").evaluate((el) => getComputedStyle(el).animationName)).toBe("fit-slide");
 });
 
-test("the module rail appears once the questions are behind you and selects a module", async ({ page }) => {
+test("module rail: only modules with data, follows the card on screen, droplet moves, unused question cards are grey", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 800 });
-  await collected(page);
-  await page.getByRole("button", { name: "Use this dataset" }).click();
-  await expect(page.getByRole("navigation", { name: "Modules" })).toHaveCount(0); // questions still in view or above
-  await page.getByRole("button", { name: /What do you want to get sentiment of\?/ }).click();
-  await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
+  await page.goto("/");
+  await page.getByRole("button", { name: "Try synthetic demo data" }).click();
+  await expect(page.getByRole("region", { name: "Dataset summary" })).toContainText("42 rows", { timeout: 30000 });
+  // the synthetic file has no comments: Sentiment cannot be answered, so its question card is grey
+  const sentimentCard = page.getByRole("button", { name: /What do you want to get sentiment of\?/ });
+  await expect(sentimentCard).toHaveClass(/module-unused/);
+  await expect(page.getByRole("button", { name: /What do you want to get charts of\?/ })).not.toHaveClass(/module-unused/);
+  // no module card on screen yet, so no rail
+  await expect(page.getByRole("navigation", { name: "Modules" })).toHaveCount(0);
+  await page.getByRole("button", { name: /What do you want to get charts of\?/ }).click();
+  await page.locator('[data-module="charts"]').scrollIntoViewIfNeeded();
+  await page.evaluate(() => document.querySelector('[data-module="charts"]')!.scrollIntoView({ block: "center" }));
   const rail = page.getByRole("navigation", { name: "Modules" });
   await expect(rail).toBeVisible();
-  await expect(rail.getByRole("button")).toHaveCount(6);
-  await expect(rail.getByRole("button", { name: "Go to Sentiment" })).toHaveAttribute("aria-pressed", "true");
-  await rail.getByRole("button", { name: "Go to Demand" }).click();
-  await expect(rail.getByRole("button", { name: "Go to Demand" })).toHaveAttribute("aria-pressed", "true");
-  await expect(page.getByRole("region", { name: "Demand results" })).toBeVisible();
+  // only the five modules that have data
+  await expect(rail.getByRole("button")).toHaveCount(5);
+  await expect(rail.getByRole("button", { name: "Go to Sentiment" })).toHaveCount(0);
+  await expect(rail.getByRole("button", { name: "Go to Charts" })).toHaveAttribute("aria-pressed", "true");
+  const drop = rail.locator(".module-rail__drop");
+  await expect(drop).toHaveAttribute("data-on", "true");
+  const y1 = await drop.evaluate((el) => new DOMMatrix(getComputedStyle(el).transform).m42);
+  // scroll to the second card: the highlight and the droplet move to it
+  const other = await page.evaluate(() => [...document.querySelectorAll("[data-module]")].map((e) => (e as HTMLElement).dataset.module));
+  expect(other.length).toBe(2);
+  await page.evaluate((k) => document.querySelector(`[data-module="${k}"]`)!.scrollIntoView({ block: "center" }), other[1]);
+  await expect(rail.locator(".module-rail__btn.is-active")).toHaveCount(1);
+  await expect(rail.locator(".module-rail__btn.is-active")).not.toHaveAttribute("title", "Charts");
+  await expect.poll(() => drop.evaluate((el) => new DOMMatrix(getComputedStyle(el).transform).m42)).not.toBe(y1);
+  // the droplet is plain orange
+  expect(await rail.locator(".module-rail__blob").evaluate((el) => getComputedStyle(el).backgroundImage)).toBe("none");
+  // and the rail leaves when no module card is on screen
+  await page.evaluate(() => window.scrollTo(0, 0));
+  await expect(page.getByRole("navigation", { name: "Modules" })).toHaveCount(0);
 });
 
 test("scrolling stays light: the water lens rests while the page moves and returns after", async ({ page }) => {

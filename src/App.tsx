@@ -1666,14 +1666,34 @@ export default function App() {
   const [source, setSource] = useState<{ label: string; demo: boolean } | null>(null);
   const [busy, setBusy] = useState(false);
   const [nudge, setNudge] = useState(false);
-  /* Once the question cards have scrolled out of view, the six modules stay reachable as icons at the side. */
-  const [railOn, setRailOn] = useState(false);
+  /* The rail follows the module card on screen: which one is crossing the middle of the window, or none. */
+  const [inView, setInView] = useState<Key | null>(null);
   useEffect(() => {
-    const el = document.getElementById("questions");
-    if (!el || !("IntersectionObserver" in window)) return;
-    const io = new IntersectionObserver(([entry]) => setRailOn(!entry.isIntersecting && entry.boundingClientRect.bottom < 0), { threshold: 0 });
-    io.observe(el);
-    return () => io.disconnect();
+    let raf = 0;
+    const find = () => {
+      raf = 0;
+      const mid = window.innerHeight * 0.45;
+      let hit: Key | null = null;
+      for (const el of document.querySelectorAll<HTMLElement>("[data-module]")) {
+        const r = el.getBoundingClientRect();
+        if (r.top <= mid && r.bottom >= mid) hit = el.dataset.module as Key;
+      }
+      setInView((prev) => (prev === hit ? prev : hit));
+    };
+    const onMove = () => {
+      if (!raf) raf = requestAnimationFrame(find);
+    };
+    find();
+    window.addEventListener("scroll", onMove, { passive: true });
+    window.addEventListener("resize", onMove);
+    const mo = new MutationObserver(onMove);
+    mo.observe(document.body, { childList: true, subtree: true });
+    return () => {
+      window.removeEventListener("scroll", onMove);
+      window.removeEventListener("resize", onMove);
+      mo.disconnect();
+      cancelAnimationFrame(raf);
+    };
   }, []);
   const [dragging, setDragging] = useState(false);
   const [updatedAt, setUpdatedAt] = useState<number | null>(null);
@@ -2076,7 +2096,7 @@ export default function App() {
                         50,
                       );
                     }}
-                    className={`ctl flex h-full min-h-[var(--size-target)] w-full flex-col items-start gap-3 rounded-2xl p-4 text-left disabled:opacity-80 ${picked === k ? "is-selected" : ""} ${locked ? "border-dashed !bg-transparent" : ""}`}
+                    className={`ctl flex h-full min-h-[var(--size-target)] w-full flex-col items-start gap-3 rounded-2xl p-4 text-left disabled:opacity-80 ${picked === k ? "is-selected" : ""} ${locked ? "border-dashed !bg-transparent" : ""} ${!locked && analysis && moduleInfo(k, analysis).status === "Needs more data" ? "module-unused" : ""}`}
                   >
                     <span className="grid h-10 w-10 place-items-center rounded-xl bg-ink/10 text-ink">
                       <Icon name={k} size="lg" />
@@ -2089,31 +2109,42 @@ export default function App() {
             </ul>
           </section>
 
-          {analysis && railOn && (
-            <nav aria-label="Modules" className="module-rail">
-              {ORDER.map((k) => (
-                <button
-                  key={k}
-                  type="button"
-                  disabled={locked}
-                  aria-pressed={picked === k}
-                  aria-label={`Go to ${META[k].tab}`}
-                  title={META[k].tab}
-                  onClick={() => {
-                    setPicked(k);
-                    setTab(null);
-                    setTimeout(() => document.getElementById("result")?.scrollIntoView({ behavior: "smooth" }), 50);
-                  }}
-                  className={`module-rail__btn ${picked === k ? "is-active" : ""}`}
-                >
-                  <Icon name={k} size="md" />
-                  <span className="module-rail__tip" aria-hidden="true">
-                    {META[k].tab}
-                  </span>
-                </button>
-              ))}
-            </nav>
-          )}
+          {analysis && inView && (() => {
+            const items = ORDER.filter((k) => moduleInfo(k, analysis).status !== "Needs more data");
+            const index = items.indexOf(inView);
+            if (!items.length) return null;
+            return (
+              <nav aria-label="Modules" className="module-rail" style={{ ["--n" as string]: items.length, ["--i" as string]: Math.max(0, index) }}>
+                <span className="module-rail__drop" data-on={index >= 0 || undefined} aria-hidden="true">
+                  <span key={inView} className="module-rail__blob" />
+                </span>
+                {items.map((k) => (
+                  <button
+                    key={k}
+                    type="button"
+                    aria-pressed={inView === k}
+                    aria-label={`Go to ${META[k].tab}`}
+                    title={META[k].tab}
+                    onClick={() => {
+                      const card = document.querySelector<HTMLElement>(`[data-module="${k}"]`);
+                      if (card) card.scrollIntoView({ behavior: "smooth", block: "start" });
+                      else {
+                        setPicked(k);
+                        setTab(null);
+                        setTimeout(() => document.getElementById("result")?.scrollIntoView({ behavior: "smooth" }), 50);
+                      }
+                    }}
+                    className={`module-rail__btn ${inView === k ? "is-active" : ""}`}
+                  >
+                    <Icon name={k} size="md" />
+                    <span className="module-rail__tip" aria-hidden="true">
+                      {META[k].tab}
+                    </span>
+                  </button>
+                ))}
+              </nav>
+            );
+          })()}
 
           {busy && !analysis && <AnalysisLoader />}
           {analysis && (
@@ -2224,7 +2255,7 @@ export default function App() {
             {Primary ? (
               <>
                 <h2 className="sr-only">{META[picked!].title}</h2>
-                <div className="result-arrive">
+                <div className="result-arrive" data-module={picked!}>
                   <Primary key={`primary-${revision}-${viewRevision}-${picked}`} />
                 </div>
                 <div className="mt-10">
@@ -2247,7 +2278,7 @@ export default function App() {
                       </button>
                     ))}
                   </div>
-                  <div className="result-arrive">
+                  <div className="result-arrive" data-module={active}>
                     <Secondary key={`secondary-${revision}-${viewRevision}-${active}`} />
                   </div>
                 </div>

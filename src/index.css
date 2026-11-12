@@ -595,8 +595,9 @@ html[data-at-end] .edge-blur--bottom { opacity: 0; }
 }
 @keyframes fit-slide { to { transform: translate3d(var(--shift), 0, 0); } }
 
-/* ---------- Module rail: the six modules as icons at the side while you scroll ---------- */
+/* ---------- Module rail: the modules that have data, as icons at the side, with an orange droplet that follows the card on screen ---------- */
 .module-rail {
+  --step: 50px; /* button 44px + 6px gap */
   position: fixed;
   z-index: 30;
   top: 50%;
@@ -613,19 +614,46 @@ html[data-at-end] .edge-blur--bottom { opacity: 0; }
   animation: rail-in 220ms var(--ease-standard, ease-out) both;
 }
 @keyframes rail-in { from { opacity: 0; transform: translate(10px, -50%); } }
+.module-rail__drop {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  width: 44px;
+  height: 44px;
+  pointer-events: none;
+  opacity: 0;
+  transform: translate3d(0, calc(var(--i, 0) * var(--step)), 0) scale(0.5);
+  transition: transform 640ms cubic-bezier(0.22, 1.35, 0.36, 1), opacity 200ms;
+}
+.module-rail__drop[data-on] { opacity: 1; transform: translate3d(0, calc(var(--i, 0) * var(--step)), 0) scale(1); }
+/* The droplet stretches along its travel and settles back, plain orange with no gradient. */
+.module-rail__blob {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 9999px;
+  background: var(--color-orange-fill);
+  animation: droplet 640ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+@keyframes droplet {
+  0% { transform: scale(1, 1); }
+  30% { transform: scale(0.78, 1.42); }
+  62% { transform: scale(1.1, 0.92); }
+  100% { transform: scale(1, 1); }
+}
 .module-rail__btn {
   position: relative;
+  z-index: 1;
   display: grid;
   place-items: center;
   width: 44px;
   height: 44px;
   border-radius: 9999px;
   color: var(--color-mute);
-  transition: background-color 160ms, color 160ms;
+  transition: color 200ms 120ms;
 }
-.module-rail__btn:hover:not(:disabled) { background: rgb(245 245 247 / 0.1); color: var(--color-snow); }
-.module-rail__btn.is-active { background: var(--color-orange-fill); color: #0a0a0a; }
-.module-rail__btn:disabled { opacity: 0.4; }
+.module-rail__btn:hover { color: var(--color-snow); }
+.module-rail__btn.is-active { color: #0a0a0a; }
 .module-rail__tip {
   position: absolute;
   right: calc(100% + 10px);
@@ -648,82 +676,17 @@ html[data-at-end] .edge-blur--bottom { opacity: 0; }
   .module-rail { top: 12px; right: 50%; transform: translateX(50%); flex-direction: row; animation-name: rail-in-top; }
   @keyframes rail-in-top { from { opacity: 0; transform: translate(50%, -10px); } }
   .module-rail__btn { width: 40px; height: 40px; }
+  .module-rail { --step: 46px; }
+  .module-rail__drop { width: 40px; height: 40px; transform: translate3d(calc(var(--i, 0) * var(--step)), 0, 0) scale(0.5); }
+  .module-rail__drop[data-on] { transform: translate3d(calc(var(--i, 0) * var(--step)), 0, 0) scale(1); }
   .module-rail__tip { display: none; }
 }
-
-/* ---------- 3D chat launcher (navy mascot) ---------- */
-.bot3d-launcher {
-  --tx: 0;
-  --ty: 0;
-  perspective: 260px;
-  background: transparent;
-  transition: transform 150ms var(--ease-out, ease-out);
-  filter: drop-shadow(0 10px 16px rgba(234, 88, 12, 0.45)) drop-shadow(0 0 1px rgba(255, 220, 160, 0.5));
-}
-.bot3d { overflow: visible; transform-style: preserve-3d; }
-.bot3d-body,
-.bot3d-dot,
-.bot3d-eyes,
-.bot3d-shadow { transform-box: fill-box; transform-origin: center; }
-.bot3d-body { transition: transform 220ms cubic-bezier(0.2, 0.8, 0.2, 1); }
-.bot3d-eyes { transition: transform 180ms ease-out; }
-.bot3d-shadow { transition: transform 220ms ease-out, opacity 220ms ease-out; }
-.bot3d-dot { transition: transform 260ms cubic-bezier(0.3, 1.5, 0.5, 1); }
-.bot3d-eye { transform-box: fill-box; transform-origin: center; }
-
-/* Alive when idle: the body breathes, the dot floats, the eyes drift and blink. */
-.bot3d-body { animation: bot3d-breathe 4.2s ease-in-out infinite; }
-.bot3d-dot { animation: bot3d-float 3.4s ease-in-out infinite; }
-.bot3d-eyes { animation: bot3d-wander 7s ease-in-out infinite; }
-.bot3d-eye { animation: bot3d-blink 4.6s ease-in-out infinite; }
-.bot3d-eye + .bot3d-eye { animation-delay: 0.04s; }
-
-/* Hovered: it turns to face you, sits up straight, and its eyes lock onto the cursor. */
-.bot3d-launcher[data-alert] .bot3d-body,
-.bot3d-launcher:focus-visible .bot3d-body {
-  transform: translateY(-2px) rotateY(calc(var(--tx) * 12deg)) rotateX(calc(var(--ty) * -10deg)) scale(1.06);
-  animation-duration: 2.6s;
-}
-.bot3d-launcher[data-alert] .bot3d-eyes,
-.bot3d-launcher:focus-visible .bot3d-eyes {
-  animation: none;
-  transition-duration: 90ms;
-  transform: translate(calc(var(--tx) * 7px), calc(var(--ty) * 5px)) scale(1.1);
-}
-.bot3d-launcher[data-alert] .bot3d-eye,
-.bot3d-launcher:focus-visible .bot3d-eye { animation-duration: 3.2s; }
-.bot3d-launcher[data-alert] .bot3d-dot,
-.bot3d-launcher:focus-visible .bot3d-dot {
-  transform: translate(calc(var(--tx) * -4px), -4px) scale(1.12);
-}
-.bot3d-launcher[data-alert] .bot3d-shadow { transform: scale(0.85); opacity: 0.22; }
-
-/* Alert: the small circle wags like a dog's tail, pivoting from where it meets the body. */
-.bot3d-dot { transform-box: view-box; transform-origin: 72px 32px; }
-.bot3d-launcher[data-alert] .bot3d-dot,
-.bot3d-launcher:focus-visible .bot3d-dot { animation: bot3d-wag 0.32s ease-in-out infinite; }
-@keyframes bot3d-wag {
-  0%, 100% { rotate: -24deg; }
-  50% { rotate: 24deg; }
+@media (prefers-reduced-motion: reduce) {
+  .module-rail__blob { animation: none; }
+  .module-rail__drop { transition: opacity 120ms; }
 }
 
-@keyframes bot3d-breathe {
-  0%, 100% { scale: 1 1; translate: 0 0; rotate: 0deg; }
-  50% { scale: 1.025 0.975; translate: 0 0.8px; rotate: 0.6deg; }
-}
-@keyframes bot3d-float {
-  0%, 100% { translate: 0 0; }
-  50% { translate: 0 -2.5px; }
-}
-@keyframes bot3d-wander {
-  0%, 12% { translate: 0 0; }
-  20%, 34% { translate: -3px 1px; }
-  42%, 58% { translate: 3px -1.5px; }
-  66%, 80% { translate: 1px 2px; }
-  90%, 100% { translate: 0 0; }
-}
-@keyframes bot3d-blink {
-  0%, 90%, 100% { scale: 1 1; }
-  93% { scale: 1 0.1; }
-  96% { scale: 1 1; }
-}
+/* Question cards the data cannot answer yet: kept (they explain what is missing) but greyed. */
+.module-unused { opacity: 0.55; border-style: dashed; background: transparent !important; }
+.module-unused:hover { opacity: 0.8; }
+.module-unused > span:first-child { filter: grayscale(1); background: rgb(161 161 166 / 0.14); color: var(--color-mute); }
