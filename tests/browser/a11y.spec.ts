@@ -19,6 +19,7 @@ test("home screen has no serious accessibility violations", async ({ page }) => 
 });
 
 test("every module result has no serious accessibility violations", async ({ page }) => {
+  test.setTimeout(90000); // six axe scans take about 20 seconds when the machine is quiet
   await page.goto("/");
   await page.getByRole("button", { name: "Try synthetic demo data" }).click();
   await expect(page.getByRole("region", { name: "Dataset summary" })).toContainText("42 rows", { timeout: 30000 });

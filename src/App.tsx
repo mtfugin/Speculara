@@ -24,8 +24,11 @@ import { Logo } from "./design-system/Logo";
 import { Icon } from "./design-system/Icon";
 import { Illustration } from "./design-system/illustrations";
 import { Splash } from "./design-system/Splash";
+import { ChatBotIcon } from "./components/ui/chat-bot-icon";
 import { AnalysisLoader } from "./design-system/AnalysisLoader";
-import { Card, Fact, H, KeyNumber, Numbers, Pills, Well } from "./design-system/ui";
+import { Card, Fact, H, Numbers, Pills, Well } from "./design-system/ui";
+import { ForecastHero, ModuleTitle, SentimentBar, SignalBar, WordChips } from "./components/module-visuals";
+import { CollectionFacts, DownloadButtons, Emphasis, MetricTile, PostGallery, PreviewRows, ProfileHeader } from "./components/collected";
 import { RollingNumber, isRollable } from "./design-system/RollingNumber";
 import ResponsiveHeroBanner from "./components/ui/responsive-hero-banner";
 import DashboardPreview from "./components/dashboard-preview";
@@ -40,7 +43,6 @@ import {
   Sparkles,
   ChevronLeft,
   ChevronRight,
-  Eye,
 } from "lucide-react";
 
 import { moduleInfo, updatedLabel, priorityLabel, type ModuleKey } from "./polish";
@@ -372,16 +374,16 @@ function Predict() {
   const f = analysis.predict;
   return (
     <Card label="Predict results">
-      <H sub="A guide to what might happen next.">Predict</H>
+      <ModuleTitle module="predict" sub="A guide to what might happen next.">Predict</ModuleTitle>
       <ModuleBrief module="predict" />
       {f.available ? (
         <>
-          <Stat
-            l={`${calculationLabel(f.metric)} estimated for ${f.points[0].label}`}
-            v={number(f.points[0].value)}
+          <ForecastHero
+            metric={calculationLabel(f.metric)}
+            date={f.points[0].label}
+            value={number(f.points[0].value)}
           />
-          <p className="mt-3 text-sm text-slate-700">An estimate, not a guarantee.</p>
-          <p className="mt-2 text-sm text-slate-700">
+          <p className="mt-3 text-sm text-slate-700">
             Use this as a starting point, then check what happens.
           </p>
           <Well className="mt-4">
@@ -446,62 +448,47 @@ function Predict() {
 function DecisionOverview() {
   const a = useAnalysis();
   const brief = decisionBrief(a);
-  const references = (a.post_references ?? []).slice(0, 365).filter((r) => safePostUrl(r.post_url));
+  const stages = funnelStages(a);
+  const stage = (key: string) => stages.find((s) => s.key === key);
+  const counted = (key: "likes" | "comments") => ({
+    key,
+    label: key === "likes" ? "Likes" : "Comments",
+    value: a.totals[key] ?? null,
+    note: "Sum of known counts; missing counts are excluded.",
+  });
+  const tiles = [stage("views"), counted("likes"), counted("comments"), stage("saves"), stage("questions"), stage("sales")].filter(Boolean) as {
+    key: string;
+    label: string;
+    value: number | null;
+    note: string;
+  }[];
   return (
     <div className="mb-8 space-y-6">
       <Card label="Decision brief">
         <H sub="Start with the evidence, then choose one small test.">Your decision brief</H>
         <p className="text-xs font-semibold uppercase tracking-wide text-slate-600">What changed</p>
         <p className="mt-1 break-words font-sans text-2xl font-medium leading-snug tracking-tight text-ink sm:text-3xl">
-          {brief.changed}
+          <Emphasis text={brief.changed} />
         </p>
         <dl className="mt-6 grid gap-x-8 gap-y-5 border-t border-border-default pt-5 sm:grid-cols-3">
-          <Fact label="Why it matters">{brief.matters}</Fact>
-          <Fact label="Try next">{brief.try_next}</Fact>
+          <Fact label="Why it matters">
+            <Emphasis text={brief.matters} />
+          </Fact>
+          <Fact label="Try next">
+            <Emphasis text={brief.try_next} />
+          </Fact>
           <Fact label="How to measure">{brief.measure}</Fact>
         </dl>
       </Card>
       <Card label="Independent counts">
-        <H sub="Attention, interest, questions and purchases recorded in this file.">
-          Independent counts
-        </H>
-        <dl className="grid gap-x-8 gap-y-5 sm:grid-cols-2 lg:grid-cols-4">
-          {funnelStages(a).map((stage) => (
-            <KeyNumber
-              key={stage.key}
-              label={stage.label}
-              value={stage.value == null ? "Not supplied" : stage.value.toLocaleString()}
-              muted={stage.value == null}
-              note={stage.note}
-            />
+        <H sub="Attention, interest, questions and purchases recorded in this file.">Independent counts</H>
+        <dl className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {tiles.map((t) => (
+            <MetricTile key={t.key} id={t.key} label={t.label} value={t.value} note={t.note} />
           ))}
         </dl>
         <p className="mt-5 text-sm text-slate-600">{a.funnel?.note ?? FUNNEL_NOTE}</p>
-        {references.length > 0 && (
-          <details className="mt-4 text-sm">
-            <summary className="min-h-[var(--size-target)] content-center rounded-lg py-2 font-semibold text-ink">
-              Post references
-            </summary>
-            <p className="text-slate-700">
-              Supplied links are references, not verified platform connections.
-            </p>
-            <ul className="mt-2 space-y-2">
-              {references.map((r, index) => (
-                <li key={index}>
-                  <a
-                    href={safePostUrl(r.post_url)!}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex min-h-11 items-center break-all rounded-lg py-2 text-ink underline"
-                  >
-                    {r.post_id ? `Post ${r.post_id}` : `Supplied post link ${index + 1}`} (opens in
-                    new tab)
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </details>
-        )}
+        <PostGallery analysis={a} safeUrl={safePostUrl} />
       </Card>
     </div>
   );
@@ -550,7 +537,7 @@ function Recommend() {
   const a = useAnalysis();
   return (
     <Card label="Recommendations results">
-      <H sub="Small steps you can test, based on your data.">Your next decisions</H>
+      <ModuleTitle module="recommend" sub="Small steps you can test, based on your data.">Your next decisions</ModuleTitle>
       <ModuleBrief module="recommend" />
       <p className="mb-3 text-sm text-slate-600">Suggested order to try, not predicted impact.</p>
       <ol className="space-y-4">
@@ -663,7 +650,7 @@ function Charts() {
   const shown = rows.slice(page * pageSize, (page + 1) * pageSize);
   return (
     <Card label="Charts results">
-      <H sub="See how your numbers compare.">Charts</H>
+      <ModuleTitle module="charts" sub="See how your numbers compare.">Charts</ModuleTitle>
       <ModuleBrief module="charts" />
       {!a.metrics.length ? (
         <p className="text-sm text-slate-700">No chart is available yet.</p>
@@ -872,7 +859,7 @@ function Correlation() {
   };
   return (
     <Card label="Correlation results">
-      <H sub="See which numbers tend to change together.">Connections in your data</H>
+      <ModuleTitle module="correlation" sub="See which numbers tend to change together.">Connections in your data</ModuleTitle>
       <ModuleBrief module="correlation" />
       <Pills
         items={["All connections", "Strong connections", "Opposite movement"]}
@@ -908,25 +895,34 @@ function Correlation() {
   );
 }
 function Sentiment() {
-  const s = useAnalysis().sentiment;
+  const analysis = useAnalysis();
+  const s = analysis.sentiment;
+  const posts = analysis.provenance?.posts;
   return (
     <Card label="Sentiment results">
-      <H sub="Based on a simple word check">How comments sound</H>
+      <ModuleTitle module="sentiment" sub="Based on a simple word check">
+        How comments sound
+      </ModuleTitle>
       <ModuleBrief module="sentiment" />
       {s.available ? (
         <>
-          <div className="grid grid-cols-3 gap-3">
-            {Object.entries(s.counts!).map(([k, v]) => (
-              <Stat
-                key={k}
-                l={`${calculationLabel(k)} comments`}
-                v={`${((v / s.n!) * 100).toFixed(1)}%`}
-                c={k === "negative" ? WINE : INK}
-              />
-            ))}
+          <p className="mb-4 text-sm text-slate-700">
+            Reads <strong className="font-bold text-ink underline decoration-orange/60 decoration-2 underline-offset-4">{s.n!.toLocaleString()} comments</strong>
+            {posts ? (
+              <>
+                {" "}
+                from <strong className="font-bold text-ink">{posts} posts</strong>
+              </>
+            ) : null}
+            , not just one.
+          </p>
+          <SentimentBar counts={s.counts!} total={s.n!} />
+          <p className="mt-5 text-sm font-semibold text-ink">Words people used most</p>
+          <div className="mt-2">
+            <WordChips words={s.keywords!} />
           </div>
-          <p className="mt-3 text-sm text-slate-700">
-            Read the comments before deciding how to respond.
+          <p className="mt-5 text-sm text-slate-700">
+            <Emphasis text="Read the comments before deciding how to respond. This is a simple word check, not a trained model, and it can miss sarcasm and context." />
           </p>
           <Numbers>
             <p>
@@ -937,15 +933,6 @@ function Sentiment() {
               {Object.entries(s.counts!).map(([k, v]) => (
                 <li key={k}>
                   {calculationLabel(k)}: {number(v)}
-                </li>
-              ))}
-            </ul>
-            <H>Frequent words</H>
-            <ul>
-              {s.keywords!.map((w) => (
-                <li className="flex justify-between gap-3" key={w.word}>
-                  <span>{w.word}</span>
-                  <b>{w.count}</b>
                 </li>
               ))}
             </ul>
@@ -964,30 +951,37 @@ function Demand() {
     d = a.demand;
   const salesPeriod = a.periods.sales;
   const savesPeriod = a.periods.saves;
+  const rows = d.text_rows ?? 0;
   return (
     <Card label="Demand results">
-      <H sub="Look at purchases and signs of interest.">Demand</H>
+      <ModuleTitle module="demand" sub="Look at purchases and signs of interest.">
+        Demand
+      </ModuleTitle>
       <ModuleBrief module="demand" />
       {d.available ? (
         <>
-          <div className="mt-3 grid grid-cols-2 gap-3">
-            {d.sales != null && (
-              <Stat
-                l={salesPeriod?.available ? "Sales in latest week" : "Sales in your data"}
-                v={number(salesPeriod?.available ? salesPeriod.current_total! : d.sales)}
-              />
-            )}
-            {d.saves != null && (
-              <Stat
-                l={savesPeriod?.available ? "Saves in latest week" : "Saves in your data"}
-                v={number(savesPeriod?.available ? savesPeriod.current_total! : d.saves)}
-              />
-            )}
-            {d.inquiries != null && <Stat l="Entries with questions" v={d.inquiries} />}
-            {d.requests != null && <Stat l="Entries asking for more" v={d.requests} />}
-          </div>
-          <p className="mt-3 text-sm text-slate-600">
-            Interest doesn’t always turn into a purchase.
+          {(d.inquiries != null || d.requests != null) && rows > 0 && (
+            <ul className="grid gap-3 md:grid-cols-2">
+              {d.inquiries != null && (
+                <SignalBar icon="questions" label="Entries with questions" value={d.inquiries} of={rows} note="People asking how, where or how much." />
+              )}
+              {d.requests != null && (
+                <SignalBar icon="demand" label="Entries asking for more" value={d.requests} of={rows} note="Requests to restock or make more." />
+              )}
+            </ul>
+          )}
+          {(d.sales != null || d.saves != null) && (
+            <dl className="mt-3 grid grid-cols-2 gap-3">
+              {d.sales != null && (
+                <MetricTile id="sales" label={salesPeriod?.available ? "Sales in latest week" : "Sales in your data"} value={salesPeriod?.available ? salesPeriod.current_total! : d.sales} />
+              )}
+              {d.saves != null && (
+                <MetricTile id="saves" label={savesPeriod?.available ? "Saves in latest week" : "Saves in your data"} value={savesPeriod?.available ? savesPeriod.current_total! : d.saves} />
+              )}
+            </dl>
+          )}
+          <p className="mt-4 text-sm text-slate-700">
+            <Emphasis text="Interest doesn’t always turn into a purchase. Questions and requests can overlap and are not unique buyers." />
           </p>
           <p className="mt-2 text-sm text-slate-700">
             {salesPeriod?.available || savesPeriod?.available
@@ -1303,6 +1297,33 @@ function Chat() {
   const messages = useRef<HTMLDivElement>(null);
   const input = useRef<HTMLInputElement>(null);
   const launcher = useRef<HTMLButtonElement>(null);
+  /* The mascot notices the pointer within 300px: it turns alert, its eyes follow, its tail wags. */
+  useEffect(() => {
+    const el = launcher.current;
+    if (!el) return;
+    const track = (e: PointerEvent) => {
+      if (e.pointerType === "touch") return;
+      const r = el.getBoundingClientRect();
+      const dx = e.clientX - (r.left + r.width / 2);
+      const dy = e.clientY - (r.top + r.height / 2);
+      if (Math.hypot(dx, dy) > 300) {
+        el.removeAttribute("data-alert");
+        el.style.setProperty("--tx", "0");
+        el.style.setProperty("--ty", "0");
+        return;
+      }
+      el.setAttribute("data-alert", "");
+      el.style.setProperty("--tx", String(Math.max(-1, Math.min(1, dx / 110))));
+      el.style.setProperty("--ty", String(Math.max(-1, Math.min(1, dy / 110))));
+    };
+    const leave = () => el.removeAttribute("data-alert");
+    window.addEventListener("pointermove", track);
+    document.documentElement.addEventListener("pointerleave", leave);
+    return () => {
+      window.removeEventListener("pointermove", track);
+      document.documentElement.removeEventListener("pointerleave", leave);
+    };
+  }, []);
   const [closing, setClosing] = useState(false);
   const closeTimer = useRef<number>(0);
   /* Exit is shorter than entry (160ms vs 220ms) and heads back toward the launcher. */
@@ -1387,7 +1408,7 @@ function Chat() {
       const timeout = window.setTimeout(() => controller.abort(), 130000);
       try {
         /* Only a summary goes out: never the rows, post links or comments. With no data loaded it is empty. */
-        const summary = analysis ? (({ preview: _p, post_references: _r, ...rest }) => rest)(analysis) : {};
+        const summary = analysis ? (({ preview: _p, post_references: _r, data_table: _t, profile: _pr, ...rest }) => rest)(analysis) : {};
         const response = await fetch(`${apiBase}/api/ai/chat`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -1445,7 +1466,7 @@ function Chat() {
         <div
           role="dialog"
           aria-label="Ask about your analysis"
-          className={`ios-sheet flex h-[min(34rem,calc(100dvh-5.5rem))] w-[calc(100vw-1.5rem)] flex-col overflow-hidden sm:w-[24rem] ${closing ? "popover-out" : "popover-in"}`}
+          className={`ios-sheet flex h-[min(34rem,calc(100dvh-6.5rem))] w-[calc(100vw-1.5rem)] flex-col overflow-hidden sm:w-[24rem] ${closing ? "popover-out" : "popover-in"}`}
         >
           <div className="relative flex shrink-0 items-center gap-3 px-4 pb-3 pt-4 pr-16 [@media(max-height:560px)]:pb-1 [@media(max-height:560px)]:pt-2">
             <span className="relative grid h-12 w-12 [@media(max-height:560px)]:h-9 [@media(max-height:560px)]:w-9 shrink-0 place-items-center rounded-full bg-gradient-to-b from-zinc-600/80 to-zinc-800 ring-1 ring-white/20 shadow-[0_4px_14px_rgba(0,0,0,0.35)]">
@@ -1595,10 +1616,9 @@ function Chat() {
         }}
         aria-label={open ? "Close chat" : "Open chat"}
         aria-expanded={open}
-        className="grid h-14 w-14 place-items-center rounded-full bg-gradient-to-b from-[#ffb340] to-orange-fill text-neutral-950 shadow-[0_10px_34px_rgba(255,159,10,0.45)] ring-1 ring-white/25 transition-transform duration-150 hover:scale-105 hover:brightness-110 active:scale-95"
+        className="bot3d-launcher grid h-16 w-16 place-items-center rounded-full active:scale-95"
       >
-        {/* The eye is symmetric, so it sits exactly in the centre of the circle. */}
-        <Eye className="block h-7 w-7" strokeWidth={2.2} aria-hidden="true" />
+        <ChatBotIcon className="block h-14 w-14" />
       </button>
     </div>
   );
@@ -1646,6 +1666,15 @@ export default function App() {
   const [source, setSource] = useState<{ label: string; demo: boolean } | null>(null);
   const [busy, setBusy] = useState(false);
   const [nudge, setNudge] = useState(false);
+  /* Once the question cards have scrolled out of view, the six modules stay reachable as icons at the side. */
+  const [railOn, setRailOn] = useState(false);
+  useEffect(() => {
+    const el = document.getElementById("questions");
+    if (!el || !("IntersectionObserver" in window)) return;
+    const io = new IntersectionObserver(([entry]) => setRailOn(!entry.isIntersecting && entry.boundingClientRect.bottom < 0), { threshold: 0 });
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
   const [dragging, setDragging] = useState(false);
   const [updatedAt, setUpdatedAt] = useState<number | null>(null);
   const [viewRevision, setViewRevision] = useState(0);
@@ -1771,7 +1800,7 @@ export default function App() {
       else
         download(
           "speculara-analysis.json",
-          JSON.stringify({ source, ...analysis }, null, 2),
+          JSON.stringify({ source, ...(({ data_table: _t, profile: pr, ...rest }) => ({ ...rest, profile: pr ? { ...pr, avatar: undefined } : undefined }))(analysis) }, null, 2),
           "application/json",
         );
       setNotice(kind === "report" ? "Report download started." : "Results download started.");
@@ -1938,118 +1967,79 @@ export default function App() {
           {candidate && (
             <section
               aria-labelledby="upload-preview-title"
-              className="surface focus-in mb-10 min-w-0 rounded-2xl p-5 sm:p-6"
+              className="surface focus-in mb-10 min-w-0 rounded-3xl p-6 sm:p-8"
             >
-              <div className="grid gap-8 lg:grid-cols-[1.3fr_1fr]">
-                <div className="min-w-0">
-                  <h2
-                    id="upload-preview-title"
-                    tabIndex={-1}
-                    className="font-display text-xl font-bold text-ink"
-                  >
-                    Upload preview
-                  </h2>
-                  <p className="mt-2 break-all font-semibold text-ink">{candidate.label}</p>
-                  {candidate.data.source_kind === "synthetic" && (
-                    <p className="mt-2 text-sm font-semibold text-wine">
-                      Synthetic demo: fictional records
-                    </p>
-                  )}
-                  <p className="mt-2 text-sm text-slate-700">
-                    {candidate.data.rows.toLocaleString()} rows. Review this file before using it.
-                    Your current results stay unchanged until you confirm.
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <h2 id="upload-preview-title" tabIndex={-1} className="font-display text-2xl font-bold text-ink">
+                  Upload preview
+                </h2>
+                <p className="chip px-3 py-1.5 text-sm">
+                  <strong className="font-semibold text-ink">{candidate.data.rows.toLocaleString()}</strong> rows to review
+                </p>
+              </div>
+              {candidate.data.source_kind === "synthetic" && (
+                <p className="mt-2 text-sm font-semibold text-wine">Synthetic demo: fictional records</p>
+              )}
+              <div className="mt-6 grid gap-10 lg:grid-cols-[1.25fr_1fr]">
+                <div className="min-w-0 space-y-6">
+                  <ProfileHeader analysis={candidate.data} label={candidate.label} />
+                  <CollectionFacts analysis={candidate.data} />
+                  <div>
+                    <h3 className="mb-3 font-display text-lg font-bold text-ink">
+                      {candidate.data.data_table ? "Latest posts" : "First rows"}
+                    </h3>
+                    <PreviewRows analysis={candidate.data} />
+                  </div>
+                  <p className="text-sm text-slate-600">
+                    Detected columns: {(candidate.data.preview?.columns ?? candidate.data.columns).join(", ")}. Your current
+                    results stay unchanged until you confirm.
                   </p>
-                  <p className="mt-3 break-words text-sm text-slate-700">
-                    Detected columns:{" "}
-                    {(candidate.data.preview?.columns ?? candidate.data.columns).join(", ")}
-                  </p>
-                  {candidate.data.preview?.rows.length ? (
-                    <div
-                      className="mt-3 max-w-full overflow-x-auto rounded-lg"
-                      role="region"
-                      aria-label="Preview rows"
-                      tabIndex={0}
-                    >
-                      <table
-                        className="w-full table-fixed text-left text-xs"
-                        style={{
-                          minWidth: `${Math.max(280, candidate.data.preview.columns.length * 120)}px`,
-                        }}
-                      >
-                        <caption className="pb-2 text-left text-slate-700">
-                          First {Math.min(5, candidate.data.preview.rows.length)} rows of{" "}
-                          {candidate.data.preview.total_rows.toLocaleString()}
-                        </caption>
-                        <thead>
-                          <tr>
-                            {candidate.data.preview.columns.map((column) => (
-                              <th key={column} scope="col" className="p-2 [overflow-wrap:anywhere]">
-                                {column}
-                              </th>
-                            ))}
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {candidate.data.preview.rows.slice(0, 5).map((row, index) => (
-                            <tr key={index}>
-                              {candidate.data.preview!.columns.map((column) => (
-                                <td
-                                  key={column}
-                                  className="border-t border-ink/10 p-2 align-top [overflow-wrap:anywhere]"
-                                >
-                                  {row[column] == null ? "—" : String(row[column])}
-                                </td>
-                              ))}
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-                  ) : (
-                    <p className="mt-2 text-sm text-slate-700">
-                      Row preview is unavailable for this response.
-                    </p>
-                  )}
                 </div>
                 <div className="min-w-0">
-                  <h3 className="font-display text-2xl text-ink">What this file supports</h3>
-                  <ul className="mt-3 space-y-3">
+                  <h3 className="font-display text-lg font-bold text-ink">What this file supports</h3>
+                  <ul className="mt-3 grid gap-2.5">
                     {ORDER.map((key) => {
                       const info = moduleInfo(key, candidate.data);
                       return (
-                        <li key={key} className="min-w-0 text-sm">
-                          <div className="flex flex-wrap items-center gap-2">
-                            <span className="font-semibold text-ink">{META[key].tab}</span>
-                            <StatusBadge module={key} analysis={candidate.data} />
+                        <li key={key} className="flex min-w-0 items-start gap-3 rounded-2xl bg-ink/[0.06] p-3">
+                          <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-ink/10 text-ink">
+                            <Icon name={key} size="md" />
+                          </span>
+                          <div className="min-w-0 text-sm">
+                            <div className="flex flex-wrap items-center gap-2">
+                              <span className="font-semibold text-ink">{META[key].tab}</span>
+                              <StatusBadge module={key} analysis={candidate.data} />
+                            </div>
+                            <p className="mt-1 break-words text-slate-700">
+                              <Emphasis text={info.needed ?? info.finding} />
+                            </p>
                           </div>
-                          <p className="mt-1 break-words text-slate-700">
-                            {info.needed ?? info.finding}
-                          </p>
                         </li>
                       );
                     })}
                   </ul>
-                  <div className="mt-4 flex flex-wrap gap-3">
-                    <button
-                      type="button"
-                      disabled={busy}
-                      onClick={() => commitDataset(candidate.data, candidate.label)}
-                      className="btn-primary min-h-11 rounded-xl px-4 text-sm"
-                    >
-                      Use this dataset
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setCandidate(null);
-                        document.getElementById("upload")?.focus();
-                      }}
-                      className="ctl min-h-11 rounded-xl px-4 text-sm text-ink"
-                    >
-                      Cancel
-                    </button>
-                  </div>
                 </div>
+              </div>
+              <div className="mt-8 flex flex-wrap items-center gap-3 border-t border-border-default pt-6">
+                <button
+                  type="button"
+                  disabled={busy}
+                  onClick={() => commitDataset(candidate.data, candidate.label)}
+                  className="btn-primary min-h-11 rounded-xl px-5 text-sm"
+                >
+                  Use this dataset
+                </button>
+                <DownloadButtons analysis={candidate.data} label={candidate.label} />
+                <button
+                  type="button"
+                  onClick={() => {
+                    setCandidate(null);
+                    document.getElementById("upload")?.focus();
+                  }}
+                  className="ctl min-h-11 rounded-xl px-4 text-sm text-ink sm:ml-auto"
+                >
+                  Cancel
+                </button>
               </div>
             </section>
           )}
@@ -2059,10 +2049,18 @@ export default function App() {
               What do you want to know?
             </h2>
             <p className="mt-1 text-slate-600">Pick a question. Each one turns your numbers into a plain answer.</p>
-            {nudge && (
-              <p role="status" className="chip mt-4 inline-block px-3 py-2 text-sm">
-                Analyzed {source?.label}. Choose any module to explore.
-              </p>
+            {nudge && analysis && (analysis.profile || analysis.provenance) ? (
+              <div role="status" className="surface mt-5 rounded-2xl p-4">
+                <ProfileHeader analysis={analysis} label={source?.label ?? ""} />
+                <p className="mt-3 text-sm font-semibold text-ink">Choose any module to explore.</p>
+                <DownloadButtons analysis={analysis} label={source?.label ?? "data"} className="mt-3" />
+              </div>
+            ) : (
+              nudge && (
+                <p role="status" className="chip mt-4 inline-block px-3 py-2 text-sm">
+                  Analyzed {source?.label}. Choose any module to explore.
+                </p>
+              )
             )}
             <ul aria-label="Questions" className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {ORDER.map((k, i) => (
@@ -2091,6 +2089,32 @@ export default function App() {
             </ul>
           </section>
 
+          {analysis && railOn && (
+            <nav aria-label="Modules" className="module-rail">
+              {ORDER.map((k) => (
+                <button
+                  key={k}
+                  type="button"
+                  disabled={locked}
+                  aria-pressed={picked === k}
+                  aria-label={`Go to ${META[k].tab}`}
+                  title={META[k].tab}
+                  onClick={() => {
+                    setPicked(k);
+                    setTab(null);
+                    setTimeout(() => document.getElementById("result")?.scrollIntoView({ behavior: "smooth" }), 50);
+                  }}
+                  className={`module-rail__btn ${picked === k ? "is-active" : ""}`}
+                >
+                  <Icon name={k} size="md" />
+                  <span className="module-rail__tip" aria-hidden="true">
+                    {META[k].tab}
+                  </span>
+                </button>
+              ))}
+            </nav>
+          )}
+
           {busy && !analysis && <AnalysisLoader />}
           {analysis && (
             <section
@@ -2103,7 +2127,7 @@ export default function App() {
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>
                   <p className="break-words font-semibold text-ink">
-                    {source?.demo ? "Synthetic demo: fictional records" : "Uploaded dataset"}:{" "}
+                    {source?.demo ? "Synthetic demo: fictional records" : analysis.provenance ? "Collected profile" : "Uploaded dataset"}:{" "}
                     {source?.label}
                   </p>
                   <p className="mt-1 text-sm text-slate-700">

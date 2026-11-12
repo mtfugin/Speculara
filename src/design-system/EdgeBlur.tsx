@@ -2,17 +2,17 @@
    The lens magnifies and ripples whatever slides under the edge (an SVG displacement map: strongest at the edge, fading to
    nothing inward, with a slow wobble of water on top). Browsers that cannot use SVG filters as a backdrop keep the blur only.
    As you scroll, text slides under these two bands and softens as it leaves or arrives, so you can see the effect
-   working on the content itself (instead of blurring titles). Five stacked layers give a smooth ramp from sharp to soft.
+   working on the content itself (instead of blurring titles). Two stacked layers give a smooth ramp from sharp to soft.
    The top band appears once you have scrolled; the bottom band steps aside when you reach the end of the page.
+   The water lens is the costly part, so it rests while the page is moving and comes back as soon as scrolling pauses
+   (html[data-scrolling]); the blur stays on the whole time.
    Decorative: hidden from assistive technology and never blocks the pointer. */
 import { useEffect } from "react";
 
+/* Two layers instead of five: each one is a full backdrop blur, and they are the main cost of scrolling. */
 const LAYERS = [
-  { blur: 0.6, reach: 100 },
-  { blur: 1.6, reach: 78 },
-  { blur: 3.2, reach: 58 },
-  { blur: 6, reach: 40 },
-  { blur: 10, reach: 24 },
+  { blur: 2, reach: 100 },
+  { blur: 7, reach: 46 },
 ];
 
 /* Displacement map for the magnifier: G channel pushes sampling inward, 255 at the edge easing to neutral 128 inside.
@@ -29,15 +29,13 @@ function lensMap(edge: "top" | "bottom") {
 }
 
 function WaterFilters() {
-  const calm = typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
   return (
     <svg aria-hidden="true" focusable="false" width="0" height="0" style={{ position: "absolute" }}>
       {(["top", "bottom"] as const).map((edge) => (
         <filter key={edge} id={`edge-water-${edge}`} x="0" y="0" width="100%" height="100%" colorInterpolationFilters="sRGB">
           <feImage href={lensMap(edge)} x="0" y="0" width="100%" height="100%" preserveAspectRatio="none" result="lens" />
-          <feTurbulence type="fractalNoise" baseFrequency="0.0022 0.011" numOctaves="1" seed={edge === "top" ? 4 : 9} result="noise">
-            {!calm && <animate attributeName="baseFrequency" dur="14s" repeatCount="indefinite" values="0.0022 0.011;0.0032 0.015;0.0022 0.011" />}
-          </feTurbulence>
+          {/* Still noise: an animated turbulence is re-drawn every frame, which made scrolling stutter. */}
+          <feTurbulence type="fractalNoise" baseFrequency="0.0026 0.013" numOctaves="1" seed={edge === "top" ? 4 : 9} result="noise" />
           <feColorMatrix in="noise" type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 0 0 0.5  0 0 0 0 1" result="wave" />
           <feComposite in="lens" in2="wave" operator="arithmetic" k1="0" k2="0.86" k3="0.14" k4="0" result="map" />
           <feDisplacementMap in="SourceGraphic" in2="map" scale="46" xChannelSelector="R" yChannelSelector="G" />
@@ -82,7 +80,11 @@ export default function EdgeBlur() {
       root.toggleAttribute("data-scrolled", y > 24);
       root.toggleAttribute("data-at-end", end > 0 && y >= end - 24);
     };
+    let idle = 0;
     const onScroll = () => {
+      root.setAttribute("data-scrolling", "");
+      window.clearTimeout(idle);
+      idle = window.setTimeout(() => root.removeAttribute("data-scrolling"), 160);
       if (!raf) raf = requestAnimationFrame(update);
     };
     update();
@@ -92,6 +94,8 @@ export default function EdgeBlur() {
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", onScroll);
       cancelAnimationFrame(raf);
+      window.clearTimeout(idle);
+      root.removeAttribute("data-scrolling");
       root.removeAttribute("data-scrolled");
       root.removeAttribute("data-at-end");
     };

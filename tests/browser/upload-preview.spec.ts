@@ -52,8 +52,9 @@ test("preview stages columns, five rows and six truthful statuses before confirm
   await expect(p.getByRole("heading", { name: "Upload preview" })).toBeFocused();
   await expect(p).toContainText("Synthetic demo: fictional records");
   await expect(p).toContainText("6 rows");
-  await expect(p.getByRole("columnheader")).toHaveText(["views", "comments", "text"]);
-  await expect(p.locator("tbody tr")).toHaveCount(5);
+  // rows are cards (no sideways scrolling): five cards, each labelled by column name
+  await expect(p.getByRole("list", { name: "First rows" }).getByRole("listitem")).toHaveCount(5);
+  await expect(p.getByRole("list", { name: "First rows" }).getByRole("listitem").first().locator("dt")).toHaveText(["views", "comments", "text"]);
   await expect(p.locator('[aria-label$="status: Needs more data"]')).toHaveCount(5);
   await expect(p.getByLabel("Charts status: Ready")).toBeVisible();
   await expect(p).toContainText("Add a text column with individual comments or reviews.");

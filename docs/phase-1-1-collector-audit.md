@@ -125,3 +125,16 @@ Known issues carried forward (not blockers for Stage 2 planning):
 6. Kept comments are capped at 8 per post while the page returns about 40. Revisit for friction mining in Stage 2.
 
 Decision on the `backend/app` suite: leave it out of the default check (it needs scikit-learn, statsmodels and supabase) and document the command in the README. Revisit if that API is kept.
+
+## After the exit gate: collected data screens (done)
+Feedback from a real run drove a screen pass. What changed:
+- **Upload preview** is a card with the profile picture, name, followers and a source line ("Collected from TikTok @handle, signed out, time"), a strip of posts, comments and missing counts, the latest posts as cards (thumbnail, date, category, views, likes, comments) instead of a wide table (no sideways scrolling), and a clear row of actions: Use this dataset, Download data (CSV), Download profile picture, Cancel.
+- **Data**: comment rows now carry the post's category; up to 40 comments are kept per post (it was 8), so sentiment and demand read far more of the conversation; video thumbnails and the profile card (name, picture, followers) come with the analysis; the picture is fetched once by the server from the platform's own picture hosts and is never stored.
+- **Counts** show Views, Likes, Comments, Saves, Questions and Sales as tiles with an icon, one fixed value size and the same position for label, value and note. "Not Supplied" is the same size as a number. A value wider than its tile is cut and slides sideways on hover or focus.
+- **Posts in this analysis** is a gallery of video thumbnails with views, opening each post in a new tab.
+- **Sticky module rail**: once the question cards scroll out of view, the six modules stay reachable as icons at the side.
+- **Unique cards**: each module has its own header colour and layout. Predict leads with a large estimate, Sentiment is one stacked bar plus sized word chips, Demand shows how much of the conversation is asking, Recommend keeps numbered steps.
+- **Emphasis**: numbers and the phrases a person must not miss (needs more data, does not, estimate, early finding) are bold and underlined.
+- **Scrolling**: the edge blur cost most of the scroll time. It now uses two blur layers, still noise instead of an animated one, and the water lens rests while the page is moving. Frame time while scrolling fell from about 122 ms to 50 ms in the same test machine.
+- Tests: 124 backend, 23 unit, 69 browser including new ones for the preview, downloads, tiles, the rail and scroll behaviour.
+- Answer to "is sentiment from only one video?": no. It reads every kept comment from every collected post (up to 40 per post).

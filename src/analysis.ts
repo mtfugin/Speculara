@@ -195,7 +195,21 @@ export type Analysis = {
     rows: Record<string, string | number | null>[];
     total_rows: number;
   };
-  post_references?: { post_id: string | null; post_url: string | null }[];
+  post_references?: { post_id: string | null; post_url: string | null; thumb_url?: string }[];
+  /** Collected profiles only: who it is, where the numbers came from, and the table behind them. */
+  profile?: { platform: string; handle: string; nickname: string; followers: number | null; avatar: string | null };
+  provenance?: {
+    source: string;
+    handle: string;
+    collector: string;
+    method: string;
+    collected_at: string | null;
+    posts: number;
+    metrics: Record<string, { observed: number; blank: number }>;
+    comments: { read: number; kept: number };
+    inferred: boolean;
+  };
+  data_table?: { columns: string[]; rows: Record<string, string | number | null>[]; total_rows: number };
   schema_version: 2;
 
   ratios: Record<string, Ratio>;

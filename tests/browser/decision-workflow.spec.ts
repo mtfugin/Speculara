@@ -48,8 +48,9 @@ test("decision overview, safe references and measured experiments work on mobile
   await expect(brief).toContainText("Observed zero sales");
   const counts = page.getByRole("region", { name: "Independent counts", exact: true });
   await expect(counts).toContainText("not a tracked customer journey");
-  await expect(counts).toContainText("Not supplied");
-  await counts.getByText("Post references", { exact: true }).click();
+  await expect(counts).toContainText("Not Supplied");
+  // post references are always shown, as a gallery of linked posts
+  await expect(counts.getByRole("region", { name: "Post references" })).toBeVisible();
   await expect(counts.getByRole("link")).toHaveCount(1);
   await expect(counts.getByRole("link")).toHaveAttribute("rel", "noopener noreferrer");
   const recommendations = page.getByRole("region", { name: "Recommendations results" });

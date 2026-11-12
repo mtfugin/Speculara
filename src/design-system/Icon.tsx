@@ -4,7 +4,7 @@
 import {
   ArrowDownRight, ArrowRight, ArrowUpRight, Menu, Play, Check, ChevronRight, CircleAlert, CircleCheck, Copy, Download, FileSpreadsheet,
   Info, Lightbulb, Link2, Lock, LogIn, MessageCircle, MessageSquareText, Minus, RefreshCw, Send, ShoppingBag,
-  TrendingUp, TriangleAlert, Upload, X, ChartColumn,
+  TrendingUp, TriangleAlert, Upload, X, ChartColumn, Eye, Bookmark, CircleHelp, Heart, Film, UserRound,
 } from "lucide-react";
 import type { ComponentType, SVGProps } from "react";
 
@@ -48,6 +48,14 @@ export const ICONS = {
   arrow: ArrowRight,
   play: Play,
   menu: Menu,
+  views: Eye,
+  saves: Bookmark,
+  questions: CircleHelp,
+  sales: ShoppingBag,
+  likes: Heart,
+  comments: MessageCircle,
+  posts: Film,
+  user: UserRound,
 } as const satisfies Record<string, Glyph>;
 
 export type IconName = keyof typeof ICONS;

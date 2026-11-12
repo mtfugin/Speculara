@@ -269,9 +269,11 @@
   height: 112px;
   z-index: 25; /* above the page, below the chat, toasts and the loading screen */
   pointer-events: none;
+  contain: layout paint style;
   transition: opacity 240ms var(--ease-standard);
 }
 .edge-blur i { position: absolute; inset: 0; }
+html[data-scrolling] .edge-blur i[data-water] { visibility: hidden; }
 .edge-blur--top { top: 0; opacity: 0; background: linear-gradient(to bottom, rgb(9 9 11 / 0.5), transparent); }
 .edge-blur--bottom { bottom: 0; opacity: 1; background: linear-gradient(to top, rgb(9 9 11 / 0.5), transparent); }
 html[data-scrolled] .edge-blur--top { opacity: 1; }
@@ -551,7 +553,7 @@ html[data-at-end] .edge-blur--bottom { opacity: 0; }
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  min-height: 36px;
+  min-height: 44px;
   padding: 0 12px;
   border-radius: 9999px;
   color: var(--color-subtle);
@@ -565,4 +567,163 @@ html[data-at-end] .edge-blur--bottom { opacity: 0; }
   color: var(--color-ink);
   border-color: rgb(255 255 255 / 0.16);
   background: rgb(255 255 255 / 0.05);
+}
+
+/* ---------- Metric tiles and text that fits ---------- */
+.metric-tile {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  border-radius: 1rem;
+  background: rgb(245 245 247 / 0.05);
+  padding: 1rem 1.1rem;
+  box-shadow: inset 0 0 0 1px var(--color-line);
+}
+.fit {
+  display: block;
+  max-width: 100%;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.fit__in { display: inline-block; white-space: nowrap; will-change: transform; }
+.fit[data-clipped]:hover,
+.fit[data-clipped]:focus-visible { text-overflow: clip; }
+.fit[data-clipped]:hover .fit__in,
+.fit[data-clipped]:focus-visible .fit__in {
+  animation: fit-slide var(--shift-ms, 3s) linear 120ms infinite alternate;
+}
+@keyframes fit-slide { to { transform: translate3d(var(--shift), 0, 0); } }
+
+/* ---------- Module rail: the six modules as icons at the side while you scroll ---------- */
+.module-rail {
+  position: fixed;
+  z-index: 30;
+  top: 50%;
+  right: 14px;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 6px;
+  border-radius: 9999px;
+  background: rgb(24 24 27 / 0.94);
+  border: 1px solid rgb(255 255 255 / 0.12);
+  box-shadow: 0 12px 32px rgb(0 0 0 / 0.5);
+  animation: rail-in 220ms var(--ease-standard, ease-out) both;
+}
+@keyframes rail-in { from { opacity: 0; transform: translate(10px, -50%); } }
+.module-rail__btn {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 9999px;
+  color: var(--color-mute);
+  transition: background-color 160ms, color 160ms;
+}
+.module-rail__btn:hover:not(:disabled) { background: rgb(245 245 247 / 0.1); color: var(--color-snow); }
+.module-rail__btn.is-active { background: var(--color-orange-fill); color: #0a0a0a; }
+.module-rail__btn:disabled { opacity: 0.4; }
+.module-rail__tip {
+  position: absolute;
+  right: calc(100% + 10px);
+  white-space: nowrap;
+  padding: 6px 10px;
+  border-radius: 9px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-snow);
+  background: rgb(24 24 27 / 0.96);
+  border: 1px solid rgb(255 255 255 / 0.12);
+  opacity: 0;
+  transform: translateX(6px);
+  pointer-events: none;
+  transition: opacity 140ms, transform 140ms;
+}
+.module-rail__btn:hover .module-rail__tip,
+.module-rail__btn:focus-visible .module-rail__tip { opacity: 1; transform: none; }
+@media (max-width: 1023px) {
+  .module-rail { top: 12px; right: 50%; transform: translateX(50%); flex-direction: row; animation-name: rail-in-top; }
+  @keyframes rail-in-top { from { opacity: 0; transform: translate(50%, -10px); } }
+  .module-rail__btn { width: 40px; height: 40px; }
+  .module-rail__tip { display: none; }
+}
+
+/* ---------- 3D chat launcher (navy mascot) ---------- */
+.bot3d-launcher {
+  --tx: 0;
+  --ty: 0;
+  perspective: 260px;
+  background: transparent;
+  transition: transform 150ms var(--ease-out, ease-out);
+  filter: drop-shadow(0 10px 16px rgba(234, 88, 12, 0.45)) drop-shadow(0 0 1px rgba(255, 220, 160, 0.5));
+}
+.bot3d { overflow: visible; transform-style: preserve-3d; }
+.bot3d-body,
+.bot3d-dot,
+.bot3d-eyes,
+.bot3d-shadow { transform-box: fill-box; transform-origin: center; }
+.bot3d-body { transition: transform 220ms cubic-bezier(0.2, 0.8, 0.2, 1); }
+.bot3d-eyes { transition: transform 180ms ease-out; }
+.bot3d-shadow { transition: transform 220ms ease-out, opacity 220ms ease-out; }
+.bot3d-dot { transition: transform 260ms cubic-bezier(0.3, 1.5, 0.5, 1); }
+.bot3d-eye { transform-box: fill-box; transform-origin: center; }
+
+/* Alive when idle: the body breathes, the dot floats, the eyes drift and blink. */
+.bot3d-body { animation: bot3d-breathe 4.2s ease-in-out infinite; }
+.bot3d-dot { animation: bot3d-float 3.4s ease-in-out infinite; }
+.bot3d-eyes { animation: bot3d-wander 7s ease-in-out infinite; }
+.bot3d-eye { animation: bot3d-blink 4.6s ease-in-out infinite; }
+.bot3d-eye + .bot3d-eye { animation-delay: 0.04s; }
+
+/* Hovered: it turns to face you, sits up straight, and its eyes lock onto the cursor. */
+.bot3d-launcher[data-alert] .bot3d-body,
+.bot3d-launcher:focus-visible .bot3d-body {
+  transform: translateY(-2px) rotateY(calc(var(--tx) * 12deg)) rotateX(calc(var(--ty) * -10deg)) scale(1.06);
+  animation-duration: 2.6s;
+}
+.bot3d-launcher[data-alert] .bot3d-eyes,
+.bot3d-launcher:focus-visible .bot3d-eyes {
+  animation: none;
+  transition-duration: 90ms;
+  transform: translate(calc(var(--tx) * 7px), calc(var(--ty) * 5px)) scale(1.1);
+}
+.bot3d-launcher[data-alert] .bot3d-eye,
+.bot3d-launcher:focus-visible .bot3d-eye { animation-duration: 3.2s; }
+.bot3d-launcher[data-alert] .bot3d-dot,
+.bot3d-launcher:focus-visible .bot3d-dot {
+  transform: translate(calc(var(--tx) * -4px), -4px) scale(1.12);
+}
+.bot3d-launcher[data-alert] .bot3d-shadow { transform: scale(0.85); opacity: 0.22; }
+
+/* Alert: the small circle wags like a dog's tail, pivoting from where it meets the body. */
+.bot3d-dot { transform-box: view-box; transform-origin: 72px 32px; }
+.bot3d-launcher[data-alert] .bot3d-dot,
+.bot3d-launcher:focus-visible .bot3d-dot { animation: bot3d-wag 0.32s ease-in-out infinite; }
+@keyframes bot3d-wag {
+  0%, 100% { rotate: -24deg; }
+  50% { rotate: 24deg; }
+}
+
+@keyframes bot3d-breathe {
+  0%, 100% { scale: 1 1; translate: 0 0; rotate: 0deg; }
+  50% { scale: 1.025 0.975; translate: 0 0.8px; rotate: 0.6deg; }
+}
+@keyframes bot3d-float {
+  0%, 100% { translate: 0 0; }
+  50% { translate: 0 -2.5px; }
+}
+@keyframes bot3d-wander {
+  0%, 12% { translate: 0 0; }
+  20%, 34% { translate: -3px 1px; }
+  42%, 58% { translate: 3px -1.5px; }
+  66%, 80% { translate: 1px 2px; }
+  90%, 100% { translate: 0 0; }
+}
+@keyframes bot3d-blink {
+  0%, 90%, 100% { scale: 1 1; }
+  93% { scale: 1 0.1; }
+  96% { scale: 1 1; }
 }

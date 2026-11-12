@@ -117,7 +117,8 @@ test("XLSX upload, text-only replacement, errors and clear", async ({ page }) =>
   await choose(page, "What do you want to get sentiment of?");
   const sentiment = page.getByRole("region", { name: "Sentiment results" });
   await expect(sentiment.getByText("Based on a simple word check")).toBeVisible();
-  await expect(sentiment.getByText("Negative comments", { exact: true })).toBeVisible();
+  await expect(sentiment.getByText("Negative", { exact: true })).toBeVisible();
+  await expect(sentiment.getByText(/Reads \d+ comments/)).toBeVisible();
   await expect(sentiment.getByText(/lexicon/)).toBeHidden();
   await choose(page, "What do you want to Predict?");
   await expect(

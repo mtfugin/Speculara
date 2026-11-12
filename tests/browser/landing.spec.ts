@@ -149,7 +149,7 @@ test("water lens filters exist for both edges and calm down with reduced motion"
     await expect(filter).toHaveCount(1);
     await expect(filter.locator("feDisplacementMap")).toHaveCount(1);
     await expect(filter.locator("feImage")).toHaveCount(1);
-    await expect(filter.locator("animate")).toHaveCount(1); // the slow wobble
+    await expect(filter.locator("animate")).toHaveCount(0); // still noise: an animated one made scrolling stutter
   }
   const ctx = await browser.newContext({ reducedMotion: "reduce" });
   const calm = await ctx.newPage();
