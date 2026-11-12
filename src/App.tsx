@@ -1665,21 +1665,21 @@ export default function App() {
             <a
               href="/demo/speculara-synthetic.csv"
               download
-              className="inline-flex min-h-[var(--size-target)] min-w-[var(--size-target)] items-center rounded-lg px-1 text-slate-700 underline hover:text-ink"
+              className="inline-flex min-h-12 min-w-[var(--size-target)] items-center rounded-lg px-1 text-slate-700 underline hover:text-ink"
             >
               Demo CSV
             </a>
             <a
               href="/demo/speculara-synthetic.xlsx"
               download
-              className="inline-flex min-h-[var(--size-target)] min-w-[var(--size-target)] items-center rounded-lg px-1 text-slate-700 underline hover:text-ink"
+              className="inline-flex min-h-12 min-w-[var(--size-target)] items-center rounded-lg px-1 text-slate-700 underline hover:text-ink"
             >
               Demo XLSX
             </a>
             <a
               href="/demo/speculara-text-synthetic.csv"
               download
-              className="inline-flex min-h-[var(--size-target)] min-w-[var(--size-target)] items-center rounded-lg px-1 text-slate-700 underline hover:text-ink"
+              className="inline-flex min-h-12 min-w-[var(--size-target)] items-center rounded-lg px-1 text-slate-700 underline hover:text-ink"
             >
               Text-only demo
             </a>
