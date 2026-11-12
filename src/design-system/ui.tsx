@@ -2,6 +2,7 @@
    Rule: line, not box. Cards are white with a hairline; nested groups use `.panel` (line only, no fill). */
 import type { ReactNode } from "react";
 import { calculationLabel } from "../analysis";
+import { RollingNumber, isRollable } from "./RollingNumber";
 
 export function Card({ children, className = "", label }: { children: ReactNode; className?: string; label?: string }) {
   return (
@@ -38,7 +39,7 @@ export function KeyNumber({ label, value, note, muted = false }: { label: string
   return (
     <div className="tabular min-w-0 border-t border-border-default pt-3">
       <dt className="text-sm font-semibold text-ink">{label}</dt>
-      <dd className={muted ? "mt-1 font-sans text-xl font-medium leading-tight text-slate-600" : "mt-1 font-sans text-3xl font-semibold leading-tight tracking-tight text-ink [overflow-wrap:anywhere] sm:text-4xl"}>{value}</dd>
+      <dd className={muted ? "mt-1 font-sans text-xl font-medium leading-tight text-slate-600" : "mt-1 font-sans text-3xl font-semibold leading-tight tracking-tight text-ink [overflow-wrap:anywhere] sm:text-4xl"}>{isRollable(value) ? <RollingNumber value={value} /> : value}</dd>
       {note && <dd className="mt-1 text-sm text-slate-600">{note}</dd>}
     </div>
   );

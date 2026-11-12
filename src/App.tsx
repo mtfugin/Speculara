@@ -26,8 +26,10 @@ import { Illustration } from "./design-system/illustrations";
 import { Splash } from "./design-system/Splash";
 import { AnalysisLoader } from "./design-system/AnalysisLoader";
 import { Card, Fact, H, KeyNumber, Numbers, Pills, Well } from "./design-system/ui";
+import { RollingNumber, isRollable } from "./design-system/RollingNumber";
 import ResponsiveHeroBanner from "./components/ui/responsive-hero-banner";
 import DashboardPreview from "./components/dashboard-preview";
+import EdgeBlur from "./design-system/EdgeBlur";
 import { ArrowUp } from "lucide-react";
 
 import { moduleInfo, updatedLabel, priorityLabel, type ModuleKey } from "./polish";
@@ -185,7 +187,7 @@ const Explain = ({ children }: { children: ReactNode }) => (
 const Stat = ({ l, v, c = INK }: { l: string; v: string | number; c?: string }) => (
   <div className="panel tabular rounded-2xl p-4">
     <p className="font-sans text-3xl font-semibold leading-tight tracking-tight [overflow-wrap:anywhere] sm:text-4xl" style={{ color: c }}>
-      {v}
+      {isRollable(String(v)) ? <RollingNumber value={String(v)} /> : v}
     </p>
     <p className="mt-1 text-sm text-slate-600">{l}</p>
   </div>
@@ -1630,6 +1632,7 @@ export default function App() {
   return (
     <Results.Provider value={analysis}>
       <Splash />
+      <EdgeBlur />
       <div className="min-h-screen pb-24">
         <main id="main">
           <ResponsiveHeroBanner

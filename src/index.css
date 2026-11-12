@@ -255,3 +255,100 @@
 }
 .typing-dot:nth-child(2) { animation-delay: 0.15s; }
 .typing-dot:nth-child(3) { animation-delay: 0.3s; }
+
+/* ---------- Scroll edges: progressive blur fixed to the top and bottom of the screen ---------- */
+.edge-blur {
+  position: fixed;
+  left: 0;
+  right: 0;
+  height: 112px;
+  z-index: 25; /* above the page, below the chat, toasts and the loading screen */
+  pointer-events: none;
+  transition: opacity 240ms var(--ease-standard);
+}
+.edge-blur i { position: absolute; inset: 0; }
+.edge-blur--top { top: 0; opacity: 0; background: linear-gradient(to bottom, rgb(9 9 11 / 0.5), transparent); }
+.edge-blur--bottom { bottom: 0; opacity: 1; background: linear-gradient(to top, rgb(9 9 11 / 0.5), transparent); }
+html[data-scrolled] .edge-blur--top { opacity: 1; }
+html[data-at-end] .edge-blur--bottom { opacity: 0; }
+
+/* ---------- Rolling numbers: each digit scrolls through two full turns of 0 to 9, then settles ---------- */
+.roll { display: inline-block; white-space: nowrap; }
+.roll-digit {
+  position: relative;
+  display: inline-block;
+  width: 1ch;
+  height: 1em;
+  overflow: hidden;
+  line-height: 1;
+  text-align: center;
+  vertical-align: top;
+}
+.roll-digit::before {
+  content: "0\A 1\A 2\A 3\A 4\A 5\A 6\A 7\A 8\A 9\A 0\A 1\A 2\A 3\A 4\A 5\A 6\A 7\A 8\A 9";
+  display: block;
+  white-space: pre;
+  line-height: 1;
+  transform: translateY(0);
+  transition: transform 1.25s var(--ease-out) calc(var(--i, 0) * 70ms);
+}
+.roll.is-in .roll-digit::before {
+  transform: translateY(calc((var(--d) + 10) * -1em));
+}
+.roll-real {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+}
+
+/* ---------- Line flow: faint grid, thin lines of light gliding across it ---------- */
+.line-flow {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  -webkit-mask-image: radial-gradient(90% 85% at 50% 45%, #000 38%, transparent 100%);
+  mask-image: radial-gradient(90% 85% at 50% 45%, #000 38%, transparent 100%);
+}
+.line-flow__grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgb(245 245 247 / 0.07) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(245 245 247 / 0.07) 1px, transparent 1px);
+  background-size: 64px 64px;
+}
+.streak {
+  position: absolute;
+  opacity: 0;
+  will-change: transform, opacity;
+  --c: rgb(255 159 10 / 0.95);
+  filter: drop-shadow(0 0 5px rgb(255 159 10 / 0.55));
+}
+.streak-white { --c: rgb(245 245 247 / 0.6); filter: drop-shadow(0 0 4px rgb(245 245 247 / 0.25)); }
+.streak-x {
+  left: 0;
+  height: 1px;
+  width: var(--len);
+  background: linear-gradient(90deg, transparent, var(--c) 50%, transparent);
+  animation: streak-x var(--dur) linear var(--delay) infinite;
+}
+.streak-y {
+  top: 0;
+  width: 1px;
+  height: var(--len);
+  background: linear-gradient(180deg, transparent, var(--c) 50%, transparent);
+  animation: streak-y var(--dur) linear var(--delay) infinite;
+}
+@keyframes streak-x {
+  0%   { transform: translateX(-35vw); opacity: 0; }
+  12%  { opacity: 1; }
+  88%  { opacity: 1; }
+  100% { transform: translateX(120vw); opacity: 0; }
+}
+@keyframes streak-y {
+  0%   { transform: translateY(-45vh); opacity: 0; }
+  12%  { opacity: 1; }
+  88%  { opacity: 1; }
+  100% { transform: translateY(130vh); opacity: 0; }
+}

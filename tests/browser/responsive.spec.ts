@@ -13,7 +13,7 @@ for (const width of [320, 375, 768, 1024]) {
     for (const m of MODULES) {
       await page.getByRole("button", { name: new RegExp(`What do you want to (get )?${m}`) }).click();
       await page.waitForTimeout(500);
-      await page.evaluate(() => Promise.all(document.getAnimations().map((a) => a.finished)));
+      await page.evaluate(() => Promise.all(document.getAnimations().filter((a) => a.timeline === document.timeline && a.effect?.getComputedTiming().iterations !== Infinity).map((a) => a.finished)));
       const wide = await page.evaluate(() => {
         const limit = window.innerWidth + 1;
         const out: string[] = [];

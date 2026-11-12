@@ -1,5 +1,5 @@
 /* Loading screen with the logo: 1.5 seconds, every load.
-   0.00s  black screen
+   0.00s  black screen with a faint grid; thin lines of light glide across it the whole time
    0.08s  three bars rise from the mirror line
    0.45s  the reflection answers below
    0.85s  the wordmark rises in
@@ -10,6 +10,7 @@ import { useEffect, useState } from "react";
 import { AnimatedMark } from "./AnimatedMark";
 import { shouldPlaySplash } from "./motion";
 import { Wordmark } from "./Logo";
+import LineFlow from "./LineFlow";
 
 export const SPLASH_MS = 1500;
 const FADE_MS = 250;
@@ -43,7 +44,8 @@ export function Splash() {
       className="fixed inset-0 z-[var(--z-modal)] grid place-items-center bg-canvas"
       style={{ opacity: phase === "out" ? 0 : 1, transition: `opacity ${FADE_MS}ms var(--ease-exit)` }}
     >
-      <div className="flex items-center gap-4" aria-hidden="true">
+      <LineFlow speed={5} />
+      <div className="relative z-10 flex items-center gap-4" aria-hidden="true">
         <AnimatedMark size={84} mode="reveal" />
         <span className="splash-word">
           <Wordmark className="text-5xl" />

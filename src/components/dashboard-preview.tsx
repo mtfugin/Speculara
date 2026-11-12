@@ -3,6 +3,7 @@
    same analysis object the modules use, so it measures whatever dataset is loaded (the synthetic demo until you add yours). */
 import { useRef, useState } from "react";
 import { Icon } from "@/design-system/Icon";
+import { RollingNumber } from "@/design-system/RollingNumber";
 import { niceMax } from "@/chart-presentation";
 import type { Analysis, Metric } from "@/analysis";
 
@@ -140,7 +141,7 @@ export default function DashboardPreview({
               <div key={m} className="tabular min-w-0 rounded-2xl bg-white/[0.04] p-3 ring-1 ring-white/10">
                 <dt className="text-xs capitalize text-slate-600">{m}</dt>
                 <dd className="min-w-0">
-                  <span className="mt-0.5 block truncate font-sans text-xl font-semibold tracking-tight text-ink sm:text-2xl">{fmt(analysis.totals[m]!)}</span>
+                  <span className="mt-0.5 block truncate font-sans text-xl font-semibold tracking-tight text-ink sm:text-2xl"><RollingNumber value={fmt(analysis.totals[m]!)} key={fmt(analysis.totals[m]!)} /></span>
                   <Delta a={analysis} metric={m} />
                   <Sparkline values={series(analysis, m).slice(-14).map((p) => p.value)} />
                 </dd>

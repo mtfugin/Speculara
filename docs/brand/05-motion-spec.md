@@ -66,6 +66,9 @@ Click, tap or Esc skips it (it fades in 250ms). It never plays with reduced moti
 | Skeleton pulse | Placeholder shimmer | Content pending | Opacity 0.55 to 1, 1.4s | Static |
 | Toast | Confirm a quick action (copy, download, reset) | Action completes | Fades and scales in from 0.96 in 380ms `--ease-enter`, stays 4.5s, then is removed. Bottom left, never steals focus, `role="status"` | Appears instantly |
 | Bar value reveal | Exact value on hover | Pointer over a bar | Value label fades in 150ms, bar darkens 10% | Instant |
+| Scroll edges | Text softens as it slides out of and into view | Scrolling | Two fixed progressive blur bands, 112px, five layers from 0.6px to 10px. The top band fades in after 24px of scroll; the bottom band fades out at the end of the page (240ms) | Bands stay, no fade |
+| Rolling numbers | Numbers arrive by counting | A key number first scrolls into view | Each digit scrolls two turns of 0 to 9, then settles, 1.25s, 70ms between digits. Real text stays in the page | Final number appears |
+| Line flow | Loading screen backdrop | During the 1.5s loading screen | A faint 64px grid; orange and white lines of light glide along grid lines and fade at both ends, about 5x faster than a slow drift | Loading screen is skipped |
 | Ring drift | Optional ambient backdrop | Reserved | 2.4s linear rotation | Removed |
 
 AI answers show a "Writing an answer" status that changes to "Still working. AI answers can take up to a minute." after 8 seconds. This is text, not a decorative animation.
