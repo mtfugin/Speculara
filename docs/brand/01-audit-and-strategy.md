@@ -1,6 +1,6 @@
 # Speculara brand: Phase 01, audit and strategy
 
-Status: proposal for approval. No visual change has been made. Work happens on branch `redesign`. Backup: tag `backup-before-redesign-2026-11-12`, branch `backup/before-redesign-2026-11-12`, folder `Speculara-backup-2026-11-12`.
+Status: approved and implemented (see 02 to 05). Decisions: colors stay locked, the logo mark was fully remade (two circles and a lens) while the wordmark typography stayed unchanged, Sora and Manrope self-hosted plus a small mono, lucide-react icons, GSAP for sequences, no Lottie, and a global skill after the system is proven. Original proposal below. Work happens on branch `redesign`. Backup: tag `backup-before-redesign-2026-11-12`, branch `backup/before-redesign-2026-11-12`, folder `Speculara-backup-2026-11-12`.
 
 ## 1. What the product is
 

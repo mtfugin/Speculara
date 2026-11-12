@@ -22,6 +22,10 @@ import {
 import { chartTicks, niceMax } from "./chart-presentation";
 import { Logo } from "./design-system/Logo";
 import { Icon } from "./design-system/Icon";
+import { Illustration } from "./design-system/illustrations";
+import { RingsPattern } from "./design-system/patterns";
+import { Splash } from "./design-system/Splash";
+import { AnalysisLoader } from "./design-system/AnalysisLoader";
 
 import { moduleInfo, updatedLabel, priorityLabel, type ModuleKey } from "./polish";
 
@@ -398,8 +402,13 @@ const number = (v: number) => v.toLocaleString(undefined, { maximumFractionDigit
 function Unavailable({ children }: { children: ReactNode }) {
   return (
     <Well>
-      <p className="font-semibold text-ink">A little more data will help</p>
-      <p className="mt-2 text-sm text-slate-700">{children}</p>
+      <div className="flex flex-col items-center gap-4 text-center sm:flex-row sm:text-left">
+        <Illustration name="needsData" className="h-24 w-36 shrink-0" />
+        <div>
+          <p className="font-display text-lg font-semibold text-ink">A little more data will help</p>
+          <p className="mt-1 text-sm text-slate-700">{children}</p>
+        </div>
+      </div>
     </Well>
   );
 }
@@ -1620,6 +1629,7 @@ export default function App() {
 
   return (
     <Results.Provider value={analysis}>
+      <Splash />
       <div className="min-h-screen pb-24">
         <header className="sticky top-0 z-[var(--z-header)] border-b border-border-default bg-white/90 backdrop-blur">
           <div className="mx-auto flex h-16 max-w-[var(--layout-app)] items-center gap-3 px-[var(--layout-gutter)]">
@@ -1633,7 +1643,10 @@ export default function App() {
         </header>
 
         <main id="main" className="mx-auto max-w-[var(--layout-app)] px-[var(--layout-gutter)]">
-          <section id="top" className="grid items-center gap-10 py-10 md:grid-cols-[1.05fr_1fr] md:py-16">
+          <section id="top" className="relative isolate grid items-center gap-10 overflow-hidden py-10 md:grid-cols-[1.05fr_1fr] md:py-16">
+            <div className="pointer-events-none absolute -right-32 -top-32 -z-10 hidden w-[560px] text-ink md:block" aria-hidden="true">
+              <RingsPattern />
+            </div>
             <div className="min-w-0">
               <h1 className="font-display text-4xl font-bold leading-[1.1] text-ink md:text-5xl">
                 Turn views, saves, and sales into the next decision.
@@ -1885,17 +1898,7 @@ export default function App() {
             </ul>
           </section>
 
-          {busy && !analysis && (
-            <div aria-hidden="true" className="surface skeleton-pulse mb-6 space-y-3 rounded-3xl p-5">
-              <div className="skeleton-bar h-5 w-2/3" />
-              <div className="skeleton-bar h-4 w-1/2" />
-              <div className="grid grid-cols-3 gap-3">
-                <div className="skeleton-bar h-16" />
-                <div className="skeleton-bar h-16" />
-                <div className="skeleton-bar h-16" />
-              </div>
-            </div>
-          )}
+          {busy && !analysis && <AnalysisLoader />}
           {analysis && (
             <section
               key={`summary-${revision}-${viewRevision}`}

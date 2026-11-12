@@ -189,6 +189,7 @@
   }
   .skeleton-pulse { animation: skeleton-pulse 1.4s ease-in-out infinite; }
   .skeleton-bar { border-radius: var(--radius-md); background: var(--color-track); }
+  .splash-word { display: inline-block; opacity: 0; animation: result-arrive var(--motion-component) var(--ease-enter) 1000ms both; }
   .ring-drift { animation: ring-drift var(--motion-ambient) linear infinite; transform-origin: center; }
 }
 
