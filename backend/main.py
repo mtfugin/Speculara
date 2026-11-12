@@ -111,6 +111,13 @@ async def profile_analyze(body: ProfileUrl, request: Request):
     except ValueError as exc:
         raise HTTPException(422,f'{exc} {profile.notes}'.strip()) from exc
     result['provenance'] = profile_import.provenance(profile, posts)
+    picture = await run_in_threadpool(profile_import.fetch_image_data_url, profile.avatar_url) if profile.avatar_url else ''
+    result['profile'] = profile_import.profile_card(profile, picture)
+    thumbs = {post.id: post.thumb_url for post in posts if post.thumb_url}
+    for reference in result.get('post_references', []):
+        if thumbs.get(reference.get('post_id')):
+            reference['thumb_url'] = thumbs[reference['post_id']]
+    result['data_table'] = profile_import.table_for_download(profile_import.posts_to_frame(posts))
     result['warnings'] = [f'Collected from a public {profile.platform} profile (@{profile.handle}). {profile.notes}'.strip(), *result.get('warnings',[])]
     return result
 

@@ -6,8 +6,11 @@ computer are accepted, because it opens a browser window for sign-in and drives 
 produce, so every module, chart and the chat work on it unchanged. Nothing is stored.
 Using it must respect each platform's terms and the account owner's consent.
 """
+import base64
 import os
+import urllib.request
 from datetime import timezone
+from urllib.parse import urlparse
 
 import pandas as pd
 
@@ -48,7 +51,7 @@ def posts_to_frame(posts) -> pd.DataFrame:
         rows.append(row)
         texts = [c.text for c in post.comment_evidence] or list(post.comments_sample)
         for text in texts:
-            rows.append({**base, "text": text})
+            rows.append({**base, "category": post.type, "text": text})
     if not rows:
         raise ValueError("No posts could be collected from that profile.")
     frame = pd.DataFrame(rows).dropna(axis=1, how="all")
@@ -80,3 +83,41 @@ def provenance(profile, posts) -> dict:
         "comments": {"read": seen_comments, "kept": kept_comments},
         "inferred": False,
     }
+
+
+IMAGE_HOSTS = ("tiktokcdn.com", "tiktokcdn-us.com", "tiktokv.com", "cdninstagram.com", "fbcdn.net")
+
+
+def fetch_image_data_url(url: str, limit: int = 1_000_000) -> str:
+    """The profile picture as a data link, fetched once so the person can download it.
+
+    Only image links on the platforms' own picture hosts are fetched, over https, with a size limit and a short timeout.
+    Any problem returns an empty string; the picture is a nicety, never a reason to fail a collection.
+    """
+    try:
+        parsed = urlparse(url or "")
+        host = (parsed.hostname or "").lower()
+        if parsed.scheme != "https" or parsed.username or not any(host == h or host.endswith("." + h) for h in IMAGE_HOSTS):
+            return ""
+        request = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0", "Accept": "image/*"})
+        with urllib.request.urlopen(request, timeout=8) as response:
+            kind = response.headers.get_content_type()
+            data = response.read(limit + 1)
+        if not kind.startswith("image/") or len(data) > limit or not data:
+            return ""
+        return f"data:{kind};base64,{base64.b64encode(data).decode()}"
+    except Exception:
+        return ""
+
+
+def profile_card(profile, picture: str) -> dict:
+    return {"platform": profile.platform, "handle": profile.handle, "nickname": profile.nickname,
+            "followers": profile.followers, "avatar": picture or None}
+
+
+def table_for_download(frame, limit: int = 5000) -> dict:
+    """The collected table as plain rows, so it can be downloaded as a file. Blank stays blank."""
+    clipped = frame.head(limit)
+    rows = [{key: (None if pd.isna(value) else (value.item() if hasattr(value, "item") else value)) for key, value in row.items()}
+            for row in clipped.to_dict("records")]
+    return {"columns": list(clipped.columns), "rows": rows, "total_rows": len(frame)}

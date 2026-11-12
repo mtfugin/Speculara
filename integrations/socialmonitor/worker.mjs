@@ -55,7 +55,7 @@ export async function execute(input, deps, emit = () => {}) {
     const options = {
       range: 'all', limit: Math.min(40, Math.max(5, Number(input.limit) || 20)),
       known: new Set(), due: new Map(), comments: true,
-      maxComments: 8, usedSession: false,
+      maxComments: 40, usedSession: false,
       log: (line) => {
         notes.push(line); console.error(line)
         emit({ event: 'progress', message: /comments read/.test(line) ? `Reading post ${++read} of up to ${Math.min(40, Math.max(5, Number(input.limit) || 20))}…` : line })
@@ -67,7 +67,17 @@ export async function execute(input, deps, emit = () => {}) {
     emit({ event: 'progress', message: 'Loading posts and comment samples…' })
     const cancelled = (deps.cancelled || new Promise(() => {})).then(() => { throw new Error('Collection cancelled.') })
     const posts = await Promise.race([collectors[profile.network].collect(page, profile, options), timeout, cancelled])
-    return { ...profile, posts, signed_in: session, notes: notes.slice(-10) }
+    // Best effort: the profile card (name, picture, followers) when the collector saw it. Never stops a collection.
+    let card = null
+    try {
+      if (profile.network === 'tiktok') {
+        const { profileCard } = await import('./vendor/collect/tiktok.ts')
+        const info = profileCard.current
+        const user = info?.user
+        if (user) card = { nickname: user.nickname ?? null, avatar_url: user.avatarLarger || user.avatarMedium || user.avatarThumb || null, followers: info?.stats?.followerCount ?? info?.statsV2?.followerCount ?? null }
+      }
+    } catch {}
+    return { ...profile, posts, signed_in: session, notes: notes.slice(-10), profile_card: card }
   } finally { clearTimeout(timer); await closeBrowser() }
 }
 

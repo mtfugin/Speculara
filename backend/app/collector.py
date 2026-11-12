@@ -250,7 +250,7 @@ async def start_login(network: str) -> dict:
     return {"opened": True, "message": "Sign in in the browser window, then click Done signing in here."}
 
 
-COMMENT_CAP = 8
+COMMENT_CAP = 40
 
 
 def normalize(data: dict, canonical_url: str, network: str, handle: str) -> tuple[ProfileInfo, list[Post]]:
@@ -281,7 +281,7 @@ def normalize(data: dict, canonical_url: str, network: str, handle: str) -> tupl
                         source_url=safe_url(c.get("url")) or url,
                         source_kind="comment" if safe_url(c.get("url")) else "post" if url else "none") for c in comment_rows],
                      unavailable_metrics=unavailable,
-                     collected_at=collected_at, method=method, comments_seen=len(all_comments),
+                     collected_at=collected_at, method=method, comments_seen=len(all_comments), thumb_url=safe_url(raw.get("thumb_url")),
                      observed_metrics=[k for k in ("likes", "comments", "shares", "views") if k not in unavailable])
             posts.append(p)
             missing.update(unavailable)
@@ -299,7 +299,11 @@ def normalize(data: dict, canonical_url: str, network: str, handle: str) -> tupl
         notes += f" Skipped {skipped} posts with missing or invalid dates/data."
     if not sources:
         sources = [ResearchSource(title=f"{network} profile", url=canonical_url)]
-    return ProfileInfo(platform=network, handle=handle, notes=notes, sources=sources, collector="socialmonitor", unavailable_metrics=sorted(missing)), posts
+    card = data.get("profile_card") if isinstance(data.get("profile_card"), dict) else {}
+    followers = card.get("followers")
+    return ProfileInfo(platform=network, handle=handle, notes=notes,
+                       nickname=str(card.get("nickname") or "")[:100], avatar_url=safe_url(card.get("avatar_url")),
+                       followers=int(followers) if isinstance(followers, (int, float)) and followers >= 0 else None, sources=sources, collector="socialmonitor", unavailable_metrics=sorted(missing)), posts
 
 
 async def collect_profile(raw_url: str, limit: int = 20) -> tuple[ProfileInfo, list[Post]]:

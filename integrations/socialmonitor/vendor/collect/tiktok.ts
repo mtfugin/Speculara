@@ -26,6 +26,9 @@ const NEXT = 'SocialMonitor stopped reading TikTok for this update; the next one
  * "Please wait" check (some connections get it on every request), the same public calls run
  * from inside a throwaway logged-out browser page once the page has passed that check.
  */
+/** Speculara: the profile card (name, picture, followers) the logged-out page already carried, kept for the worker. */
+export const profileCard: { current: unknown } = { current: null }
+
 export const tiktok: Collector = {
   network: 'tiktok',
   // The shared, possibly signed-in browser page is never used for TikTok.
@@ -39,7 +42,8 @@ export const tiktok: Collector = {
     }
     const browser = await openLoggedOut()
     try {
-      const { get, secUid } = await openProfile(browser.context, profile, opt)
+      const { get, secUid, data } = await openProfile(browser.context, profile, opt)
+      profileCard.current = (data as { __DEFAULT_SCOPE__?: Record<string, { userInfo?: unknown }> } | null)?.__DEFAULT_SCOPE__?.['webapp.user-detail']?.userInfo ?? null
       return await readPublic(profile, opt, get, true, secUid)
     } finally {
       await browser.close()

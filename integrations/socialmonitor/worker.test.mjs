@@ -76,7 +76,7 @@ test('collection returns upstream records with bounded options and closes the br
   const result = await execute({ action: 'collect', url: 'instagram.com/brand', limit: 999 }, deps)
   assert.equal(result.posts[0].likes, 7)
   assert.equal(state.options.limit, 40)
-  assert.equal(state.options.maxComments, 8)
+  assert.equal(state.options.maxComments, 40)
   assert.equal(state.closed, 1)
 })
 

@@ -109,14 +109,14 @@ class ProfileRouteTests(unittest.TestCase):
         self.assertEqual(posts[0].method, "playwright browser, signed out")
         self.assertTrue(posts[0].collected_at)
         self.assertEqual(posts[0].comments_seen, 12)
-        self.assertEqual(len(posts[0].comment_evidence), collector.COMMENT_CAP)
+        self.assertEqual(len(posts[0].comment_evidence), 12)  # under the cap, so all are kept
         self.assertNotIn("comments", posts[0].observed_metrics)
         self.assertIn("shares", posts[1].observed_metrics)  # an observed zero is a real value
         info = profile_import.provenance(profile, posts)
         self.assertFalse(info["inferred"])
         self.assertEqual(info["metrics"]["views"], {"observed": 1, "blank": 1})
         self.assertEqual(info["metrics"]["shares"], {"observed": 1, "blank": 1})
-        self.assertEqual(info["comments"], {"read": 12, "kept": 8})
+        self.assertEqual(info["comments"], {"read": 12, "kept": 12})
         frame = profile_import.posts_to_frame(posts)
         self.assertTrue(frame.loc[frame["post_id"] == "1", "views"].notna().any())
         self.assertNotIn("zero placeholders", profile.notes)
@@ -145,7 +145,7 @@ class ProfileRouteTests(unittest.TestCase):
         self.assertIn("’", first.caption)
         self.assertEqual((first.likes, first.comments, first.shares, first.views), (836, 134, 25, 24600))
         self.assertEqual(first.comments_seen, 12)
-        self.assertEqual(len(first.comment_evidence), collector.COMMENT_CAP)
+        self.assertEqual(len(first.comment_evidence), 12)
         self.assertEqual(photo.type, "Photo")
         self.assertIn("comments", photo.observed_metrics)  # an observed zero
         self.assertEqual(photo.comments, 0)
@@ -184,6 +184,48 @@ class ProfileRouteTests(unittest.TestCase):
             self.assertEqual(client.post("/api/profile/analyze", json={"url": "https://www.tiktok.com/@examplebrand", "limit": 3}).status_code, 422)
             self.assertEqual(client.post("/api/profile/analyze", json={"url": "https://www.tiktok.com/@examplebrand", "limit": 41}).status_code, 422)
         self.assertEqual(seen, [10])
+
+    def test_comments_over_the_cap_are_counted_but_not_all_kept(self):
+        raw = {"posts": [{"ext_id": "1", "posted_at": "2026-11-01T10:00:00Z", "kind": "video", "caption": "a", "likes": 1,
+                          "comments_count": 99, "shares": 0, "views": 5, "comments": [{"text": f"c{i}"} for i in range(collector.COMMENT_CAP + 15)]}]}
+        _profile, posts = collector.normalize(raw, "https://www.tiktok.com/@x", "TikTok", "x")
+        self.assertEqual(posts[0].comments_seen, collector.COMMENT_CAP + 15)
+        self.assertEqual(len(posts[0].comment_evidence), collector.COMMENT_CAP)
+
+    def test_comment_rows_carry_the_post_category_and_no_counts(self):
+        data = fixture("tiktok_profile.json")
+        _profile, posts = collector.normalize(data, data["url"], "TikTok", data["handle"])
+        frame = profile_import.posts_to_frame(posts)
+        comment_rows = frame[frame["text"].notna()]
+        self.assertTrue(comment_rows["category"].notna().all())
+        self.assertTrue(comment_rows["views"].isna().all())
+
+    def test_profile_card_thumbnails_and_download_table(self):
+        data = fixture("tiktok_profile.json")
+        data["profile_card"] = {"nickname": "Example Brand", "avatar_url": "https://p16.tiktokcdn.com/a.jpeg", "followers": 1234}
+        data["posts"][0]["thumb_url"] = "https://p16.tiktokcdn.com/t1.jpeg"
+        profile, posts = collector.normalize(data, data["url"], "TikTok", data["handle"])
+        self.assertEqual((profile.nickname, profile.followers), ("Example Brand", 1234))
+
+        async def fake(url):
+            return profile, posts
+
+        with patch.dict(os.environ, {"ENABLE_PROFILE_COLLECTOR": "1"}), patch.object(collector, "collect_profile", fake), \
+             patch.object(profile_import, "fetch_image_data_url", lambda u: "data:image/jpeg;base64,AAAA"):
+            body = client.post("/api/profile/analyze", json={"url": "https://www.tiktok.com/@examplebrand"}).json()
+        self.assertEqual(body["profile"]["avatar"], "data:image/jpeg;base64,AAAA")
+        self.assertEqual(body["profile"]["nickname"], "Example Brand")
+        refs = {r["post_id"]: r for r in body["post_references"]}
+        self.assertEqual(refs["7000000000000000001"]["thumb_url"], "https://p16.tiktokcdn.com/t1.jpeg")
+        self.assertNotIn("thumb_url", refs["7000000000000000002"])
+        table = body["data_table"]
+        self.assertIn("post_url", table["columns"])
+        self.assertEqual(table["total_rows"], len(table["rows"]))
+        self.assertTrue(any(row.get("views") is None for row in table["rows"]))  # blank stays blank
+
+    def test_picture_fetch_only_trusts_the_platforms_picture_hosts(self):
+        for bad in ("http://p16.tiktokcdn.com/a.jpg", "https://example.com/a.jpg", "https://user@p16.tiktokcdn.com/a.jpg", "", "file:///etc/passwd"):
+            self.assertEqual(profile_import.fetch_image_data_url(bad), "", bad)
 
     def test_worker_errors_are_told_apart(self):
         cases = {

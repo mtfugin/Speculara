@@ -36,6 +36,7 @@ class Post(BaseModel):
     method: str = ""
     observed_metrics: list[str] = Field(default_factory=list)
     comments_seen: int = 0  # comment rows the browser read, before the per-post cap
+    thumb_url: str = ""  # a link to the video's cover picture, shown as is, never stored
 
 
 class AnalyzeRequest(BaseModel):
@@ -63,6 +64,8 @@ class ProfileInfo(BaseModel):
     platform: str = "unknown"
     handle: str = ""
     followers: Optional[int] = None
+    nickname: str = ""
+    avatar_url: str = ""  # the profile picture's link; fetched once by the server, never stored
     notes: str = ""
     sources: list[ResearchSource] = Field(default_factory=list)
     collector: str = ""
