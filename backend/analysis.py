@@ -286,6 +286,14 @@ def analyze(frame: pd.DataFrame) -> dict:
 
         raise ValueError('Include views, likes, saves, comments, sales, or text. See demo files for the schema.')
 
+    # Rows that hold only a comment's text (blank in every metric) are not observations of the metrics.
+    # They are left out of metric coverage checks so a collected profile is not blocked by them.
+    if metrics and 'text' in df:
+        has_text = df['text'].notna() & df['text'].astype(str).str.strip().ne('')
+        text_only = has_text & pd.concat([pd.to_numeric(df[m], errors='coerce') for m in metrics], axis=1).isna().all(axis=1)
+    else:
+        text_only = pd.Series(False, index=df.index)
+
     missing = {}
 
     for m in metrics:
@@ -304,7 +312,7 @@ def analyze(frame: pd.DataFrame) -> dict:
 
         df[m] = values
 
-        missing[m] = int(values.isna().sum())
+        missing[m] = int(values[~text_only].isna().sum())
 
         if missing[m]: warnings.append(f'{m}: {missing[m]} missing values excluded, not treated as zero.')
 
@@ -340,9 +348,9 @@ def analyze(frame: pd.DataFrame) -> dict:
 
             charts[group] = [{'label':str(k), **{m: None if pd.isna(v) else float(v) for m,v in row.items()}} for k,row in groups.head(365).iterrows()]
 
-    correlations = calculate_correlations(df)
+    correlations = calculate_correlations(df[~text_only])
 
-    forecast = forecast_daily(df)
+    forecast = forecast_daily(df[~text_only])
 
     sentiment = {'available':False,'reason':'Include a text column with individual comments or reviews.'}
 
@@ -396,13 +404,13 @@ def analyze(frame: pd.DataFrame) -> dict:
 
         demand.update({'available':True,'sales':totals.get('sales'),'saves':totals.get('saves')})
 
-    ratios = calculate_ratios(df)
+    ratios = calculate_ratios(df[~text_only])
 
-    periods = compare_periods(df)
+    periods = compare_periods(df[~text_only])
 
-    rankings = rank_performance(df)
+    rankings = rank_performance(df[~text_only])
 
-    recommendations = build_recommendations(df, ratios, rankings, correlations, demand)
+    recommendations = build_recommendations(df[~text_only], ratios, rankings, correlations, demand)
 
     warnings.append('Rows are treated as independent records; verify grain and avoid repeated post totals across comment rows. No social account is connected.')
 

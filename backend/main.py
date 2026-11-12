@@ -121,7 +121,7 @@ class AIChat(BaseModel):
 @app.post('/api/ai/chat')
 async def ai_chat_endpoint(body: AIChat):
     if not ai_chat.ai_enabled():
-        raise HTTPException(403,'AI answers are not enabled on this server.')
+        raise HTTPException(403,ai_chat.GENERIC_ERROR)
     try:
         return {'answer': await ai_chat.answer(body.message, body.analysis)}
     except ValueError as exc:
