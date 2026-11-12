@@ -1,4 +1,10 @@
 import { test, expect } from "@playwright/test";
+
+test.beforeEach(async ({ page }) => {
+  // These tests check the built-in answers, so keep them independent of a live AI service.
+  await page.route("**/api/health", (route) => route.fulfill({ json: { status: "ok", ai: false } }));
+});
+
 const csv =
   "date,post_id,category,views,saves,sales\n" +
   Array.from(

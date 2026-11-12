@@ -1,5 +1,11 @@
 import { test, expect } from "@playwright/test";
 import path from "node:path";
+
+test.beforeEach(async ({ page }) => {
+  // These tests check the built-in answers, so keep them independent of a live AI service.
+  await page.route("**/api/health", (route) => route.fulfill({ json: { status: "ok", ai: false } }));
+});
+
 const demo = (name: string) => path.resolve("public/demo", name);
 const choose = async (page: import("@playwright/test").Page, module: string) =>
   page.getByRole("button", { name: module }).click();

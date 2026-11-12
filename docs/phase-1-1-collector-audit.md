@@ -99,3 +99,12 @@ Still untested: private profile, expired Instagram sign-in, rate limiting, TikTo
 - The screen already shows each reason and the "exploratory small sample" label; no screen change needed.
 - Suites: backend 119, unit 23, browser 56, all pass.
 - Not checked by hand yet: ratios (sales and saves per view) and category and post rankings. Collected profiles have no sales or saves, so they only apply to uploads; the existing tests cover their rules.
+
+## Phase 1.6: collection experience (done)
+- While a profile is being collected, the panel shows what the collector is doing (it asks the server every 1.5 s) and a Cancel button. The progress line is scrolled into view so it is not under the bottom edge blur.
+- Cancel shows "Cancelling. The browser is closing…" and then "Cancelled. Nothing was kept." It is not treated as a failure and offers no retry.
+- After a failure the panel shows the plain message plus **Try again**. A timeout (or a 504) also offers **Try with fewer posts (10)**. A wrong link, a sign-in problem or a profile that was not found shows the message only, since a retry would not help.
+- `/api/profile/analyze` accepts `limit` (5 to 40 posts, default 20); anything else is a 422.
+- Checked live: real TikTok collection from the screen, progress text shown, Cancel worked end to end.
+- Partial results are not possible yet: the worker returns posts only when it finishes, so a cancelled or timed out run keeps nothing. Fewer posts is the way to a result sooner. Streaming partial posts would need a worker change; decide in 1.7 or leave for later.
+- Tests: 120 backend, 23 unit, 59 browser (3 new for progress and Cancel, timeout retry, not-found with no retry).

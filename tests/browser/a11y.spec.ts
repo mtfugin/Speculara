@@ -1,6 +1,12 @@
 import { test, expect } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 
+test.beforeEach(async ({ page }) => {
+  // These tests check the built-in answers, so keep them independent of a live AI service.
+  await page.route("**/api/health", (route) => route.fulfill({ json: { status: "ok", ai: false } }));
+});
+
+
 const scan = async (page: any) =>
   (await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21aa"]).analyze()).violations
     .filter((v: any) => ["serious", "critical"].includes(v.impact))

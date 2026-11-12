@@ -30,7 +30,18 @@ import { RollingNumber, isRollable } from "./design-system/RollingNumber";
 import ResponsiveHeroBanner from "./components/ui/responsive-hero-banner";
 import DashboardPreview from "./components/dashboard-preview";
 import EdgeBlur from "./design-system/EdgeBlur";
-import { ArrowUp } from "lucide-react";
+import {
+  ArrowUp,
+  Calculator,
+  CloudUpload,
+  Download,
+  Lock,
+  ShieldCheck,
+  Sparkles,
+  ChevronLeft,
+  ChevronRight,
+  Eye,
+} from "lucide-react";
 
 import { moduleInfo, updatedLabel, priorityLabel, type ModuleKey } from "./polish";
 
@@ -1031,6 +1042,31 @@ function ProfileLink({
   const [working, setWorking] = useState(false);
   const [signingIn, setSigningIn] = useState(false);
   const [msg, setMsg] = useState("");
+  const [collecting, setCollecting] = useState(false);
+  const [progress, setProgress] = useState("");
+  const [cancelling, setCancelling] = useState(false);
+  const [retry, setRetry] = useState<{ limit: number; smaller: boolean } | null>(null);
+  const progressRow = useRef<HTMLDivElement>(null);
+  /* Keep the progress line and Cancel in the middle of the window, clear of the edge blur. */
+  useEffect(() => {
+    if (collecting) progressRow.current?.scrollIntoView({ block: "center", behavior: "smooth" });
+  }, [collecting]);
+  /* While a collection runs, ask the server what it is doing every second and a half. */
+  useEffect(() => {
+    if (!collecting) return;
+    let alive = true;
+    const tick = () =>
+      fetch(`${base}/api/profile/status`)
+        .then((r) => (r.ok ? r.json() : null))
+        .then((s) => alive && s?.progress && setProgress(String(s.progress)))
+        .catch(() => {});
+    tick();
+    const id = window.setInterval(tick, 1500);
+    return () => {
+      alive = false;
+      window.clearInterval(id);
+    };
+  }, [collecting, base]);
   useEffect(() => {
     let alive = true;
     fetch(`${base}/api/health`)
@@ -1050,8 +1086,49 @@ function ProfileLink({
       signal: AbortSignal.timeout(timeout),
     });
     const data = await response.json().catch(() => ({}));
-    if (!response.ok) throw new Error(typeof data.detail === "string" ? data.detail : "That did not work.");
+    if (!response.ok) {
+      const error = new Error(typeof data.detail === "string" ? data.detail : "That did not work.");
+      (error as Error & { status?: number }).status = response.status;
+      throw error;
+    }
     return data;
+  };
+  const analyze = async (limit: number) => {
+    setWorking(true);
+    setCollecting(true);
+    setCancelling(false);
+    setRetry(null);
+    setProgress("Opening the collection browser…");
+    setMsg("");
+    try {
+      const data = await call("analyze", { url: url.trim(), limit }, 240000);
+      if (data.schema_version !== 2) throw new Error("Unsupported analysis schema; version 2 required.");
+      onAnalyzed(data, url.trim().replace(/^https?:\/\/(www\.)?/, ""));
+    } catch (e) {
+      const status = (e as Error & { status?: number }).status;
+      if (status === 409 && e instanceof Error && /cancelled/i.test(e.message)) {
+        setMsg("Cancelled. Nothing was kept.");
+      } else if (e instanceof Error && e.name === "TimeoutError") {
+        setMsg("That took too long.");
+        setRetry({ limit, smaller: limit > 10 });
+      } else {
+        setMsg(e instanceof Error ? e.message : "That did not work.");
+        // A wrong link or a sign-in problem will not fix itself; other failures are worth another try.
+        if (status !== 422 && status !== 401 && status !== 404) setRetry({ limit, smaller: status === 504 && limit > 10 });
+      }
+    } finally {
+      setWorking(false);
+      setCollecting(false);
+      setCancelling(false);
+    }
+  };
+  const cancel = async () => {
+    setCancelling(true);
+    try {
+      await call("cancel");
+    } catch {
+      /* the collection result still arrives; nothing else to do */
+    }
   };
   const run = async (task: () => Promise<void>) => {
     setWorking(true);
@@ -1135,26 +1212,80 @@ function ProfileLink({
         <button
           type="button"
           disabled={busy || signingIn || !allowed || url.trim().length < 3}
-          onClick={() =>
-            run(async () => {
-              setMsg("Collecting posts. This can take a minute or two…");
-              const data = await call("analyze", { url: url.trim() }, 240000);
-              if (data.schema_version !== 2) throw new Error("Unsupported analysis schema; version 2 required.");
-              setMsg("");
-              onAnalyzed(data, url.trim().replace(/^https?:\/\/(www\.)?/, ""));
-            })
-          }
+          onClick={() => analyze(20)}
           className="btn-primary min-h-11 w-full rounded-xl px-4 font-semibold"
         >
           Analyze this profile
         </button>
-        {msg && (
+        {collecting && (
+          <div ref={progressRow} className="flex flex-wrap items-center gap-3">
+            <p role="status" className="min-w-0 flex-1 text-slate-700">
+              {cancelling ? "Cancelling. The browser is closing…" : progress}
+            </p>
+            <button
+              type="button"
+              disabled={cancelling}
+              onClick={cancel}
+              className="ctl min-h-11 rounded-xl px-3 font-semibold text-ink"
+            >
+              Cancel
+            </button>
+          </div>
+        )}
+        {!collecting && msg && (
           <p role="status" className="text-slate-700">
             {msg}
           </p>
         )}
+        {!collecting && retry && (
+          <div className="flex flex-wrap gap-2">
+            <button type="button" onClick={() => analyze(retry.limit)} className="ctl min-h-11 rounded-xl px-3 font-semibold text-ink">
+              Try again
+            </button>
+            {retry.smaller && (
+              <button type="button" onClick={() => analyze(10)} className="ctl min-h-11 rounded-xl px-3 font-semibold text-ink">
+                Try with fewer posts (10)
+              </button>
+            )}
+          </div>
+        )}
       </div>
     </details>
+  );
+}
+
+/* While the AI writes, the notice cycles through playful action words so waiting feels alive. */
+const THINKING_PHRASES = [
+  "Untangling your numbers",
+  "Reading between the bars",
+  "Chasing the trend line",
+  "Weighing the evidence",
+  "Connecting the dots",
+  "Sifting the signal from the noise",
+  "Squinting at your totals",
+  "Sharpening the insight",
+  "Counting twice, answering once",
+  "Distilling it into plain words",
+  "Tuning the forecast",
+  "Following the buying clues",
+  "Dusting off the charts",
+  "Stitching a clear answer together",
+  "Hunting for the why behind it",
+  "Polishing the final sentence",
+];
+function ThinkingPhrase() {
+  const [i, setI] = useState(() => Math.floor(Math.random() * THINKING_PHRASES.length));
+  useEffect(() => {
+    const id = window.setInterval(() => setI((n) => (n + 1) % THINKING_PHRASES.length), 2200);
+    return () => window.clearInterval(id);
+  }, []);
+  return (
+    <span className="min-w-0 flex-1">
+      <span key={i} className="focus-in ai-blink block truncate" aria-hidden="true">
+        {THINKING_PHRASES[i]}…
+      </span>
+      <span className="sr-only">The assistant is writing your answer</span>
+    </span>
   );
 }
 
@@ -1163,7 +1294,7 @@ function Chat() {
   const analysis = useContext(Results);
   const [open, setOpen] = useState(false);
   const [text, setText] = useState("");
-  const [msgs, setMsgs] = useState<{ me: boolean; t: string }[]>([
+  const [msgs, setMsgs] = useState<{ me: boolean; t: string; ai?: boolean; note?: string }[]>([
     {
       me: false,
       t: "Ask what changed, what it means, or what to try next. I use only the data you uploaded.",
@@ -1200,11 +1331,34 @@ function Chat() {
   useEffect(() => {
     if (messages.current) messages.current.scrollTop = messages.current.scrollHeight;
   }, [msgs, open]);
-  /* Optional AI answers: shown only when the server enables them, and off until the person turns them on. */
+  /* AI answers are the default whenever the server enables them. While one is being written the person can
+     switch to the built-in answer at once instead of waiting. */
   const [aiAvailable, setAiAvailable] = useState(false);
-  const [aiOn, setAiOn] = useState(false);
   const [thinking, setThinking] = useState(false);
-  const [slow, setSlow] = useState(false);
+  const pending = useRef<{ controller: AbortController; skipped: boolean } | null>(null);
+  /* Suggested questions scroll sideways; arrows appear on hover when there is more to reveal. */
+  const chips = useRef<HTMLDivElement>(null);
+  const [canLeft, setCanLeft] = useState(false);
+  const [canRight, setCanRight] = useState(false);
+  const updateArrows = () => {
+    const el = chips.current;
+    if (!el) return;
+    setCanLeft(el.scrollLeft > 4);
+    setCanRight(el.scrollLeft + el.clientWidth < el.scrollWidth - 4);
+  };
+  const scrollChips = (dir: -1 | 1) => {
+    const el = chips.current;
+    if (el) el.scrollBy({ left: dir * Math.max(120, el.clientWidth * 0.6), behavior: "smooth" });
+  };
+  useEffect(() => {
+    if (!open) return;
+    const id = window.requestAnimationFrame(updateArrows);
+    window.addEventListener("resize", updateArrows);
+    return () => {
+      window.cancelAnimationFrame(id);
+      window.removeEventListener("resize", updateArrows);
+    };
+  }, [open, analysis]);
   const apiBase = (import.meta.env.VITE_API_BASE_URL ?? "").replace(/\/$/, "");
   useEffect(() => {
     let alive = true;
@@ -1220,47 +1374,50 @@ function Chat() {
     if (!t.trim() || thinking) return;
     setText("");
     setMsgs((m) => [...m, { me: true, t }]);
-    if (!analysis) {
-      setMsgs((m) => [
-        ...m,
-        {
-          me: false,
-          t: "Upload a dataset or load the labeled synthetic demo first. No social account is connected.",
-        },
-      ]);
-      return;
-    }
-    if (aiOn && aiAvailable) {
+    /* The built-in answer: instant, works offline, and is what the person gets if they skip the wait. */
+    const standard = () =>
+      analysis
+        ? plainChat(answer(t, analysis))
+        : "Upload a dataset or load the labeled synthetic demo first. No social account is connected.";
+    if (aiAvailable) {
+      const controller = new AbortController();
+      const job = { controller, skipped: false };
+      pending.current = job;
       setThinking(true);
-      setSlow(false);
-      const slowTimer = window.setTimeout(() => setSlow(true), 8000);
+      const timeout = window.setTimeout(() => controller.abort(), 130000);
       try {
-        const { preview: _preview, post_references: _refs, ...summary } = analysis;
+        /* Only a summary goes out: never the rows, post links or comments. With no data loaded it is empty. */
+        const summary = analysis ? (({ preview: _p, post_references: _r, ...rest }) => rest)(analysis) : {};
         const response = await fetch(`${apiBase}/api/ai/chat`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ message: t, analysis: summary }),
-          signal: AbortSignal.timeout(130000),
+          signal: controller.signal,
         });
         if (!response.ok) throw new Error("ai");
         const { answer: aiAnswer } = await response.json();
-        setMsgs((m) => [...m, { me: false, t: plainChat(String(aiAnswer)) }]);
+        setMsgs((m) => [...m, { me: false, ai: true, t: plainChat(String(aiAnswer)) }]);
       } catch {
         setMsgs((m) => [
           ...m,
-          {
-            me: false,
-            t: `That did not load, so here is the standard answer instead. ${plainChat(answer(t, analysis))}`,
-          },
+          job.skipped
+            ? { me: false, t: standard() }
+            : { me: false, note: "AI did not respond, standard answer", t: `That did not load, so here is the standard answer instead. ${standard()}` },
         ]);
       } finally {
-        window.clearTimeout(slowTimer);
+        window.clearTimeout(timeout);
+        if (pending.current === job) pending.current = null;
         setThinking(false);
-        setSlow(false);
       }
       return;
     }
-    setMsgs((m) => [...m, { me: false, t: plainChat(answer(t, analysis)) }]);
+    setMsgs((m) => [...m, { me: false, t: standard() }]);
+  };
+  const skipToStandard = () => {
+    const job = pending.current;
+    if (!job) return;
+    job.skipped = true;
+    job.controller.abort();
   };
   const quickQuestions = analysis
     ? [
@@ -1290,33 +1447,25 @@ function Chat() {
           aria-label="Ask about your analysis"
           className={`ios-sheet flex h-[min(34rem,calc(100dvh-5.5rem))] w-[calc(100vw-1.5rem)] flex-col overflow-hidden sm:w-[24rem] ${closing ? "popover-out" : "popover-in"}`}
         >
-          <div className="relative flex shrink-0 items-center justify-center px-3 pb-1 pt-2">
-            {aiAvailable && (
-              <label className="absolute left-3 top-0.5 flex min-h-11 cursor-pointer items-center gap-2 text-xs font-semibold text-slate-700">
-                <input
-                  type="checkbox"
-                  checked={aiOn}
-                  onChange={(e) => setAiOn(e.target.checked)}
-                  aria-describedby="ai-note"
-                  className="relative h-[26px] w-[44px] shrink-0 cursor-pointer appearance-none rounded-full bg-white/20 transition-colors duration-200 checked:bg-orange-fill after:absolute after:left-0.5 after:top-0.5 after:h-[22px] after:w-[22px] after:rounded-full after:bg-white after:shadow after:transition-transform after:duration-200 after:content-[''] checked:after:translate-x-[18px]"
-                />
-                <span aria-hidden="true">AI</span>
-                <span className="sr-only">Use AI answers</span>
-                <span id="ai-note" className="sr-only">
-                  {aiOn ? "On: a summary of your results is sent to Google." : "Off: nothing leaves this app."}
+          <div className="relative flex shrink-0 items-center gap-3 px-4 pb-3 pt-4 pr-16 [@media(max-height:560px)]:pb-1 [@media(max-height:560px)]:pt-2">
+            <span className="relative grid h-12 w-12 [@media(max-height:560px)]:h-9 [@media(max-height:560px)]:w-9 shrink-0 place-items-center rounded-full bg-gradient-to-b from-zinc-600/80 to-zinc-800 ring-1 ring-white/20 shadow-[0_4px_14px_rgba(0,0,0,0.35)]">
+              <Logo variant="mark" size={26} />
+              {aiAvailable && (
+                <span aria-hidden="true" className="absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 rounded-full bg-green ring-2 ring-zinc-800" />
+              )}
+            </span>
+            <div className="flex items-center gap-2">
+              <p className="text-[19px] font-semibold leading-none tracking-tight text-ink">Ask Speculara</p>
+              {aiAvailable && (
+                <span aria-label="AI answers on" className="rounded-md bg-orange-fill/15 px-2 py-1 text-[12px] font-bold leading-none tracking-wide text-orange-fill ring-1 ring-orange-fill/30">
+                  AI
                 </span>
-              </label>
-            )}
-            <div className="flex flex-col items-center">
-              <span className="grid h-8 w-8 place-items-center rounded-full bg-gradient-to-b from-zinc-600/80 to-zinc-800 ring-1 ring-white/15">
-                <Logo variant="mark" size={18} />
-              </span>
-              <p className="mt-0.5 text-[11px] font-semibold leading-none text-slate-700">Ask Speculara</p>
+              )}
             </div>
             <button
               onClick={close}
               aria-label="Close chat"
-              className="absolute right-2 top-0.5 grid h-11 w-11 place-items-center rounded-full text-ink transition-colors hover:bg-white/10"
+              className="absolute right-2 top-1.5 grid h-11 w-11 place-items-center rounded-full text-ink transition-colors hover:bg-white/10"
             >
               <span className="grid h-7 w-7 place-items-center rounded-full bg-white/15">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.2" strokeLinecap="round" aria-hidden="true">
@@ -1327,56 +1476,85 @@ function Chat() {
           </div>
           <div
             ref={messages}
-            className="neu-scroll min-h-0 flex-1 space-y-1.5 overflow-y-auto overscroll-contain px-3.5 py-1 text-[15px] leading-snug"
+            className="neu-scroll min-h-0 flex-1 space-y-1.5 overflow-y-auto overscroll-contain px-3.5 py-2 text-[15px] leading-snug"
             aria-live="polite"
           >
             {msgs.map((m, i) => (
               <div key={i} className={`focus-in flex ${m.me ? "justify-end" : "justify-start"}`}>
                 <div
-                  className={`max-w-[82%] whitespace-pre-line break-words rounded-[20px] px-3.5 py-2 ${m.me ? "rounded-br-md bg-orange-fill text-neutral-950" : "rounded-bl-md bg-white/[0.12] text-ink"}`}
+                  className={`max-w-[84%] whitespace-pre-line break-words rounded-[20px] px-3.5 py-2 shadow-sm ${m.me ? "rounded-br-md bg-orange-fill text-neutral-950" : "rounded-bl-md bg-white/[0.12] text-ink ring-1 ring-white/10"}`}
                 >
                   {m.t}
+                  {!m.me && m.t !== msgs[0].t && (
+                    <span
+                      className={`mt-1 flex items-center gap-1 text-[10.5px] font-medium leading-none ${m.ai ? "text-orange-fill" : "text-slate-600"}`}
+                      title={m.ai ? "Written by AI" : (m.note ?? "Built-in answer, not AI")}
+                    >
+                      {m.ai ? <Sparkles className="h-3 w-3" strokeWidth={2.4} aria-hidden="true" /> : <Calculator className="h-3 w-3" strokeWidth={2.4} aria-hidden="true" />}
+                      {m.ai ? "AI generated" : (m.note ?? "Standard answer")}
+                    </span>
+                  )}
                 </div>
               </div>
             ))}
             {thinking && (
-              <div role="status" className="flex justify-start">
-                <div className="rounded-[20px] rounded-bl-md bg-white/[0.12] px-4 py-3 text-slate-700">
-                  {slow ? (
-                    "Still working. AI answers can take up to a minute."
-                  ) : (
-                    <>
-                      <span className="flex items-center gap-1.5" aria-hidden="true">
-                        <span className="typing-dot" />
-                        <span className="typing-dot" />
-                        <span className="typing-dot" />
-                      </span>
-                      <span className="sr-only">Writing an answer…</span>
-                    </>
-                  )}
+              <div role="status" className="flex min-w-0 justify-start">
+                <div className="flex min-w-0 max-w-full items-center gap-2.5 rounded-full bg-white/[0.12] py-1.5 pl-3 pr-2 text-[13px] text-slate-700 ring-1 ring-white/10">
+                  <span className="flex shrink-0 items-center gap-1.5" aria-hidden="true">
+                    <span className="typing-dot" />
+                    <span className="typing-dot" />
+                    <span className="typing-dot" />
+                  </span>
+                  <ThinkingPhrase />
+                  <button
+                    type="button"
+                    onClick={skipToStandard}
+                    className="relative shrink-0 whitespace-nowrap rounded-full bg-white/10 px-2.5 py-0.5 text-[11px] font-medium text-ink transition-colors after:absolute after:-inset-3 after:content-[''] hover:bg-white/20"
+                  >
+                    Standard answer
+                  </button>
                 </div>
               </div>
             )}
           </div>
-          {aiAvailable && aiOn && (
+          {aiAvailable && (
             <p className="mx-4 mb-1 shrink-0 text-xs leading-snug text-slate-600">
-              A summary of your results (totals, relationships, forecasts) is sent to Google to write each answer. Your rows, post links and comments are not sent.
+              Answers use a summary of your results (totals, relationships, forecasts). Your rows, post links and comments are never sent.
             </p>
           )}
-          <div
-            role="group"
-            aria-label="Suggested questions"
-            className="no-bar flex shrink-0 gap-2 overflow-x-auto px-3.5 pb-1.5 pt-0.5"
-          >
-            {quickQuestions.map(({ label, question }) => (
-              <button
-                key={question}
-                onClick={() => send(question)}
-                className="min-h-11 shrink-0 rounded-full bg-white/10 px-4 text-[13px] font-medium text-ink transition-transform hover:bg-white/15 active:scale-95"
-              >
-                {label}
-              </button>
-            ))}
+          <div className="group/chips relative shrink-0">
+            <div
+              ref={chips}
+              role="group"
+              aria-label="Suggested questions"
+              onScroll={updateArrows}
+              className="no-bar flex gap-1.5 overflow-x-auto scroll-smooth px-3.5 pb-0.5 pt-0"
+            >
+              {quickQuestions.map(({ label, question }) => (
+                <button key={question} onClick={() => send(question)} className="group/chip min-h-11 shrink-0 active:scale-95 transition-transform">
+                  {/* The button keeps a 44px touch target; the visible chip is slim. */}
+                  <span className="block rounded-full px-3 py-1 text-[12.5px] font-normal leading-5 text-slate-700 ring-1 ring-white/15 transition-colors group-hover/chip:bg-white/10 group-hover/chip:text-ink">
+                    {label}
+                  </span>
+                </button>
+              ))}
+            </div>
+            {(["left", "right"] as const).map((side) => {
+              const show = side === "left" ? canLeft : canRight;
+              const Chevron = side === "left" ? ChevronLeft : ChevronRight;
+              return (
+                <button
+                  key={side}
+                  type="button"
+                  tabIndex={-1}
+                  aria-hidden="true"
+                  onClick={() => scrollChips(side === "left" ? -1 : 1)}
+                  className={`absolute top-1/2 hidden h-7 w-7 -translate-y-1/2 place-items-center rounded-full bg-zinc-800/90 text-ink opacity-0 shadow-md ring-1 ring-white/20 backdrop-blur transition-opacity duration-150 hover:bg-zinc-700 ${side === "left" ? "left-1.5" : "right-1.5"} ${show ? "!grid group-hover/chips:opacity-100" : ""}`}
+                >
+                  <Chevron className="h-4 w-4" strokeWidth={2.4} />
+                </button>
+              );
+            })}
           </div>
           <form
             onSubmit={(e) => {
@@ -1417,21 +1595,10 @@ function Chat() {
         }}
         aria-label={open ? "Close chat" : "Open chat"}
         aria-expanded={open}
-        className="grid h-14 w-14 place-items-center rounded-full bg-orange-fill text-neutral-950 shadow-[0_10px_34px_rgba(255,159,10,0.45)] transition-transform duration-150 hover:brightness-110 active:scale-95"
+        className="grid h-14 w-14 place-items-center rounded-full bg-gradient-to-b from-[#ffb340] to-orange-fill text-neutral-950 shadow-[0_10px_34px_rgba(255,159,10,0.45)] ring-1 ring-white/25 transition-transform duration-150 hover:scale-105 hover:brightness-110 active:scale-95"
       >
-        <svg
-          width="26"
-          height="26"
-          style={{ transform: "translate(-0.6px, -0.3px)" }} /* optical centre: the bubble's tail pulls the shape down and to the left */
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <path d="M21 12a8 8 0 0 1-11.5 7.2L4 20l1-4.5A8 8 0 1 1 21 12z" />
-        </svg>
+        {/* The eye is symmetric, so it sits exactly in the centre of the circle. */}
+        <Eye className="block h-7 w-7" strokeWidth={2.2} aria-hidden="true" />
       </button>
     </div>
   );
@@ -1652,9 +1819,23 @@ export default function App() {
           />
           <div className="mx-auto max-w-[var(--layout-app)] px-[var(--layout-gutter)]">
           <section id="data" aria-label="Add your data" className="scroll-mt-6 pt-14">
-        <div ref={listRef} id="start" className="overlay mx-auto min-w-0 max-w-3xl scroll-mt-6 rounded-3xl p-5 sm:p-7">
-          <h2 className="font-display text-3xl font-extrabold tracking-[-0.03em] text-ink">Start with your data</h2>
-                  <div className="mt-3" aria-busy={busy}>
+        <div ref={listRef} id="start" className="upload-card mx-auto min-w-0 max-w-3xl scroll-mt-6 rounded-3xl p-5 sm:p-8">
+          <div className="relative flex flex-wrap items-start justify-between gap-x-6 gap-y-3">
+            <div className="min-w-0">
+              <p className="upload-eyebrow">Step 1</p>
+              <h2 className="mt-2 font-display text-3xl font-extrabold tracking-[-0.03em] text-ink">
+                Start with your data
+              </h2>
+              <p className="mt-2 max-w-md text-sm leading-relaxed text-slate-700">
+                Add a spreadsheet of your posts, such as a CSV or Excel file with dates, views, likes or sales. Speculara reads it on your device, shows which questions your data can answer, and explains each result in plain words.
+              </p>
+            </div>
+            <span className="chip inline-flex items-center gap-1.5 px-3 py-1.5 text-xs" aria-hidden="true">
+              <Lock size={13} strokeWidth={2} />
+              Never saved
+            </span>
+          </div>
+          <div className="relative mt-6" aria-busy={busy}>
             <label htmlFor="upload" className="sr-only">
               Upload your dataset
             </label>
@@ -1670,9 +1851,15 @@ export default function App() {
                 const file = e.dataTransfer.files?.[0];
                 if (file && !busy) void analyzeFile(file);
               }}
-              className={`rounded-2xl border-2 border-dashed p-3.5 text-center transition-colors ${dragging ? "border-ink bg-ink/5" : "border-border-default"}`}
+              className={`upload-zone ${dragging ? "is-dragging" : ""} ${busy ? "is-busy" : ""}`}
             >
-              <p className="text-sm text-slate-700">Drop a CSV or XLSX file here, or choose one</p>
+              <span className="upload-zone__icon" aria-hidden="true">
+                <CloudUpload size={26} strokeWidth={1.6} />
+              </span>
+              <p className="font-display text-xl text-ink">
+                {dragging ? "Release to upload" : "Drop a CSV or XLSX file here"}
+              </p>
+              <p className="mt-1 text-sm text-slate-600">or choose one from your computer</p>
               <input
                 id="upload"
                 type="file"
@@ -1684,12 +1871,23 @@ export default function App() {
                   if (file) void analyzeFile(file);
                   e.target.value = "";
                 }}
-                className="mt-3 block min-h-11 w-full min-w-0 rounded-xl text-sm file:mr-3 file:min-h-11 file:rounded-xl file:border-0 file:bg-white file:px-4 file:py-2 file:font-semibold file:text-neutral-900"
+                className="upload-input mt-5"
               />
+              <ul className="mt-6 flex flex-wrap justify-center gap-2" aria-hidden="true">
+                {["CSV (UTF-8)", "XLSX first sheet", "5 MB", "20,000 rows", "50 columns"].map((spec) => (
+                  <li key={spec} className="upload-spec">
+                    {spec}
+                  </li>
+                ))}
+              </ul>
             </div>
-            <p id="upload-help" className="mt-2 text-xs leading-relaxed text-slate-600">
+            <p id="upload-help" className="sr-only">
               CSV (UTF-8) or XLSX first sheet. Up to 5 MB, 20,000 rows, 50 columns. Processed in server
               memory and never saved.
+            </p>
+            <p className="mt-3 flex items-center justify-center gap-1.5 text-xs text-slate-600" aria-hidden="true">
+              <ShieldCheck size={14} strokeWidth={1.8} />
+              Processed in server memory and never saved.
             </p>
             <p id="upload-msg" className="mt-2 text-sm text-wine" role="alert">
               {err}
@@ -1699,36 +1897,30 @@ export default function App() {
                 {loadingMessage}
               </p>
             )}
+            <div className="upload-or" aria-hidden="true">
+              <span>or</span>
+            </div>
             <button
               type="button"
               disabled={busy}
               onClick={() => void loadDemo()}
-              className="ctl mt-2 min-h-11 w-full rounded-xl text-sm font-semibold text-ink"
+              className="ctl upload-demo min-h-12 w-full text-sm font-semibold text-ink"
             >
+              <Sparkles size={16} strokeWidth={1.9} aria-hidden="true" />
               Try synthetic demo data
             </button>
-            <div className="mt-1 flex flex-wrap gap-x-4 text-xs">
-              <a
-                href="/demo/speculara-synthetic.csv"
-                download
-                className="inline-flex min-h-12 min-w-[var(--size-target)] items-center rounded-lg px-1 text-slate-700 underline hover:text-ink"
-              >
-                Demo CSV
-              </a>
-              <a
-                href="/demo/speculara-synthetic.xlsx"
-                download
-                className="inline-flex min-h-12 min-w-[var(--size-target)] items-center rounded-lg px-1 text-slate-700 underline hover:text-ink"
-              >
-                Demo XLSX
-              </a>
-              <a
-                href="/demo/speculara-text-synthetic.csv"
-                download
-                className="inline-flex min-h-12 min-w-[var(--size-target)] items-center rounded-lg px-1 text-slate-700 underline hover:text-ink"
-              >
-                Text-only demo
-              </a>
+            <div className="mt-4 flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-xs">
+              <span className="text-slate-600">Sample files</span>
+              {[
+                ["/demo/speculara-synthetic.csv", "Demo CSV"],
+                ["/demo/speculara-synthetic.xlsx", "Demo XLSX"],
+                ["/demo/speculara-text-synthetic.csv", "Text-only demo"],
+              ].map(([href, label]) => (
+                <a key={href} href={href} download className="upload-sample">
+                  <Download size={13} strokeWidth={1.9} aria-hidden="true" />
+                  {label}
+                </a>
+              ))}
             </div>
             <ProfileLink
               disabled={busy}

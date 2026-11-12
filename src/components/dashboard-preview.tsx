@@ -155,7 +155,7 @@ export default function DashboardPreview({
           )}
           {forecast && (
             <p className="mt-4 text-sm text-slate-700">
-              <span className="font-semibold text-ink">Next day:</span> about {fmt(forecast.points[0].value)} {forecast.metric}, a rough estimate checked against the last three days.
+              <span className="font-semibold text-ink">Next day:</span> about {fmt(forecast.points[0].value)} {forecast.metric}. This is a rough estimate, not a promise. Speculara tested it by predicting each of the last three days from the days before, then comparing with what really happened, so you can see how far off it tends to be.
             </p>
           )}
         </>

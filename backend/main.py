@@ -47,6 +47,7 @@ def health():
 # ---- Optional profile link analysis (off by default, this computer only) ----
 class ProfileUrl(BaseModel):
     url: str = Field(min_length=3, max_length=500)
+    limit: int = Field(20, ge=5, le=40)  # posts to read; a smaller number finishes sooner
 
 
 class ProfileLogin(BaseModel):
@@ -99,7 +100,8 @@ async def profile_analyze(body: ProfileUrl, request: Request):
     if collector.status()['login_open']:
         raise HTTPException(409,'Finish signing in, then click Done signing in before analyzing.')
     try:
-        profile, posts = await collector.collect_profile(url)
+        # Only pass the limit when it is not the default, so the collector keeps its one-argument call.
+        profile, posts = await collector.collect_profile(url, **({'limit': body.limit} if body.limit != 20 else {}))
     except collector.CollectorError as exc:
         raise HTTPException(exc.status_code,str(exc)) from exc
     except Exception as exc:

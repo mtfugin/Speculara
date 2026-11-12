@@ -4,6 +4,8 @@ for (const loaded of [false, true]) {
   test(`chat remains usable on short screens (${loaded ? "loaded synthetic demo" : "empty"})`, async ({
     page,
   }) => {
+    // Layout test: use the built-in answers so the reply does not depend on a live AI service.
+    await page.route("**/api/health", (route) => route.fulfill({ json: { status: "ok", ai: false } }));
     await page.goto("/");
     if (loaded) {
       await page.getByRole("button", { name: "Try synthetic demo data" }).click();

@@ -174,6 +174,17 @@ class ProfileRouteTests(unittest.TestCase):
         self.assertIn("No comment text was returned", profile.notes)
         self.assertEqual(posts[0].method, "playwright browser, signed out")
 
+    def test_post_limit_is_validated_and_passed_on(self):
+        seen = []
+        async def fake(url, limit=20):
+            seen.append(limit)
+            return collector.normalize(fixture("tiktok_profile.json"), "https://www.tiktok.com/@examplebrand", "TikTok", "examplebrand")
+        with patch.dict(os.environ, {"ENABLE_PROFILE_COLLECTOR": "1"}), patch.object(collector, "collect_profile", fake):
+            self.assertEqual(client.post("/api/profile/analyze", json={"url": "https://www.tiktok.com/@examplebrand", "limit": 10}).status_code, 200)
+            self.assertEqual(client.post("/api/profile/analyze", json={"url": "https://www.tiktok.com/@examplebrand", "limit": 3}).status_code, 422)
+            self.assertEqual(client.post("/api/profile/analyze", json={"url": "https://www.tiktok.com/@examplebrand", "limit": 41}).status_code, 422)
+        self.assertEqual(seen, [10])
+
     def test_worker_errors_are_told_apart(self):
         cases = {
             "the profile @nobody did not load": (404, "not_found"),

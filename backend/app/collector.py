@@ -302,7 +302,7 @@ def normalize(data: dict, canonical_url: str, network: str, handle: str) -> tupl
     return ProfileInfo(platform=network, handle=handle, notes=notes, sources=sources, collector="socialmonitor", unavailable_metrics=sorted(missing)), posts
 
 
-async def collect_profile(raw_url: str) -> tuple[ProfileInfo, list[Post]]:
+async def collect_profile(raw_url: str, limit: int = 20) -> tuple[ProfileInfo, list[Post]]:
     canonical, network, handle = profile_url(raw_url)
-    result = await asyncio.to_thread(_invoke_sync, {"action": "collect", "url": canonical, "limit": 20})
+    result = await asyncio.to_thread(_invoke_sync, {"action": "collect", "url": canonical, "limit": max(5, min(40, int(limit)))})
     return normalize(result, canonical, network, handle)
