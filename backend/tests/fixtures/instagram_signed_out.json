@@ -1,0 +1,21 @@
+{
+ "network": "instagram",
+ "handle": "examplecafe",
+ "url": "https://www.instagram.com/examplecafe/",
+ "signed_in": false,
+ "notes": [],
+ "posts": [
+  {
+   "ext_id": "1",
+   "url": "https://www.instagram.com/p/AAA/",
+   "posted_at": "2026-10-20T08:00:00.000Z",
+   "kind": "carousel",
+   "caption": "Open late this week",
+   "likes": 120,
+   "comments_count": 9,
+   "shares": null,
+   "views": null,
+   "comments": []
+  }
+ ]
+}

@@ -84,3 +84,10 @@ Still untested: private profile, expired Instagram sign-in, rate limiting, TikTo
 - `/api/profile/analyze` returns a `provenance` block: source, handle, collector, method, collected-at, post count, observed versus blank per metric, comments read versus kept, and `inferred: false`.
 - Collected values are only observed values. Nothing in this path is model inferred; any later inferred field must be marked as such.
 - Not done: showing the provenance in the screen (a small "Where this came from" panel) and the comment cap decision for SENSE. Both go to 1.6 and stage 2.
+
+## Phase 1.4: collector test harness (done)
+- Fixtures in `backend/tests/fixtures/` follow the real worker output shape captured from a live TikTok run, with invented text and handles (no real people or comments are stored). They cover: non-ASCII captions, a duplicate post, a bad date, a post with no counts, an observed zero, comment text over the cap, and an Instagram signed-out page.
+- Tests run them through `normalize` and through `/api/profile/analyze` with no network. Backend suite: 111 tests pass.
+- The second backend suite (`backend/app`) needs the extras: `cd backend` then `python -m pytest app/tests` in an environment with `requirements-extras.txt`. 63 tests pass there. It is not part of the default `unittest` run; decide in 1.7 whether to add it to the check.
+- Opt-in live check: `SPECULARA_LIVE_URL=<profile> npm run collector:live`. It does nothing without the variable, prints counts and timing only, and saves nothing. Live result on the TikTok company page: 20 posts in 90 s, all four counts observed on every post, 902 comment rows read (160 kept after the cap of 8 per post).
+- Not covered by fixtures: the Node parsing of raw TikTok and Instagram pages (needs recorded pages, which hold third party data); a captcha stopping the run; a layout change. The Node worker tests (12) still cover control flow.

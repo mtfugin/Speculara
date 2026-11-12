@@ -1,5 +1,7 @@
+import json
 import os
 import unittest
+from pathlib import Path
 from datetime import datetime, timezone
 from unittest.mock import patch
 
@@ -12,6 +14,11 @@ from backend.app.schemas import CommentEvidence, Post, ProfileInfo
 from backend.main import app
 
 client = TestClient(app)
+FIXTURES = Path(__file__).parent / 'fixtures'
+
+
+def fixture(name):
+    return json.loads((FIXTURES / name).read_text(encoding='utf-8'))
 
 
 def make_posts(days=16):
@@ -128,6 +135,44 @@ class ProfileRouteTests(unittest.TestCase):
         self.assertEqual(prov["posts"], 16)
         self.assertEqual(prov["source"], "Instagram")
         self.assertFalse(prov["inferred"])
+
+    def test_tiktok_fixture_through_normalize(self):
+        data = fixture("tiktok_profile.json")
+        profile, posts = collector.normalize(data, data["url"], "TikTok", data["handle"])
+        self.assertEqual([p.id for p in posts], ["7000000000000000001", "7000000000000000002", "7000000000000000003"])  # duplicate and bad date dropped
+        first, photo, bare = posts
+        self.assertIn("Café", first.caption)  # non-ASCII survives
+        self.assertIn("’", first.caption)
+        self.assertEqual((first.likes, first.comments, first.shares, first.views), (836, 134, 25, 24600))
+        self.assertEqual(first.comments_seen, 12)
+        self.assertEqual(len(first.comment_evidence), collector.COMMENT_CAP)
+        self.assertEqual(photo.type, "Photo")
+        self.assertIn("comments", photo.observed_metrics)  # an observed zero
+        self.assertEqual(photo.comments, 0)
+        self.assertEqual(bare.observed_metrics, [])  # nothing shown, all blank
+        self.assertIn("Skipped 1 posts", profile.notes)
+        self.assertEqual(profile.collector, "socialmonitor")
+
+    def test_tiktok_fixture_through_the_api(self):
+        data = fixture("tiktok_profile.json")
+        async def fake(url):
+            return collector.normalize(data, data["url"], "TikTok", data["handle"])
+        with patch.dict(os.environ, {"ENABLE_PROFILE_COLLECTOR": "1"}), patch.object(collector, "collect_profile", fake):
+            r = client.post("/api/profile/analyze", json={"url": "https://www.tiktok.com/@examplebrand"})
+        self.assertEqual(r.status_code, 200)
+        body = r.json()
+        self.assertEqual(body["provenance"]["posts"], 3)
+        self.assertEqual(body["provenance"]["metrics"]["views"], {"observed": 2, "blank": 1})
+        self.assertNotIn("sales", body["totals"])
+
+    def test_instagram_signed_out_fixture_says_so(self):
+        data = fixture("instagram_signed_out.json")
+        profile, posts = collector.normalize(data, data["url"], "Instagram", data["handle"])
+        self.assertEqual(len(posts), 1)
+        self.assertEqual(posts[0].type, "Carousel")
+        self.assertIn("Sign in for comment text", profile.notes)
+        self.assertIn("No comment text was returned", profile.notes)
+        self.assertEqual(posts[0].method, "playwright browser, signed out")
 
     def test_worker_errors_are_told_apart(self):
         cases = {

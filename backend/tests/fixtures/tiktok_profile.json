@@ -1,0 +1,230 @@
+{
+ "network": "tiktok",
+ "handle": "examplebrand",
+ "url": "https://www.tiktok.com/@examplebrand",
+ "signed_in": false,
+ "notes": [],
+ "posts": [
+  {
+   "ext_id": "7000000000000000001",
+   "url": "https://www.tiktok.com/@examplebrand/video/7000000000000000001",
+   "posted_at": "2026-11-01T10:00:00.000Z",
+   "kind": "video",
+   "caption": "Café ng bayan: bagong lasa na! ☕ Don’t miss it",
+   "thumb_url": "",
+   "likes": 836,
+   "comments_count": 134,
+   "shares": 25,
+   "views": 24600,
+   "comments": [
+    {
+     "ext_id": "c0",
+     "parent_ext_id": null,
+     "author": "user_0",
+     "text": "Magkano po?",
+     "likes": 0,
+     "posted_at": "2026-11-02T08:00:00.000Z",
+     "author_avatar": "",
+     "author_url": "",
+     "media_url": null,
+     "author_followers": null
+    },
+    {
+     "ext_id": "c1",
+     "parent_ext_id": null,
+     "author": "user_1",
+     "text": "Where can I buy this?",
+     "likes": 1,
+     "posted_at": "2026-11-02T08:00:00.000Z",
+     "author_avatar": "",
+     "author_url": "",
+     "media_url": null,
+     "author_followers": null
+    },
+    {
+     "ext_id": "c2",
+     "parent_ext_id": null,
+     "author": "user_2",
+     "text": "Sobrang mahal para sa estudyante",
+     "likes": 2,
+     "posted_at": "2026-11-02T08:00:00.000Z",
+     "author_avatar": "",
+     "author_url": "",
+     "media_url": null,
+     "author_followers": null
+    },
+    {
+     "ext_id": "c3",
+     "parent_ext_id": null,
+     "author": "user_3",
+     "text": "Is this still available?",
+     "likes": 3,
+     "posted_at": "2026-11-02T08:00:00.000Z",
+     "author_avatar": "",
+     "author_url": "",
+     "media_url": null,
+     "author_followers": null
+    },
+    {
+     "ext_id": "c4",
+     "parent_ext_id": null,
+     "author": "user_4",
+     "text": "Ang sarap!",
+     "likes": 4,
+     "posted_at": "2026-11-02T08:00:00.000Z",
+     "author_avatar": "",
+     "author_url": "",
+     "media_url": null,
+     "author_followers": null
+    },
+    {
+     "ext_id": "c5",
+     "parent_ext_id": null,
+     "author": "user_5",
+     "text": "Too far from our area",
+     "likes": 5,
+     "posted_at": "2026-11-02T08:00:00.000Z",
+     "author_avatar": "",
+     "author_url": "",
+     "media_url": null,
+     "author_followers": null
+    },
+    {
+     "ext_id": "c6",
+     "parent_ext_id": null,
+     "author": "user_6",
+     "text": "Pwede ba delivery?",
+     "likes": 6,
+     "posted_at": "2026-11-02T08:00:00.000Z",
+     "author_avatar": "",
+     "author_url": "",
+     "media_url": null,
+     "author_followers": null
+    },
+    {
+     "ext_id": "c7",
+     "parent_ext_id": null,
+     "author": "user_7",
+     "text": "Legit ba to?",
+     "likes": 7,
+     "posted_at": "2026-11-02T08:00:00.000Z",
+     "author_avatar": "",
+     "author_url": "",
+     "media_url": null,
+     "author_followers": null
+    },
+    {
+     "ext_id": "c8",
+     "parent_ext_id": null,
+     "author": "user_8",
+     "text": "Wala na bang stock?",
+     "likes": 8,
+     "posted_at": "2026-11-02T08:00:00.000Z",
+     "author_avatar": "",
+     "author_url": "",
+     "media_url": null,
+     "author_followers": null
+    },
+    {
+     "ext_id": "c9",
+     "parent_ext_id": null,
+     "author": "user_9",
+     "text": "Gusto ko rin",
+     "likes": 9,
+     "posted_at": "2026-11-02T08:00:00.000Z",
+     "author_avatar": "",
+     "author_url": "",
+     "media_url": null,
+     "author_followers": null
+    },
+    {
+     "ext_id": "c10",
+     "parent_ext_id": null,
+     "author": "user_10",
+     "text": "Ilang oras po bukas?",
+     "likes": 10,
+     "posted_at": "2026-11-02T08:00:00.000Z",
+     "author_avatar": "",
+     "author_url": "",
+     "media_url": null,
+     "author_followers": null
+    },
+    {
+     "ext_id": "c11",
+     "parent_ext_id": null,
+     "author": "user_11",
+     "text": "Thank you",
+     "likes": 11,
+     "posted_at": "2026-11-02T08:00:00.000Z",
+     "author_avatar": "",
+     "author_url": "",
+     "media_url": null,
+     "author_followers": null
+    }
+   ]
+  },
+  {
+   "ext_id": "7000000000000000002",
+   "url": "https://www.tiktok.com/@examplebrand/photo/7000000000000000002",
+   "posted_at": "2026-11-03T19:38:55.000Z",
+   "kind": "photo",
+   "caption": "All your favorite flavors",
+   "thumb_url": "",
+   "likes": 4271,
+   "comments_count": 0,
+   "shares": 393,
+   "views": 112800,
+   "comments": []
+  },
+  {
+   "ext_id": "7000000000000000003",
+   "url": "https://www.tiktok.com/@examplebrand/video/7000000000000000003",
+   "posted_at": "2026-11-05T09:00:00.000Z",
+   "kind": "video",
+   "caption": "No counts shown on this one",
+   "thumb_url": "",
+   "likes": null,
+   "comments_count": null,
+   "shares": null,
+   "views": null,
+   "comments": [
+    {
+     "ext_id": "c1",
+     "parent_ext_id": null,
+     "author": "user_1",
+     "text": "Hello?",
+     "likes": 1,
+     "posted_at": "2026-11-02T08:00:00.000Z",
+     "author_avatar": "",
+     "author_url": "",
+     "media_url": null,
+     "author_followers": null
+    }
+   ]
+  },
+  {
+   "ext_id": "7000000000000000001",
+   "url": "https://www.tiktok.com/@examplebrand/video/7000000000000000001",
+   "posted_at": "2026-11-01T10:00:00.000Z",
+   "kind": "video",
+   "caption": "duplicate of the first post",
+   "likes": 1,
+   "comments_count": 1,
+   "shares": 1,
+   "views": 1,
+   "comments": []
+  },
+  {
+   "ext_id": "7000000000000000004",
+   "url": "",
+   "posted_at": "not a date",
+   "kind": "video",
+   "caption": "bad date",
+   "likes": 1,
+   "comments_count": 1,
+   "shares": 1,
+   "views": 1,
+   "comments": []
+  }
+ ]
+}
