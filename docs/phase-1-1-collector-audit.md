@@ -68,6 +68,6 @@ Problems to fix in 1.2:
 1. A missing profile returns 503 (server unavailable). It should be a 404 style "profile not found or private", in plain words. Private and missing cannot be told apart yet.
 2. A cancel is reported as an error (503 "Collection cancelled."). It should be its own non-error outcome, and the UI should not show a failure.
 3. The cancel call blocked for about 12 seconds before returning, because it waits up to 12 s for the worker to stop. The UI needs to show "Cancelling" meanwhile.
-4. While collecting, the worker logged that the public profile opened "past TikTok's Please wait check". Confirm in the worker code that this only waits for the interstitial to clear and does not solve or bypass any challenge; if it does anything more, remove it.
+4. Checked: the "Please wait" message is TikTok's own script check. The collector first asks from Node, and when TikTok answers with that page it opens a normal logged-out browser page, which runs the check by itself (`vendor/collect/tiktok.ts`). A captcha is not solved: the code throws a `Challenge` error and stops. That is acceptable. Keep it that way, and keep a test that a captcha stops the run.
 
 Still untested: private profile, expired Instagram sign-in, rate limiting, TikTok layout change.
