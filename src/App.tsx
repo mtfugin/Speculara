@@ -1286,7 +1286,10 @@ function Chat() {
           className={`overlay flex h-[min(30rem,calc(100dvh-5.5rem))] w-[calc(100vw-2rem)] flex-col overflow-hidden rounded-3xl sm:w-96 ${closing ? "popover-out" : "popover-in"}`}
         >
           <div className="flex shrink-0 items-center justify-between px-3">
-            <p className="font-display font-bold text-ink">Ask Speculara</p>
+            <p className="inline-flex items-center gap-2 font-display font-bold text-ink">
+              <Logo variant="mark" size={22} />
+              Ask Speculara
+            </p>
             {aiAvailable && (
               <label className="ml-auto mr-1 flex min-h-11 items-center gap-1.5 text-sm font-semibold text-ink">
                 <input
@@ -1320,7 +1323,7 @@ function Chat() {
             {msgs.map((m, i) => (
               <div
                 key={i}
-                className={`max-w-[85%] whitespace-pre-line break-words rounded-2xl px-3 py-2 ${m.me ? "ml-auto bg-ink text-white" : "bg-white/70 text-slate-800"}`}
+                className={`max-w-[85%] whitespace-pre-line break-words rounded-2xl px-3 py-2 ${m.me ? "ml-auto bg-ink text-white" : "border border-border-default bg-white text-slate-800"}`}
               >
                 {m.t}
               </div>
@@ -1605,6 +1608,22 @@ export default function App() {
                   </li>
                 ))}
               </ul>
+              <div className="surface stagger-in mt-8 hidden max-w-lg rounded-2xl p-5 md:block" style={{ ["--i" as string]: 4 }} aria-hidden="true">
+                <p className="text-xs font-semibold uppercase tracking-wide text-slate-600">Example of an answer</p>
+                <p className="mt-1 font-display text-lg font-semibold leading-snug text-ink">
+                  Sales dipped a little last week, and your carousel posts did best.
+                </p>
+                <div className="mt-4 flex h-16 items-end gap-1.5">
+                  {[38, 52, 44, 60, 48, 70, 56, 34].map((h, i) => (
+                    <div
+                      key={i}
+                      className="bar-grow w-full rounded-t-md"
+                      style={{ ["--i" as string]: i, height: `${h}%`, background: i === 5 ? "var(--color-ink)" : "var(--color-chart-secondary)" }}
+                    />
+                  ))}
+                </div>
+                <p className="mt-3 text-sm text-slate-600">Sample numbers for illustration, not your data.</p>
+              </div>
             </div>
 
             <div ref={listRef} className="surface stagger-in min-w-0 rounded-2xl p-5 sm:p-6" style={{ ["--i" as string]: 3 }}>
@@ -1844,7 +1863,7 @@ export default function App() {
                         50,
                       );
                     }}
-                    className={`ctl flex h-full min-h-[var(--size-target)] w-full flex-col items-start gap-3 rounded-2xl p-4 text-left ${picked === k ? "is-selected" : ""}`}
+                    className={`ctl flex h-full min-h-[var(--size-target)] w-full flex-col items-start gap-3 rounded-2xl p-4 text-left disabled:opacity-80 ${picked === k ? "is-selected" : ""} ${locked ? "border-dashed !bg-transparent" : ""}`}
                   >
                     <span className="grid h-10 w-10 place-items-center rounded-xl bg-ink/10 text-ink">
                       <Icon name={k} size="lg" />
@@ -2016,9 +2035,10 @@ export default function App() {
             </ul>
           </section>
 
-          <footer
+          <section
             id="docs"
-            className="surface mt-10 scroll-mt-24 rounded-3xl p-5 text-sm text-slate-700 sm:p-6"
+            aria-label="About your results"
+            className="surface mb-12 mt-10 scroll-mt-24 rounded-2xl p-5 text-sm text-slate-700 sm:p-6"
           >
             <p className="font-semibold text-ink">About your results</p>
             <p className="mt-1">
@@ -2036,8 +2056,14 @@ export default function App() {
                 connected.
               </p>
             </details>
-          </footer>
+          </section>
         </main>
+        <footer className="border-t border-border-default bg-white">
+          <div className="mx-auto flex max-w-[var(--layout-app)] flex-wrap items-center justify-between gap-3 px-[var(--layout-gutter)] py-8 text-sm text-slate-600">
+            <Logo size={24} />
+            <p>Honest numbers. Plain words. Demo records are fictional.</p>
+          </div>
+        </footer>
         <Chat key={revision} />
       </div>
     </Results.Provider>

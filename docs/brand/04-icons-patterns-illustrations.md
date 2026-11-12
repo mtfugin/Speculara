@@ -51,4 +51,6 @@ Illustrations are components in `src/design-system/illustrations.tsx`. Add new o
 
 ## Applications
 
+Home hero also shows an "Example of an answer" card (sample bars and one sentence, labelled as sample numbers) so people see the product before they upload. It is decorative and hidden from assistive technology.
+
 Hero (rings), module empty states (needsData), loading (animated mark), file previews and the favicon (logo family), presentation covers (lens tile plus reversed logo). Social templates and video are out of scope.
