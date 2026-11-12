@@ -1,17 +1,12 @@
-"use client";
-
 import React, { useEffect, useId, useState } from "react";
-import { ArrowRight, ArrowUpRight, Building2, Megaphone, Menu, Newspaper, Palette, Play, Search, X } from "lucide-react";
+import { ArrowRight, ArrowUpRight, Menu, X } from "lucide-react";
 import { Logo } from "@/design-system/Logo";
+import { MARK_BARS } from "@/design-system/Logo";
 
-/* Responsive Hero Banner: the supplied template, used as given.
-   Markup, classes and layout are the template's. Only these things differ:
-   - Copy is Speculara's, not the space copy.
-   - Image assets are filled: the background is an Unsplash photo (checked to exist); the logo is the live Speculara logo;
-     the partner logos are lucide-react icons with labels instead of CDN images.
-   - Inline svgs are lucide-react icons.
-   - The template toggled the mobile menu state but never rendered a menu, so one is rendered here.
-   - Actions can also be buttons (onCtaClick, onPrimaryClick, onSecondaryClick) so the page can start the demo. */
+/* Responsive Hero Banner, evolved from the supplied template.
+   Kept: nav pill, menu, headline, two actions, shadcn-style props.
+   Changed on request: no photo (the background is drawn: a dot grid and the logo's bars with their reflection),
+   no badge, no partner row, a new display face, and the first screen fits one viewport with the upload card beside the text. */
 
 interface NavLink {
     label: string;
@@ -19,24 +14,13 @@ interface NavLink {
     isActive?: boolean;
 }
 
-interface Partner {
-    logoUrl?: string;
-    icon?: React.ReactNode;
-    label?: string;
-    href: string;
-}
-
 interface ResponsiveHeroBannerProps {
-    logoUrl?: string;
-    backgroundImageUrl?: string;
     navLinks?: NavLink[];
     ctaButtonText?: string;
     ctaButtonHref?: string;
     onCtaClick?: () => void;
-    badgeText?: string;
-    badgeLabel?: string;
     title?: string;
-    titleLine2?: string;
+    emphasis?: string;
     description?: string;
     primaryButtonText?: string;
     primaryButtonHref?: string;
@@ -44,8 +28,8 @@ interface ResponsiveHeroBannerProps {
     secondaryButtonText?: string;
     secondaryButtonHref?: string;
     onSecondaryClick?: () => void;
-    partnersTitle?: string;
-    partners?: Partner[];
+    /** Content beside the headline, usually the upload card. */
+    aside?: React.ReactNode;
 }
 
 /** A link, or a button when a click handler is given. */
@@ -70,22 +54,47 @@ const Action = ({
         </a>
     );
 
+/** The logo's bars and reflection, drawn large behind the hero. They rise once, then stay still. */
+function MirrorBackdrop() {
+    const top = 24 - 3;
+    const bottom = 24 + 3;
+    return (
+        <svg
+            className="pointer-events-none absolute -bottom-24 -right-24 -z-10 hidden h-[860px] w-[860px] lg:block"
+            viewBox="0 0 48 48"
+            aria-hidden="true"
+            focusable="false"
+        >
+            {MARK_BARS.map((b, i) => (
+                <g key={b.x}>
+                    <rect
+                        className="bar-grow"
+                        style={{ ["--i" as string]: i, transformBox: "fill-box", transformOrigin: "50% 100%" }}
+                        x={b.x} y={top - b.h} width="8" height={b.h} rx="3" fill="none" stroke="#f5f5f7" strokeOpacity="0.14" strokeWidth="0.12"
+                    />
+                    <rect
+                        className="bar-grow"
+                        style={{ ["--i" as string]: i + 3, transformBox: "fill-box", transformOrigin: "50% 0%" }}
+                        x={b.x} y={bottom} width="8" height={b.h} rx="3" fill="none" stroke="#64d2ff" strokeOpacity="0.28" strokeWidth="0.12"
+                    />
+                </g>
+            ))}
+        </svg>
+    );
+}
+
 const ResponsiveHeroBanner: React.FC<ResponsiveHeroBannerProps> = ({
-    logoUrl,
-    backgroundImageUrl = "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=2400&q=80",
     navLinks = [
         { label: "Home", href: "#top", isActive: true },
-        { label: "Start", href: "#start" },
+        { label: "Challenge", href: "#challenge" },
         { label: "Questions", href: "#questions" },
         { label: "About", href: "#docs" }
     ],
     ctaButtonText = "Try the demo",
     ctaButtonHref = "#start",
     onCtaClick,
-    badgeLabel = "New",
-    badgeText = "Plain-English answers from your own numbers",
-    title = "Turn views, saves, and sales",
-    titleLine2 = "into the next decision.",
+    title = "Turn views, saves, and sales into the next",
+    emphasis = "decision.",
     description = "Upload your CSV or Excel export. Get measured findings, clear limits, and a next action grounded in views, saves and sales.",
     primaryButtonText = "Try the demo",
     primaryButtonHref = "#start",
@@ -93,14 +102,7 @@ const ResponsiveHeroBanner: React.FC<ResponsiveHeroBannerProps> = ({
     secondaryButtonText = "Upload a file",
     secondaryButtonHref = "#start",
     onSecondaryClick,
-    partnersTitle = "Built for the teams who answer to the numbers",
-    partners = [
-        { icon: <Megaphone className="h-4 w-4" />, label: "Marketing Teams", href: "#start" },
-        { icon: <Building2 className="h-4 w-4" />, label: "Advertisement Agencies", href: "#start" },
-        { icon: <Newspaper className="h-4 w-4" />, label: "PR Agencies", href: "#start" },
-        { icon: <Palette className="h-4 w-4" />, label: "Brand Strategists", href: "#start" },
-        { icon: <Search className="h-4 w-4" />, label: "Market Research Analysts", href: "#start" }
-    ] as Partner[]
+    aside
 }) => {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const menuId = useId();
@@ -113,41 +115,36 @@ const ResponsiveHeroBanner: React.FC<ResponsiveHeroBannerProps> = ({
     }, [mobileMenuOpen]);
 
     return (
-        <section id="top" className="on-dark w-full isolate min-h-screen overflow-hidden relative">
-            <img
-                src={backgroundImageUrl}
-                alt=""
-                className="w-full h-full object-cover absolute top-0 right-0 bottom-0 left-0"
+        <section id="top" className="on-dark relative isolate flex min-h-svh w-full flex-col overflow-hidden bg-canvas">
+            {/* Background: a fine dot grid that fades toward the edges, the logo's bars, and one soft blue light. */}
+            <div
+                className="pointer-events-none absolute inset-0 -z-10"
+                aria-hidden="true"
+                style={{
+                    backgroundImage:
+                        "radial-gradient(rgba(245,245,247,0.09) 1px, transparent 1px), radial-gradient(60% 55% at 12% 105%, rgba(10,132,255,0.16), transparent 70%)",
+                    backgroundSize: "28px 28px, 100% 100%",
+                    maskImage: "radial-gradient(90% 85% at 35% 45%, #000 35%, transparent 90%)",
+                    WebkitMaskImage: "radial-gradient(90% 85% at 35% 45%, #000 35%, transparent 90%)"
+                }}
             />
-            <div className="pointer-events-none absolute inset-0 ring-1 ring-black/30" />
-            {/* Photo legibility: the template relied on a dark photo; this keeps the text readable on any image. */}
-            <div className="pointer-events-none absolute inset-0 bg-black/45" />
+            <MirrorBackdrop />
 
-            <header className="z-10 xl:top-4 relative">
-                <div className="mx-6">
-                    <div className="flex items-center justify-between pt-4">
-                        {logoUrl ? (
-                            <a
-                                href="#top"
-                                aria-label="Speculara home"
-                                className="inline-flex items-center justify-center bg-center w-[100px] h-[40px] bg-cover rounded"
-                                style={{ backgroundImage: `url(${logoUrl})` }}
-                            />
-                        ) : (
-                            <a href="#top" aria-label="Speculara home" className="inline-flex min-h-11 items-center rounded">
-                                <Logo size={32} tone="reversed" />
-                            </a>
-                        )}
+            <header className="relative z-10">
+                <div className="mx-auto max-w-[var(--layout-app)] px-[var(--layout-gutter)]">
+                    <div className="flex h-20 items-center justify-between">
+                        <a href="#top" aria-label="Speculara home" className="inline-flex min-h-11 items-center rounded">
+                            <Logo size={32} tone="reversed" />
+                        </a>
 
-                        <nav aria-label="Primary" className="hidden md:flex items-center gap-2">
-                            <div className="flex items-center gap-1 rounded-full bg-white/5 px-1 py-1 ring-1 ring-white/10 backdrop-blur">
+                        <nav aria-label="Primary" className="hidden items-center gap-2 md:flex">
+                            <div className="flex items-center gap-1 rounded-full bg-white/[0.04] p-1 ring-1 ring-white/10 backdrop-blur">
                                 {navLinks.map((link, index) => (
                                     <a
                                         key={index}
                                         href={link.href}
                                         aria-current={link.isActive ? "page" : undefined}
-                                        className={`px-3 py-2 text-sm font-medium hover:text-white font-sans transition-colors ${link.isActive ? 'text-white/90' : 'text-white/80'
-                                            }`}
+                                        className={`rounded-full px-3 py-2 text-sm font-medium transition-colors hover:text-white ${link.isActive ? "text-white" : "text-white/70"}`}
                                     >
                                         {link.label}
                                     </a>
@@ -155,7 +152,7 @@ const ResponsiveHeroBanner: React.FC<ResponsiveHeroBannerProps> = ({
                                 <Action
                                     href={ctaButtonHref}
                                     onClick={onCtaClick}
-                                    className="ml-1 inline-flex items-center gap-2 rounded-full bg-white px-3.5 py-2 text-sm font-medium text-neutral-900 hover:bg-white/90 font-sans transition-colors"
+                                    className="ml-1 inline-flex items-center gap-2 rounded-full bg-white px-3.5 py-2 text-sm font-semibold text-neutral-900 transition-colors hover:bg-white/90"
                                 >
                                     {ctaButtonText}
                                     <ArrowUpRight className="h-4 w-4" />
@@ -165,7 +162,7 @@ const ResponsiveHeroBanner: React.FC<ResponsiveHeroBannerProps> = ({
 
                         <button
                             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                            className="md:hidden inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/10 ring-1 ring-white/15 backdrop-blur"
+                            className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-white/[0.06] ring-1 ring-white/15 backdrop-blur md:hidden"
                             aria-expanded={mobileMenuOpen}
                             aria-controls={menuId}
                             aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
@@ -175,7 +172,7 @@ const ResponsiveHeroBanner: React.FC<ResponsiveHeroBannerProps> = ({
                     </div>
 
                     {mobileMenuOpen && (
-                        <div id={menuId} className="md:hidden mt-3 rounded-2xl bg-black/50 p-2 ring-1 ring-white/10 backdrop-blur">
+                        <div id={menuId} className="mb-3 rounded-3xl bg-zinc-900/80 p-2 ring-1 ring-white/10 backdrop-blur-xl md:hidden">
                             <ul>
                                 {navLinks.map((link, index) => (
                                     <li key={index}>
@@ -183,7 +180,7 @@ const ResponsiveHeroBanner: React.FC<ResponsiveHeroBannerProps> = ({
                                             href={link.href}
                                             onClick={() => setMobileMenuOpen(false)}
                                             aria-current={link.isActive ? "page" : undefined}
-                                            className="flex min-h-11 items-center rounded-xl px-3 text-base font-medium font-sans text-white/90 hover:bg-white/10"
+                                            className="flex min-h-11 items-center rounded-2xl px-3 text-base font-medium text-white/90 hover:bg-white/10"
                                         >
                                             {link.label}
                                         </a>
@@ -196,7 +193,7 @@ const ResponsiveHeroBanner: React.FC<ResponsiveHeroBannerProps> = ({
                                     setMobileMenuOpen(false);
                                     onCtaClick?.();
                                 }}
-                                className="mt-2 flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-white px-4 text-base font-medium text-neutral-900 font-sans"
+                                className="mt-2 flex min-h-11 w-full items-center justify-center gap-2 rounded-2xl bg-white px-4 text-base font-semibold text-neutral-900"
                             >
                                 {ctaButtonText}
                                 <ArrowUpRight className="h-4 w-4" />
@@ -206,33 +203,28 @@ const ResponsiveHeroBanner: React.FC<ResponsiveHeroBannerProps> = ({
                 </div>
             </header>
 
-            <div className="z-10 relative">
-                <div className="sm:pt-28 md:pt-32 lg:pt-40 max-w-7xl mx-auto pt-28 px-6 pb-16">
-                    <div className="mx-auto max-w-3xl text-center">
-                        <div className="mb-6 inline-flex max-w-full items-center gap-3 rounded-full bg-white/10 px-2.5 py-2 ring-1 ring-white/15 backdrop-blur animate-fade-slide-in-1">
-                            <span className="inline-flex shrink-0 items-center text-xs font-medium text-neutral-900 bg-white/90 rounded-full py-0.5 px-2 font-sans">
-                                {badgeLabel}
+            <div className="relative z-10 flex flex-1 items-center">
+                <div className="mx-auto grid w-full max-w-[var(--layout-app)] items-center gap-12 px-[var(--layout-gutter)] pb-10 pt-2 lg:grid-cols-[1.12fr_1fr] lg:gap-16">
+                    <div className="min-w-0">
+                        <h1 className="stagger-in font-display text-[2.6rem] font-extrabold leading-[1.02] tracking-[-0.04em] text-white sm:text-6xl lg:text-[4.4rem]" style={{ ["--i" as string]: 0 }}>
+                            {title}{" "}
+                            <span
+                                className="inline-block text-white"
+                                style={{ WebkitBoxReflect: "below -0.14em linear-gradient(transparent 52%, rgba(255,255,255,0.2))" } as React.CSSProperties}
+                            >
+                                {emphasis}
                             </span>
-                            <span className="min-w-0 text-left text-sm font-medium text-white/90 font-sans">
-                                {badgeText}
-                            </span>
-                        </div>
-
-                        <h1 className="sm:text-5xl md:text-6xl lg:text-7xl leading-tight text-4xl text-white tracking-tight font-instrument-serif font-normal animate-fade-slide-in-2">
-                            {title}
-                            <br className="hidden sm:block" />
-                            {" "}{titleLine2}
                         </h1>
 
-                        <p className="sm:text-lg animate-fade-slide-in-3 text-base text-white/80 max-w-2xl mt-6 mx-auto">
+                        <p className="stagger-in mt-10 max-w-md text-base leading-relaxed text-white/70 sm:text-lg" style={{ ["--i" as string]: 1 }}>
                             {description}
                         </p>
 
-                        <div className="flex flex-col sm:flex-row sm:gap-4 mt-10 gap-3 items-center justify-center animate-fade-slide-in-4">
+                        <div className="stagger-in mt-9 flex flex-wrap items-center gap-3 sm:gap-4" style={{ ["--i" as string]: 2 }}>
                             <Action
                                 href={primaryButtonHref}
                                 onClick={onPrimaryClick}
-                                className="inline-flex items-center gap-2 hover:bg-white/15 text-sm font-medium text-white bg-white/10 ring-white/15 ring-1 rounded-full py-3 px-5 font-sans transition-colors"
+                                className="inline-flex min-h-12 items-center gap-2 rounded-full bg-white px-6 text-sm font-semibold text-neutral-900 transition-transform hover:bg-white/90 active:scale-[0.97]"
                             >
                                 {primaryButtonText}
                                 <ArrowRight className="h-4 w-4" />
@@ -240,36 +232,18 @@ const ResponsiveHeroBanner: React.FC<ResponsiveHeroBannerProps> = ({
                             <Action
                                 href={secondaryButtonHref}
                                 onClick={onSecondaryClick}
-                                className="inline-flex items-center gap-2 rounded-full bg-transparent px-5 py-3 text-sm font-medium text-white/90 hover:text-white font-sans transition-colors"
+                                className="inline-flex min-h-12 items-center gap-2 rounded-full px-5 text-sm font-semibold text-white/85 ring-1 ring-white/15 transition-colors hover:bg-white/[0.06] hover:text-white"
                             >
                                 {secondaryButtonText}
-                                <Play className="w-4 h-4" />
                             </Action>
                         </div>
                     </div>
 
-                    <div className="mx-auto mt-20 max-w-5xl">
-                        <p className="animate-fade-slide-in-1 text-sm text-white/70 text-center">
-                            {partnersTitle}
-                        </p>
-                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 animate-fade-slide-in-2 text-white/70 mt-6 items-center justify-items-center gap-4">
-                            {partners.map((partner, index) => (
-                                <a
-                                    key={index}
-                                    href={partner.href}
-                                    className={
-                                        partner.logoUrl
-                                            ? "inline-flex items-center justify-center bg-center w-[120px] h-[36px] bg-cover rounded-full opacity-80 hover:opacity-100 transition-opacity"
-                                            : "inline-flex items-center justify-center gap-2 rounded-full px-3 py-2 text-center text-sm font-medium text-white/80 opacity-80 hover:opacity-100 transition-opacity"
-                                    }
-                                    style={partner.logoUrl ? { backgroundImage: `url(${partner.logoUrl})` } : undefined}
-                                >
-                                    {partner.icon}
-                                    {partner.label}
-                                </a>
-                            ))}
+                    {aside && (
+                        <div className="stagger-in min-w-0" style={{ ["--i" as string]: 3 }}>
+                            {aside}
                         </div>
-                    </div>
+                    )}
                 </div>
             </div>
         </section>

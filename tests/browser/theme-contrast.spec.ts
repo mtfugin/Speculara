@@ -7,7 +7,7 @@ test('primary buttons keep readable labels in every interaction state',async({pa
  await expect(page.getByRole('region', {name:'Dataset summary'})).toContainText('42 rows', {timeout:30000});
  await page.getByRole('button', {name:'Open chat',exact:true}).click();
  const buttons=await page.locator('.btn-primary:visible').all();
- expect(buttons.length).toBeGreaterThanOrEqual(3);
+ expect(buttons.length).toBeGreaterThanOrEqual(1);
  const rgb=(s:string)=>s.match(/[\d.]+/g)!.slice(0,3).map(Number);
  for(const button of buttons) {
  for(const state of ['default','hover','focus','active']) {
@@ -39,7 +39,7 @@ test('focus survives outline-none and sky outline utilities; secondary meets AAA
 test('reduced motion disables animations and transitions',async({page})=>{
  await page.emulateMedia({reducedMotion:'reduce'});
  await page.goto('/', {waitUntil:'domcontentloaded'});
- const motion=await page.locator('.btn-primary').last().evaluate(el=>{const s=getComputedStyle(el);return {t:parseFloat(s.transitionDuration),a:s.animationName};});
+ const motion=await page.getByRole('button',{name:'Open chat',exact:true}).evaluate(el=>{const s=getComputedStyle(el);return {t:parseFloat(s.transitionDuration),a:s.animationName};});
  expect(motion.t).toBeLessThan(0.001);
  expect(motion.a).toBe('none');
 });

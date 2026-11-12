@@ -18,7 +18,7 @@ The dark system lives in the token file (colors, fonts, radius, elevation). Toke
 | Group | Tokens |
 | --- | --- |
 | Type | `--text-xs` to `--text-5xl` each with `--line-height`, weights 400 to 700, `--tracking-*` |
-| Fonts | `--font-display` (Instrument Serif), `--font-sans` (Inter), `--font-wordmark` (Sora), `--font-mono` |
+| Fonts | `--font-display` (Bricolage Grotesque), `--font-sans` (Inter), `--font-wordmark` (Sora), `--font-mono` (JetBrains Mono) |
 | Radius | 4, 6, 8, 12 (lg), 16 (xl), 24 (2xl and 3xl, cards). Controls are pills (9999px) |
 | Border | `--border-width` 1px, `--border-focus-width` 3px |
 | Elevation | Black-based `--shadow-xs`, `--shadow-sm`, `--shadow-md` (overlays) |
@@ -95,22 +95,17 @@ The project is shadcn compatible without running the shadcn CLI:
 | UI components | `src/components/ui/`, the folder the shadcn CLI installs into, so `npx shadcn@latest add <name>` and pasted components land in the right place |
 | Class helper | `src/lib/utils.ts` (`cn`, built on `clsx` and `tailwind-merge`) |
 
-**Decision (owner, 2026-11-12): the hero banner follows the supplied template, not the Speculara brand, because the whole system will be overhauled in that direction.** `src/components/ui/responsive-hero-banner.tsx` keeps the template's markup, classes and layout. What is the template's:
+The hero (`src/components/ui/responsive-hero-banner.tsx`) started from the supplied template and was reworked on request:
 
-- Full-screen photo background, dark overlay, glass nav pill, badge, serif headline, two actions, partner row.
-- Fonts: Instrument Serif (headline) and Inter (all body text, app-wide). The CSS variables `--bg-*`, `--text-*`, `--radius`, `--font-serif`, `--font-sans`, `--color-background`, `--color-foreground` and the `fadeSlideIn` keyframes are in `src/index.css` as supplied, plus the `animate-fade-slide-in-1..4` classes the markup needs and `tw-animate-css`.
-
-What is Speculara's, and why:
-
-| Item | Choice |
+| Template | Now |
 | --- | --- |
-| Copy | Speculara text instead of the space copy |
-| Background image | Unsplash `photo-1451187580459-43490279c0fa` (Earth at night, connected lights), checked to exist. It loads from Unsplash at runtime (a third-party request) |
-| Logo | The live `Logo` component in its reversed tone (the template's logo image was a CDN placeholder) |
-| Partner logos | lucide-react icons with audience labels |
-| Inline svgs | lucide-react icons |
-| Mobile menu | The template toggled state but rendered nothing; a real menu is rendered (Escape and link choice close it) |
-| Actions | Link, or button via `onCtaClick`, `onPrimaryClick`, `onSecondaryClick`; the page uses them to start the demo or focus the upload box |
-| Legibility | An extra 45% black layer over the photo so text stays readable on any image |
+| Full-screen Unsplash photo | No photo and no third-party image request. A fading dot grid, one soft blue light, and the logo's bars drawn as a blueprint outline |
+| Badge, partner row | Removed |
+| Instrument Serif headline | Bricolage Grotesque 800, with the last word reflected |
+| Centered text over a photo | Two columns that fit one viewport: headline and actions, then the upload card (glass) |
+| Mobile toggle with no menu | A real menu (Escape and link choice close it) |
+| Link-only actions | Link or button (`onCtaClick`, `onPrimaryClick`, `onSecondaryClick`); the page starts the demo or focuses the upload box |
 
-Known mismatch until the overhaul reaches the rest of the page: below the hero the app still uses Sora section headings and the Speculara colors, while all body text is now Inter.
+`aside` takes the content beside the headline. `tests/browser/landing.spec.ts` checks that the first screen fits at 1440x810, 1280x720 and 1024x768.
+
+The challenge section is `src/components/challenge.tsx` (content as supplied; a test compares every phrase). Chat styles `.ios-sheet` and `.typing-dot` are in `src/index.css`.

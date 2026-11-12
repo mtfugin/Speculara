@@ -2,7 +2,7 @@
 
 ## Icons
 
-**Direction.** Rounded outline on a 24px grid, 1.75px stroke, round caps and joins, 2px internal padding. One family only. Lucide (ISC license) supplies the glyphs through a single wrapper, so stroke and size can never drift. One brand glyph, `lens` (two overlapping outlined circles), follows the same rules.
+**Direction.** Rounded outline on a 24px grid, 1.75px stroke, round caps and joins, 2px internal padding. One family only. Lucide (ISC license) supplies the glyphs through a single wrapper, so stroke and size can never drift. One brand glyph, `reflect` (bars and their reflection), follows the same rules.
 
 **Implementation.** `src/design-system/Icon.tsx`: `<Icon name="check" size="sm|md|lg|xl" label? />`. Decorative icons are hidden from assistive technology. Pass `label` only when an icon stands alone. Sizes come from `--size-icon-*`.
 
@@ -14,7 +14,7 @@
 | Status | check, success, warning, error, info, lock |
 | Direction | up, down, flat |
 | Conversation | chat |
-| Brand | lens |
+| Brand | reflect |
 
 Only icons the product uses are included. Add more to the `ICONS` map when a screen needs them.
 
@@ -51,6 +51,4 @@ Illustrations are components in `src/design-system/illustrations.tsx`. Add new o
 
 ## Applications
 
-Home hero also shows an "Example of an answer" card (sample bars and one sentence, labelled as sample numbers) so people see the product before they upload. It is decorative and hidden from assistive technology.
-
-Hero (rings), module empty states (needsData), loading (animated mark), file previews and the favicon (logo family), presentation covers (lens tile plus reversed logo). Social templates and video are out of scope.
+The home hero draws the logo's bars and reflection as a blueprint outline behind the upload card (no separate pattern file). Module empty states (needsData), loading (animated mark), file previews and the favicon (logo family), presentation covers (lens tile plus reversed logo). Social templates and video are out of scope.

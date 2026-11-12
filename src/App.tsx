@@ -27,6 +27,8 @@ import { Splash } from "./design-system/Splash";
 import { AnalysisLoader } from "./design-system/AnalysisLoader";
 import { Card, Fact, H, KeyNumber, Numbers, Pills, Well } from "./design-system/ui";
 import ResponsiveHeroBanner from "./components/ui/responsive-hero-banner";
+import ChallengeSection from "./components/challenge";
+import { ArrowUp } from "lucide-react";
 
 import { moduleInfo, updatedLabel, priorityLabel, type ModuleKey } from "./polish";
 
@@ -1284,72 +1286,91 @@ function Chat() {
         <div
           role="dialog"
           aria-label="Ask about your analysis"
-          className={`overlay flex h-[min(30rem,calc(100dvh-5.5rem))] w-[calc(100vw-2rem)] flex-col overflow-hidden rounded-3xl sm:w-96 ${closing ? "popover-out" : "popover-in"}`}
+          className={`ios-sheet flex h-[min(34rem,calc(100dvh-5.5rem))] w-[calc(100vw-1.5rem)] flex-col overflow-hidden sm:w-[24rem] ${closing ? "popover-out" : "popover-in"}`}
         >
-          <div className="flex shrink-0 items-center justify-between px-3">
-            <p className="inline-flex items-center gap-2 font-display font-bold text-ink">
-              <Logo variant="mark" size={22} />
-              Ask Speculara
-            </p>
+          <div className="relative flex shrink-0 items-center justify-center px-3 pb-1 pt-2">
             {aiAvailable && (
-              <label className="ml-auto mr-1 flex min-h-11 items-center gap-1.5 text-sm font-semibold text-ink">
+              <label className="absolute left-3 top-0.5 flex min-h-11 cursor-pointer items-center gap-2 text-xs font-semibold text-slate-700">
                 <input
                   type="checkbox"
                   checked={aiOn}
                   onChange={(e) => setAiOn(e.target.checked)}
                   aria-describedby="ai-note"
-                  className="h-5 w-5 accent-[var(--color-ink)]"
+                  className="relative h-[26px] w-[44px] shrink-0 cursor-pointer appearance-none rounded-full bg-white/20 transition-colors duration-200 checked:bg-[#30d158] after:absolute after:left-0.5 after:top-0.5 after:h-[22px] after:w-[22px] after:rounded-full after:bg-white after:shadow after:transition-transform after:duration-200 after:content-[''] checked:after:translate-x-[18px]"
                 />
-                Use AI answers
+                <span aria-hidden="true">AI</span>
+                <span className="sr-only">Use AI answers</span>
                 <span id="ai-note" className="sr-only">
                   {aiOn ? "On: a summary of your results is sent to Google." : "Off: nothing leaves this app."}
                 </span>
               </label>
             )}
+            <div className="flex flex-col items-center">
+              <span className="grid h-8 w-8 place-items-center rounded-full bg-gradient-to-b from-zinc-600/80 to-zinc-800 ring-1 ring-white/15">
+                <Logo variant="mark" size={18} />
+              </span>
+              <p className="mt-0.5 text-[11px] font-semibold leading-none text-slate-700">Ask Speculara</p>
+            </div>
             <button
               onClick={close}
               aria-label="Close chat"
-              className="ctl grid h-11 w-11 place-items-center rounded-full text-ink"
+              className="absolute right-2 top-0.5 grid h-11 w-11 place-items-center rounded-full text-ink transition-colors hover:bg-white/10"
             >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" aria-hidden="true">
-                <path d="M6 6l12 12M18 6L6 18" />
-              </svg>
+              <span className="grid h-7 w-7 place-items-center rounded-full bg-white/15">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.2" strokeLinecap="round" aria-hidden="true">
+                  <path d="M6 6l12 12M18 6L6 18" />
+                </svg>
+              </span>
             </button>
           </div>
           <div
             ref={messages}
-            className="well neu-scroll mx-3 min-h-0 flex-1 space-y-2 overflow-y-auto overscroll-contain rounded-2xl p-3 text-sm"
+            className="neu-scroll min-h-0 flex-1 space-y-1.5 overflow-y-auto overscroll-contain px-3.5 py-1 text-[15px] leading-snug"
             aria-live="polite"
           >
             {msgs.map((m, i) => (
-              <div
-                key={i}
-                className={`max-w-[85%] whitespace-pre-line break-words rounded-2xl px-3 py-2 ${m.me ? "ml-auto bg-white text-neutral-900" : "border border-border-default bg-raised text-slate-800"}`}
-              >
-                {m.t}
+              <div key={i} className={`focus-in flex ${m.me ? "justify-end" : "justify-start"}`}>
+                <div
+                  className={`max-w-[82%] whitespace-pre-line break-words rounded-[20px] px-3.5 py-2 ${m.me ? "rounded-br-md bg-blue-fill text-white" : "rounded-bl-md bg-white/[0.12] text-ink"}`}
+                >
+                  {m.t}
+                </div>
               </div>
             ))}
             {thinking && (
-              <div role="status" className="skeleton-pulse max-w-[85%] rounded-2xl bg-raised px-3 py-2 text-slate-700">
-                {slow ? "Still working. AI answers can take up to a minute." : "Writing an answer…"}
+              <div role="status" className="flex justify-start">
+                <div className="rounded-[20px] rounded-bl-md bg-white/[0.12] px-4 py-3 text-slate-700">
+                  {slow ? (
+                    "Still working. AI answers can take up to a minute."
+                  ) : (
+                    <>
+                      <span className="flex items-center gap-1.5" aria-hidden="true">
+                        <span className="typing-dot" />
+                        <span className="typing-dot" />
+                        <span className="typing-dot" />
+                      </span>
+                      <span className="sr-only">Writing an answer…</span>
+                    </>
+                  )}
+                </div>
               </div>
             )}
           </div>
           {aiAvailable && aiOn && (
-            <p className="mx-3 mt-1 shrink-0 text-sm text-slate-600">
+            <p className="mx-4 mb-1 shrink-0 text-xs leading-snug text-slate-600">
               A summary of your results (totals, relationships, forecasts) is sent to Google to write each answer. Your rows, post links and comments are not sent.
             </p>
           )}
           <div
             role="group"
             aria-label="Suggested questions"
-            className="mx-3 mt-1 grid shrink-0 grid-cols-2 gap-2 [@media(min-width:600px)]:grid-cols-4"
+            className="no-bar flex shrink-0 gap-2 overflow-x-auto px-3.5 pb-1.5 pt-0.5"
           >
             {quickQuestions.map(({ label, question }) => (
               <button
                 key={question}
                 onClick={() => send(question)}
-                className="ctl min-h-11 min-w-0 rounded-full px-2 py-2 text-left text-xs leading-snug text-ink"
+                className="min-h-11 shrink-0 rounded-full bg-white/10 px-4 text-[13px] font-medium text-ink transition-transform hover:bg-white/15 active:scale-95"
               >
                 {label}
               </button>
@@ -1360,17 +1381,25 @@ function Chat() {
               e.preventDefault();
               send(text);
             }}
-            className="flex shrink-0 gap-2 p-2"
+            className="shrink-0 px-3 pb-2"
           >
-            <input
-              ref={input}
-              value={text}
-              onChange={(e) => setText(e.target.value)}
-              placeholder="Ask about your results"
-              aria-label="Your question"
-              className="well min-h-11 min-w-0 flex-1 rounded-xl bg-transparent px-3 text-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
-            />
-            <button className="btn-primary min-h-11 rounded-xl px-4 text-sm">Send</button>
+            <div className="flex items-center gap-1 rounded-full bg-white/10 py-1 pl-4 pr-1 ring-1 ring-white/10 focus-within:ring-2 focus-within:ring-white/60">
+              <input
+                ref={input}
+                value={text}
+                onChange={(e) => setText(e.target.value)}
+                placeholder="Ask Speculara"
+                aria-label="Your question"
+                className="min-h-11 min-w-0 flex-1 bg-transparent text-[15px] text-ink outline-none placeholder:text-slate-600"
+                style={{ outline: "none" }}
+              />
+              <button
+                aria-label="Send"
+                className={`grid h-11 w-11 shrink-0 place-items-center rounded-full bg-blue-fill text-white transition-all duration-150 active:scale-90 ${text.trim() ? "opacity-100" : "opacity-40"}`}
+              >
+                <ArrowUp className="h-5 w-5" strokeWidth={2.6} />
+              </button>
+            </div>
           </form>
         </div>
       )}
@@ -1386,7 +1415,7 @@ function Chat() {
         }}
         aria-label={open ? "Close chat" : "Open chat"}
         aria-expanded={open}
-        className="btn-primary grid h-14 w-14 place-items-center rounded-full"
+        className="grid h-14 w-14 place-items-center rounded-full bg-blue-fill text-white shadow-[0_10px_34px_rgba(0,113,227,0.5)] transition-transform duration-150 hover:brightness-110 active:scale-95"
       >
         <svg
           width="26"
@@ -1574,140 +1603,101 @@ export default function App() {
             onCtaClick={() => void loadDemo()}
             onPrimaryClick={() => void loadDemo()}
             onSecondaryClick={() => {
-              document.getElementById("start")?.scrollIntoView({ behavior: "smooth" });
+              document.getElementById("start")?.scrollIntoView({ behavior: "smooth", block: "center" });
               document.getElementById("upload")?.focus({ preventScroll: true });
             }}
+            aside={
+      <div ref={listRef} id="start" className="overlay min-w-0 scroll-mt-6 rounded-3xl p-5 sm:p-7">
+        <h2 className="font-display text-3xl font-extrabold tracking-[-0.03em] text-ink">Start with your data</h2>
+                <div className="mt-3" aria-busy={busy}>
+          <label htmlFor="upload" className="sr-only">
+            Upload your dataset
+          </label>
+          <div
+            onDragOver={(e) => {
+              e.preventDefault();
+              if (!busy) setDragging(true);
+            }}
+            onDragLeave={() => setDragging(false)}
+            onDrop={(e) => {
+              e.preventDefault();
+              setDragging(false);
+              const file = e.dataTransfer.files?.[0];
+              if (file && !busy) void analyzeFile(file);
+            }}
+            className={`rounded-2xl border-2 border-dashed p-3.5 text-center transition-colors ${dragging ? "border-ink bg-ink/5" : "border-border-default"}`}
+          >
+            <p className="text-sm text-slate-700">Drop a CSV or XLSX file here, or choose one</p>
+            <input
+              id="upload"
+              type="file"
+              accept=".csv,.xlsx"
+              disabled={busy}
+              aria-describedby="upload-help upload-msg"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) void analyzeFile(file);
+                e.target.value = "";
+              }}
+              className="mt-3 block min-h-11 w-full min-w-0 rounded-xl text-sm file:mr-3 file:min-h-11 file:rounded-xl file:border-0 file:bg-white file:px-4 file:py-2 file:font-semibold file:text-neutral-900"
+            />
+          </div>
+          <p id="upload-help" className="mt-2 text-xs leading-relaxed text-slate-600">
+            CSV (UTF-8) or XLSX first sheet. Up to 5 MB, 20,000 rows, 50 columns. Processed in server
+            memory and never saved.
+          </p>
+          <p id="upload-msg" className="mt-2 text-sm text-wine" role="alert">
+            {err}
+          </p>
+          {busy && (
+            <p role="status" className="mt-2 text-sm font-semibold text-ink">
+              {loadingMessage}
+            </p>
+          )}
+          <button
+            type="button"
+            disabled={busy}
+            onClick={() => void loadDemo()}
+            className="ctl mt-2 min-h-11 w-full rounded-xl text-sm font-semibold text-ink"
+          >
+            Try synthetic demo data
+          </button>
+          <div className="mt-1 flex flex-wrap gap-x-4 text-xs">
+            <a
+              href="/demo/speculara-synthetic.csv"
+              download
+              className="inline-flex min-h-[var(--size-target)] min-w-[var(--size-target)] items-center rounded-lg px-1 text-slate-700 underline hover:text-ink"
+            >
+              Demo CSV
+            </a>
+            <a
+              href="/demo/speculara-synthetic.xlsx"
+              download
+              className="inline-flex min-h-[var(--size-target)] min-w-[var(--size-target)] items-center rounded-lg px-1 text-slate-700 underline hover:text-ink"
+            >
+              Demo XLSX
+            </a>
+            <a
+              href="/demo/speculara-text-synthetic.csv"
+              download
+              className="inline-flex min-h-[var(--size-target)] min-w-[var(--size-target)] items-center rounded-lg px-1 text-slate-700 underline hover:text-ink"
+            >
+              Text-only demo
+            </a>
+          </div>
+          <ProfileLink
+            disabled={busy}
+            onAnalyzed={(data, label) => {
+              setErr("");
+              setNotice("");
+              setCandidate({ data, label });
+            }}
+          />
+        </div>
+      </div>
+            }
           />
           <div className="mx-auto max-w-[var(--layout-app)] px-[var(--layout-gutter)]">
-          <section className="grid items-start gap-10 py-10 md:grid-cols-[1.05fr_1fr] md:py-14">
-            <div className="min-w-0 md:pt-2">
-              <p className="font-display text-3xl text-ink">See it before you upload</p>
-              <ul className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-sm font-medium text-ink">
-                {["Plain-English answers", "Nothing is saved", "No account needed"].map((t) => (
-                  <li key={t} className="inline-flex items-center gap-1.5">
-                    <Icon name="check" size="sm" />
-                    {t}
-                  </li>
-                ))}
-              </ul>
-              <div className="surface mt-6 hidden max-w-lg rounded-2xl p-5 md:block" aria-hidden="true">
-                <p className="text-xs font-semibold uppercase tracking-wide text-slate-600">Example of an answer</p>
-                <p className="mt-1 font-sans text-lg font-semibold leading-snug text-ink">
-                  Sales dipped a little last week, and your carousel posts did best.
-                </p>
-                <div className="mt-4 flex h-16 items-end gap-1.5">
-                  {[38, 52, 44, 60, 48, 70, 56, 34].map((h, i) => (
-                    <div
-                      key={i}
-                      className="bar-grow w-full rounded-t-md"
-                      style={{ ["--i" as string]: i, height: `${h}%`, background: i === 5 ? "var(--color-ink)" : "var(--color-chart-secondary)" }}
-                    />
-                  ))}
-                </div>
-                <p className="mt-3 text-sm text-slate-600">Sample numbers for illustration, not your data.</p>
-              </div>
-            </div>
-
-            <div ref={listRef} id="start" className="surface min-w-0 scroll-mt-6 rounded-2xl p-5 sm:p-6">
-              <h2 className="font-display text-3xl text-ink">Start with your data</h2>
-              <p className="mt-1 text-sm text-slate-600">Upload a file, or try the demo first.</p>
-              <div className="mt-4" aria-busy={busy}>
-                <label htmlFor="upload" className="mb-2 block text-sm font-semibold text-ink">
-                  Upload your dataset
-                </label>
-                <div
-                  onDragOver={(e) => {
-                    e.preventDefault();
-                    if (!busy) setDragging(true);
-                  }}
-                  onDragLeave={() => setDragging(false)}
-                  onDrop={(e) => {
-                    e.preventDefault();
-                    setDragging(false);
-                    const file = e.dataTransfer.files?.[0];
-                    if (file && !busy) void analyzeFile(file);
-                  }}
-                  className={`rounded-2xl border-2 border-dashed p-4 text-center transition-colors ${dragging ? "border-ink bg-ink/5" : "border-border-default"}`}
-                >
-                  <Illustration name="upload" className="mx-auto h-20 w-auto" />
-                  <p className="mt-1 text-sm text-slate-700">Drop a CSV or XLSX file here, or choose one</p>
-                  <input
-                    id="upload"
-                    type="file"
-                    accept=".csv,.xlsx"
-                    disabled={busy}
-                    aria-describedby="upload-help upload-msg"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (file) void analyzeFile(file);
-                      e.target.value = "";
-                    }}
-                    className="mt-3 block min-h-11 w-full min-w-0 rounded-xl text-sm file:mr-3 file:min-h-11 file:rounded-xl file:border-0 file:bg-white file:px-4 file:py-2 file:font-semibold file:text-neutral-900"
-                  />
-                </div>
-                <p id="upload-help" className="mt-2 text-sm text-slate-600">
-                  CSV (UTF-8) or XLSX first sheet. Up to 5 MB, 20,000 rows, 50 columns. No account
-                  connection required.
-                </p>
-                <p id="upload-msg" className="mt-2 text-sm text-wine" role="alert">
-                  {err}
-                </p>
-                {busy && (
-                  <p role="status" className="mt-2 text-sm font-semibold text-ink">
-                    {loadingMessage}
-                  </p>
-                )}
-                <button
-                  type="button"
-                  disabled={busy}
-                  onClick={() => void loadDemo()}
-                  className="ctl mt-3 min-h-11 w-full rounded-xl text-sm font-semibold text-ink"
-                >
-                  Try synthetic demo data
-                </button>
-                <div className="mt-3 flex flex-wrap gap-4 text-xs">
-                  <a
-                    href="/demo/speculara-synthetic.csv"
-                    download
-                    className="inline-flex min-h-[var(--size-target)] min-w-[var(--size-target)] items-center rounded-lg px-2 py-2 text-ink underline"
-                  >
-                    Demo CSV
-                  </a>
-                  <a
-                    href="/demo/speculara-synthetic.xlsx"
-                    download
-                    className="inline-flex min-h-[var(--size-target)] min-w-[var(--size-target)] items-center rounded-lg px-2 py-2 text-ink underline"
-                  >
-                    Demo XLSX
-                  </a>
-                  <a
-                    href="/demo/speculara-text-synthetic.csv"
-                    download
-                    className="inline-flex min-h-[var(--size-target)] min-w-[var(--size-target)] items-center rounded-lg px-2 py-2 text-ink underline"
-                  >
-                    Text-only demo
-                  </a>
-                </div>
-                <p className="mt-2 text-xs text-slate-600">
-                  Demo records are fictional, not real campaign results. Uploads are processed in
-                  server memory and never saved.
-                </p>
-                <ProfileLink
-                  disabled={busy}
-                  onAnalyzed={(data, label) => {
-                    setErr("");
-                    setNotice("");
-                    setCandidate({ data, label });
-                  }}
-                />
-              </div>
-              {locked && (
-                <p className="mt-2 px-2 text-center text-xs text-slate-600">
-                  Upload data or try the synthetic demo to unlock modules.
-                </p>
-              )}
-            </div>
-          </section>
 
           {candidate && (
             <section
@@ -1828,8 +1818,10 @@ export default function App() {
             </section>
           )}
 
-          <section id="questions" aria-labelledby="modules-title" className="scroll-mt-6 pb-12">
-            <h2 id="modules-title" className="font-display text-4xl text-ink md:text-5xl">
+          <ChallengeSection />
+
+          <section id="questions" aria-labelledby="modules-title" className="scroll-mt-6 border-t border-border-default py-16 sm:py-20">
+            <h2 id="modules-title" className="font-display text-4xl font-extrabold tracking-[-0.04em] text-ink md:text-5xl">
               What do you want to know?
             </h2>
             <p className="mt-1 text-slate-600">Pick a question. Each one turns your numbers into a plain answer.</p>
@@ -2036,10 +2028,10 @@ export default function App() {
           </section>
           </div>
         </main>
-        <footer className="border-t border-border-default bg-canvas">
+        <footer className="border-t border-border-default">
           <div className="mx-auto flex max-w-[var(--layout-app)] flex-wrap items-center justify-between gap-3 px-[var(--layout-gutter)] py-8 text-sm text-slate-600">
             <Logo size={24} />
-            <p>Honest numbers. Plain words. Demo records are fictional.</p>
+            <p>Demo records are fictional.</p>
           </div>
         </footer>
         <Chat key={revision} />

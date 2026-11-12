@@ -48,7 +48,7 @@ export default function BrandSheet() {
       </header>
       <h1 className="mt-10 font-display text-5xl font-bold text-ink">Brand sheet</h1>
       <p className="mt-3 max-w-2xl text-lg text-slate-700">
-        Honest numbers. Plain words. An optical instrument: two circles, the lens between them, thin lines, light that comes into focus.
+        Honest numbers. Plain words. A mirror for your marketing numbers: bars that rise, and the reflection that tells you what they mean.
       </p>
 
       <Section id="logo" title="Logo" note="The mark is a thing and its reflection. The lens they share is cut away, so it works on any background. On the dark interface it is white and sky; on white pages use the onLight version. The wordmark stays Sora Bold. Clear space is half the mark width. Minimum: mark 16px, horizontal lockup 96px.">
@@ -122,7 +122,7 @@ export default function BrandSheet() {
         </ul>
       </Section>
 
-      <Section id="patterns" title="Patterns" note="Three patterns, all from the logo: rings, dot grid, lens tile. Low opacity, cropped by the container, never behind body text.">
+      <Section id="patterns" title="Patterns" note="Patterns derived from the logo and the dark interface: rings, dot grid, lens tile. Low opacity, cropped by the container, never behind body text. The hero backdrop (the logo bars as a blueprint outline on a fading dot grid) is its own piece.">
         <div className="grid gap-4 sm:grid-cols-3">
           <div className="surface relative h-44 overflow-hidden rounded-2xl text-ink"><RingsPattern className="absolute -right-10 -top-10 w-64" /><p className="relative p-4 font-display font-semibold">Rings</p></div>
           <div className="surface relative h-44 overflow-hidden rounded-2xl text-ink"><DotGrid className="absolute inset-0" /><p className="relative p-4 font-display font-semibold">Dot grid</p></div>
@@ -136,15 +136,15 @@ export default function BrandSheet() {
         </ul>
       </Section>
 
-      <Section id="motion" title="Motion: coming into focus" note="Entrances ease out, exits are about 20% shorter, no bounce in everyday UI. Only transform and opacity move. Reduced motion removes movement and keeps every state change visible.">
+      <Section id="motion" title="Motion: measure, then reflect" note="Entrances ease out, exits are about 20% shorter, no bounce in everyday UI. Only transform and opacity move. Reduced motion removes movement and keeps every state change visible.">
         <div className="grid gap-4 md:grid-cols-3">
           <div className="surface rounded-2xl p-5">
-            <p className="font-display font-semibold text-ink">Logo reveal (1.4s)</p>
+            <p className="font-display font-semibold text-ink">Loading screen (1.5s)</p>
             <div className="mt-3 grid place-items-center"><AnimatedMark key={replay} size={96} mode="reveal" /></div>
             <button className="ctl mt-3 min-h-11 w-full rounded-xl font-semibold" onClick={() => setReplay((n) => n + 1)}>Replay</button>
           </div>
           <div className="surface rounded-2xl p-5">
-            <p className="font-display font-semibold text-ink">Loader (2.4s cycle)</p>
+            <p className="font-display font-semibold text-ink">Loader (level meter)</p>
             <div className="mt-3 grid place-items-center"><AnimatedMark size={96} mode="loop" /></div>
             <p className="mt-3 text-sm text-slate-600">Used only while real work is happening.</p>
           </div>

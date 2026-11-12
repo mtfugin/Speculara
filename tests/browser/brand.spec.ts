@@ -34,14 +34,14 @@ test("signature splash plays once, can be skipped, and never runs with reduced m
   await reduced.close();
 });
 
-test("design tokens are applied: Instrument Serif headings, Inter text, Sora wordmark, flat surfaces", async ({ page }) => {
+test("design tokens are applied: Bricolage headings, Inter text, Sora wordmark, flat surfaces", async ({ page }) => {
   await page.goto("/");
   const h1 = await page.locator("h1").evaluate((el) => getComputedStyle(el).fontFamily);
-  expect(h1).toContain("Instrument Serif");
+  expect(h1).toContain("Bricolage Grotesque");
   const body = await page.evaluate(() => getComputedStyle(document.body).fontFamily);
   expect(body).toContain("Inter");
   const section = await page.locator("h2").first().evaluate((el) => getComputedStyle(el).fontFamily);
-  expect(section).toContain("Instrument Serif");
+  expect(section).toContain("Bricolage Grotesque");
   const word = await page.locator(".font-wordmark").first().evaluate((el) => getComputedStyle(el).fontFamily);
   expect(word).toContain("Sora");
   const card = await page.locator(".surface").first().evaluate((el) => {
@@ -58,8 +58,10 @@ test("hero banner: one h1, nav links, mobile menu opens and closes, actions work
   await expect(page.locator("h1")).toContainText("into the next decision.");
   const nav = page.getByRole("navigation", { name: "Primary" });
   await expect(nav.getByRole("link", { name: "Questions" })).toHaveAttribute("href", "#questions");
-  // The audience row moved into the banner.
-  await expect(page.getByText(/^Built for/)).toHaveCount(1);
+  // The hero is one screen: text and upload card side by side, no filler rows.
+  const hero = await page.locator("#top").boundingBox();
+  expect(Math.round(hero!.height)).toBe(await page.evaluate(() => innerHeight));
+  await expect(page.getByText(/Built for/)).toHaveCount(0);
   // The primary action starts the demo.
   await page.getByRole("button", { name: "Try the demo" }).first().click();
   await expect(page.getByRole("region", { name: "Dataset summary" })).toContainText("42 rows", { timeout: 30000 });
@@ -73,7 +75,7 @@ test("hero banner mobile menu is reachable, closes with Escape and on choosing a
   await toggle.click();
   const close = page.getByRole("button", { name: "Close menu" });
   await expect(close).toHaveAttribute("aria-expanded", "true");
-  await expect(page.getByRole("link", { name: "Start" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Challenge" })).toBeVisible();
   await page.keyboard.press("Escape");
   await expect(toggle).toHaveAttribute("aria-expanded", "false");
   await toggle.click();

@@ -1,15 +1,14 @@
 # 05 Motion specification
 
-## Philosophy: coming into focus
+## Philosophy: measure, then reflect
 
-Things arrive sharp and decisive, then settle. Nothing bounces in everyday UI. The signature idea is the logo: two circles that drift in and meet, and the lens opens. Numbers and bars resolve to their value. Informed by Emil Kowalski's design-engineering guidance and the project's animation playbook:
+Things arrive decisively and settle. Nothing bounces in everyday UI. The signature idea is the logo: bars rise from the mirror line, then the reflection answers below. Data does the same: bars grow from their baseline, numbers appear when they are real. Principles (Emil Kowalski's guidance and the project playbook):
 
-- Entrances ease out. Moves between positions ease in and out. Exits are about 20% shorter than entrances.
+- Entrances ease out. Exits are about 20% shorter than entrances.
 - Never animate from scale 0. Start near 0.95 with opacity. Put the transform origin at the trigger.
 - UI motion stays under about 300ms. Press feedback is 100 to 150ms. Stagger rows 30ms, capped.
 - Do not animate things people do many times a minute or by keyboard.
-- Only `transform` and `opacity` move. No layout animation, no blur.
-- Overshoot easing (`--ease-emphasis`) is allowed only for the logo reveal.
+- Only `transform` and `opacity` move. No layout animation.
 - A result animates only after the operation really succeeded. Waiting states are honest: no fake percentages.
 
 ## Tokens (`tokens/speculara.json`)
@@ -36,20 +35,19 @@ Things arrive sharp and decisive, then settle. Nothing bounces in everyday UI. T
 
 CSS transitions and keyframes handle every micro-interaction (no library). GSAP handles timelines only (logo reveal, loader). It loads on demand as its own 27 kB (gzip) chunk, so it never delays first paint. When the splash will play, the chunk is requested at startup (`preloadMotion`) so the reveal starts on time. Frame by frame check: circles at 0.3s, meeting at 0.8s, lens open by 0.9s, wordmark rising at 1.0s, full lockup by 1.5s.
 
-## Signature animation: logo reveal (1.4s, plus fade out)
+## Signature animation: the loading screen (1.5 seconds)
 
-Storyboard (`AnimatedMark mode="reveal"`, wrapped by `Splash`):
+`Splash` plays it on every load. `AnimatedMark mode="reveal"` draws the mark.
 
 | Time | Event |
 | --- | --- |
-| 0.00s | Two circles fade in 9 units apart on the diagonal (ink top left, sky bottom right) |
-| 0.10 to 0.65s | They move together, `power3.inOut` |
-| 0.62 to 0.76s | Scale to 1.06, `power2.out` |
-| 0.76 to 1.06s | Settle to 1.0, `back.out(2.2)` (the one allowed overshoot) |
-| 1.00s | Wordmark rises 8px and fades in (380ms, `--ease-enter`) |
-| 1.70s | Whole screen fades out in 240ms, then is removed |
+| 0.00s | Black screen |
+| 0.08 to 0.7s | The three bars rise from the mirror line, 90ms apart (`power3.out`, 0.5s each) |
+| 0.45 to 1.0s | The reflection answers below, same stagger (`power2.out`), fading to 90% |
+| 0.85 to 1.17s | The wordmark rises 8px and fades in (320ms `--ease-enter`) |
+| 1.25 to 1.50s | The screen fades out (250ms) and is removed at 1.50s |
 
-The lens cut moves with the circles (mask and clip animate together), so the logo is never distorted. Plays once per browser session, can be skipped with a click, tap or Esc, never plays for reduced motion or automated test browsers (add `?splash=1` to force it).
+Click, tap or Esc skips it (it fades in 250ms). It never plays with reduced motion or in automated browsers (add `?splash=1` to force it), and a test measures that it lasts about 1.5 seconds. The loader (`AnimatedMark mode="loop"`) is the same bars breathing like a level meter, shown only while a file is really being analyzed.
 
 ## Animation catalogue
 
@@ -61,9 +59,10 @@ The lens cut moves with the circles (mask and clip animate together), so the log
 | Row stagger | Cohesive list reveal | List mounts | Same as result arrive, delay 30ms x index (max 8) | No delay |
 | Bar grow | Data resolves from the baseline | Chart renders | scaleY 0 to 1, 420ms, delay 30ms x index (max 12), transform only | Bars appear at full height |
 | Selection pop | Confirm a tab choice | Tab selected | Scale 0.98 to 1, 220ms | None |
-| Chat open and close | Spatial continuity with the launcher | Launcher, Esc | In 220ms from 0.95 scale, origin bottom right. Out 160ms | Instant |
-| Loader | Honest waiting | File being analyzed | Circles drift apart and back, 2.4s sine cycle | Static mark |
-| Logo reveal | Brand moment | First visit per session | See storyboard, 1.4s | Not shown |
+| Chat sheet open and close | Spatial continuity with the launcher | Launcher, Esc | In 220ms from 0.95 scale, origin bottom right. Out 160ms. Messages fade and scale in 380ms | Instant |
+| Typing dots | AI answer is being written | AI mode, waiting | Three dots rise 3px in turn, 1.1s loop | Static dots |
+| Loader | Honest waiting | File being analyzed | Bars breathe like a level meter, 0.7s sine, mirrored reflection | Static mark |
+| Loading screen | Brand moment | Every load | See storyboard, 1.5s | Not shown |
 | Skeleton pulse | Placeholder shimmer | Content pending | Opacity 0.55 to 1, 1.4s | Static |
 | Toast | Confirm a quick action (copy, download, reset) | Action completes | Fades and scales in from 0.96 in 380ms `--ease-enter`, stays 4.5s, then is removed. Bottom left, never steals focus, `role="status"` | Appears instantly |
 | Bar value reveal | Exact value on hover | Pointer over a bar | Value label fades in 150ms, bar darkens 10% | Instant |

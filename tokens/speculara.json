@@ -2,7 +2,7 @@
   "palette": {
     "ink": {
       "$type": "color",
-      "$value": "#fafafa",
+      "$value": "#f5f5f7",
       "$extensions": {
         "speculara": {
           "css": "--color-ink"
@@ -11,7 +11,7 @@
     },
     "mist": {
       "$type": "color",
-      "$value": "#27272a",
+      "$value": "#1c1c1f",
       "$extensions": {
         "speculara": {
           "css": "--color-mist"
@@ -20,7 +20,7 @@
     },
     "sky": {
       "$type": "color",
-      "$value": "#38bdf8",
+      "$value": "#64d2ff",
       "$extensions": {
         "speculara": {
           "css": "--color-sky"
@@ -29,7 +29,7 @@
     },
     "sky-deep": {
       "$type": "color",
-      "$value": "#0ea5e9",
+      "$value": "#0a84ff",
       "$extensions": {
         "speculara": {
           "css": "--color-sky-deep"
@@ -38,7 +38,7 @@
     },
     "cream": {
       "$type": "color",
-      "$value": "#18181b",
+      "$value": "#141417",
       "$extensions": {
         "speculara": {
           "css": "--color-cream"
@@ -47,7 +47,7 @@
     },
     "wine": {
       "$type": "color",
-      "$value": "#f87171",
+      "$value": "#ff453a",
       "$extensions": {
         "speculara": {
           "css": "--color-wine"
@@ -65,7 +65,7 @@
     },
     "primary": {
       "$type": "color",
-      "$value": "#e4e4e7",
+      "$value": "#e8e8ed",
       "$extensions": {
         "speculara": {
           "css": "--color-primary"
@@ -74,7 +74,7 @@
     },
     "secondary": {
       "$type": "color",
-      "$value": "#a1a1aa",
+      "$value": "#a1a1a6",
       "$extensions": {
         "speculara": {
           "css": "--color-secondary"
@@ -83,7 +83,7 @@
     },
     "action-start": {
       "$type": "color",
-      "$value": "#fafafa",
+      "$value": "#f5f5f7",
       "$extensions": {
         "speculara": {
           "css": "--color-action-start"
@@ -92,7 +92,7 @@
     },
     "hover-start": {
       "$type": "color",
-      "$value": "#e4e4e7",
+      "$value": "#e8e8ed",
       "$extensions": {
         "speculara": {
           "css": "--color-hover-start"
@@ -101,7 +101,7 @@
     },
     "shadow-dark": {
       "$type": "color",
-      "$value": "#2e2e33",
+      "$value": "#2a2a2f",
       "$extensions": {
         "speculara": {
           "css": "--color-shadow-dark"
@@ -110,7 +110,7 @@
     },
     "track": {
       "$type": "color",
-      "$value": "#27272a",
+      "$value": "#1c1c1f",
       "$extensions": {
         "speculara": {
           "css": "--color-track"
@@ -128,7 +128,7 @@
     },
     "card": {
       "$type": "color",
-      "$value": "#18181b",
+      "$value": "#141417",
       "$extensions": {
         "speculara": {
           "css": "--color-card"
@@ -137,7 +137,7 @@
     },
     "raised": {
       "$type": "color",
-      "$value": "#27272a",
+      "$value": "#1c1c1f",
       "$extensions": {
         "speculara": {
           "css": "--color-raised"
@@ -146,7 +146,7 @@
     },
     "line": {
       "$type": "color",
-      "$value": "#2e2e33",
+      "$value": "#2a2a2f",
       "$extensions": {
         "speculara": {
           "css": "--color-line"
@@ -155,7 +155,7 @@
     },
     "line-strong": {
       "$type": "color",
-      "$value": "#52525b",
+      "$value": "#48484f",
       "$extensions": {
         "speculara": {
           "css": "--color-line-strong"
@@ -164,7 +164,7 @@
     },
     "snow": {
       "$type": "color",
-      "$value": "#fafafa",
+      "$value": "#f5f5f7",
       "$extensions": {
         "speculara": {
           "css": "--color-snow"
@@ -173,7 +173,7 @@
     },
     "fog": {
       "$type": "color",
-      "$value": "#e4e4e7",
+      "$value": "#e8e8ed",
       "$extensions": {
         "speculara": {
           "css": "--color-fog"
@@ -182,7 +182,7 @@
     },
     "subtle": {
       "$type": "color",
-      "$value": "#d4d4d8",
+      "$value": "#d2d2d7",
       "$extensions": {
         "speculara": {
           "css": "--color-subtle"
@@ -191,7 +191,7 @@
     },
     "mute": {
       "$type": "color",
-      "$value": "#a1a1aa",
+      "$value": "#a1a1a6",
       "$extensions": {
         "speculara": {
           "css": "--color-mute"
@@ -200,7 +200,7 @@
     },
     "dim": {
       "$type": "color",
-      "$value": "#71717a",
+      "$value": "#6e6e73",
       "$extensions": {
         "speculara": {
           "css": "--color-dim"
@@ -209,7 +209,7 @@
     },
     "slate-500": {
       "$type": "color",
-      "$value": "#a1a1aa",
+      "$value": "#a1a1a6",
       "$extensions": {
         "speculara": {
           "css": "--color-slate-500"
@@ -218,7 +218,7 @@
     },
     "slate-600": {
       "$type": "color",
-      "$value": "#a1a1aa",
+      "$value": "#a1a1a6",
       "$extensions": {
         "speculara": {
           "css": "--color-slate-600"
@@ -227,7 +227,7 @@
     },
     "slate-700": {
       "$type": "color",
-      "$value": "#d4d4d8",
+      "$value": "#d2d2d7",
       "$extensions": {
         "speculara": {
           "css": "--color-slate-700"
@@ -236,10 +236,28 @@
     },
     "slate-800": {
       "$type": "color",
-      "$value": "#e4e4e7",
+      "$value": "#e8e8ed",
       "$extensions": {
         "speculara": {
           "css": "--color-slate-800"
+        }
+      }
+    },
+    "blue": {
+      "$type": "color",
+      "$value": "#0a84ff",
+      "$extensions": {
+        "speculara": {
+          "css": "--color-blue"
+        }
+      }
+    },
+    "blue-fill": {
+      "$type": "color",
+      "$value": "#0071e3",
+      "$extensions": {
+        "speculara": {
+          "css": "--color-blue-fill"
         }
       }
     }
@@ -469,9 +487,10 @@
     "display": {
       "$type": "fontFamily",
       "$value": [
-        "Instrument Serif",
-        "Georgia",
-        "serif"
+        "Bricolage Grotesque Variable",
+        "Bricolage Grotesque",
+        "Inter Variable",
+        "sans-serif"
       ],
       "$extensions": {
         "speculara": {

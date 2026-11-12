@@ -46,13 +46,15 @@ for (const loaded of [false, true]) {
           ? ["Decision brief", "Independent counts", "Measure a test", "Explain negative"]
           : ["What next?", "Summarize totals", "Explain negative"],
       );
+      // Suggestions are one horizontally scrolling row (like a system sheet): the row fits the sheet, every chip is tall enough.
+      const row = (await suggestions.boundingBox())!;
+      expect(row.x).toBeGreaterThanOrEqual(box.x);
+      expect(row.x + row.width).toBeLessThanOrEqual(box.x + box.width + 1);
+      expect(row.y + row.height).toBeLessThanOrEqual((await input.boundingBox())!.y + 1);
       for (const button of await suggestions.getByRole("button").all()) {
-        const chip = (await button.boundingBox())!;
-        expect(chip.height).toBeGreaterThanOrEqual(44);
-        expect(chip.x).toBeGreaterThanOrEqual(box.x);
-        expect(chip.x + chip.width).toBeLessThanOrEqual(box.x + box.width);
-        expect(chip.y + chip.height).toBeLessThanOrEqual((await input.boundingBox())!.y);
+        expect((await button.boundingBox())!.height).toBeGreaterThanOrEqual(44);
       }
+      await expect(suggestions.getByRole("button").first()).toBeInViewport();
       expect(
         (await dialog.getByRole("button", { name: "Close chat", exact: true }).boundingBox())!
           .height,
@@ -78,10 +80,11 @@ test("nonmodal chat keyboard and pointer focus paths", async ({ page }) => {
   const input = dialog.getByRole("textbox", { name: "Your question" });
   await expect(input).toBeFocused();
   await expect(dialog).not.toHaveAttribute("aria-modal", "true");
+  // The focus ring is drawn on the field's pill, which wraps the input.
   expect(
     await input.evaluate((el) => {
-      const style = getComputedStyle(el);
-      return style.outlineStyle !== "none" && parseFloat(style.outlineWidth) >= 2;
+      const pill = el.parentElement!;
+      return pill.matches(":focus-within") && getComputedStyle(pill).boxShadow !== "none";
     }),
   ).toBe(true);
   await page.keyboard.press("Tab");

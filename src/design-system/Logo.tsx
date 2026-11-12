@@ -1,38 +1,38 @@
 /* Speculara logo family.
-   Mark: two circles (the thing, and its reflection) whose shared lens is cut away.
-   The cut is a mask, so the mark works on any background, light or dark.
-   Wordmark: Sora Bold, set as live text so it stays sharp and uses the product font.
-   Colors only come from existing tokens: ink, sky, primary, white. */
-import { useId } from "react";
+   Mark: three rising bars and their reflection in a mirror ("speculum" is Latin for mirror).
+   The bars are what you measured; the reflection is what you learn from it.
+   It reads at 16px, works in one color, and animates naturally: the bars rise, then the reflection answers.
+   Wordmark: Sora Bold, set as live text so it stays sharp. */
 
 type Tone = "color" | "mono" | "reversed" | "onLight";
-const TONES: Record<Tone, { a: string; b: string; word: string }> = {
-  color: { a: "var(--color-ink)", b: "var(--color-sky)", word: "var(--color-ink)" },
-  mono: { a: "currentColor", b: "currentColor", word: "currentColor" },
-  reversed: { a: "var(--color-white)", b: "var(--color-sky)", word: "var(--color-white)" },
-  onLight: { a: "#18181b", b: "#0ea5e9", word: "#18181b" },
+const TONES: Record<Tone, { a: string; b: string; word: string; reflect: number }> = {
+  color: { a: "var(--color-ink)", b: "var(--color-sky)", word: "var(--color-ink)", reflect: 0.9 },
+  mono: { a: "currentColor", b: "currentColor", word: "currentColor", reflect: 0.45 },
+  reversed: { a: "var(--color-white)", b: "var(--color-sky)", word: "var(--color-white)", reflect: 0.9 },
+  onLight: { a: "#18181b", b: "#0a84ff", word: "#18181b", reflect: 0.9 },
 };
 
+/** Bar geometry on a 48 grid: three bars, 8 wide, 4 apart; mirror axis at y = 24. */
+export const MARK_BARS = [
+  { x: 8, h: 8 },
+  { x: 20, h: 14 },
+  { x: 32, h: 20 },
+] as const;
+export const MARK_AXIS = 24;
+export const MARK_GAP = 3;
+
 export function LogoMark({ size = 32, tone = "color", title }: { size?: number; tone?: Tone; title?: string }) {
-  const id = useId().replace(/:/g, "");
   const t = TONES[tone];
-  /* Below 20px the lens would close up, so small sizes use a wider gap between the circles. */
-  const gap = size < 20 ? 3 : 0;
-  const a = { cx: 19 - gap / 2, cy: 19 - gap / 2, r: 15 };
-  const b = { cx: 29 + gap / 2, cy: 29 + gap / 2, r: 15 };
+  const top = MARK_AXIS - MARK_GAP;
+  const bottom = MARK_AXIS + MARK_GAP;
   return (
     <svg width={size} height={size} viewBox="0 0 48 48" role={title ? "img" : undefined} aria-label={title} aria-hidden={title ? undefined : true} focusable="false">
-      <defs>
-        <clipPath id={`${id}c`}><circle {...a} /></clipPath>
-        <mask id={`${id}m`}>
-          <rect width="48" height="48" fill="white" />
-          <g clipPath={`url(#${id}c)`}><circle {...b} fill="black" /></g>
-        </mask>
-      </defs>
-      <g mask={`url(#${id}m)`}>
-        <circle {...a} fill={t.a} />
-        <circle {...b} fill={t.b} />
-      </g>
+      {MARK_BARS.map((b) => (
+        <g key={b.x}>
+          <rect x={b.x} y={top - b.h} width="8" height={b.h} rx="3" fill={t.a} />
+          <rect x={b.x} y={bottom} width="8" height={b.h} rx="3" fill={t.b} opacity={t.reflect} />
+        </g>
+      ))}
     </svg>
   );
 }

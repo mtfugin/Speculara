@@ -14,17 +14,13 @@ Screens: `screens/home-desktop.png`, `screens/results-desktop.png`, `screens/hom
 
 Backup before the redesign: git tag `backup-before-redesign-2026-11-12`, branch `backup/before-redesign-2026-11-12`.
 
-## Overhaul (owner decision, 2026-11-12)
+## Current direction (owner decisions, 2026-11-12)
 
-The earlier light "ink and ivory" identity was replaced by the dark system from the supplied Responsive Hero Banner template, applied to the whole app. Documents 02 to 05 describe the current system; where they mention the earlier brand it is marked as superseded. The old values are in git tag `backup-before-redesign-2026-11-12` and in the commits before the overhaul.
+1. The light "ink and ivory" identity was replaced by a dark, Apple-grade system, applied to the whole app.
+2. The hero photo, the serif headline and the partner and badge filler were removed. The hero is one screen: headline and actions on the left, the upload card on the right, the logo's bars drawn behind as a blueprint.
+3. New logo: three bars and their reflection (the mirror). A 1.5 second loading screen plays the bars rising and the reflection answering.
+4. A "The challenge" section sets the four buckets exactly as supplied.
+5. The chat is a message sheet: glass panel, bubbles, suggestion chips, pill input with an arrow send button, and a switch for AI answers.
 
-| | Before | Now |
-| --- | --- | --- |
-| Surfaces | White cards on pale gray, ink navy accent | Zinc: canvas #09090b, card #18181b, raised #27272a, hairlines #2e2e33 |
-| Text | Navy ink, slate gray | White #fafafa, zinc 300 #d4d4d8 and 400 #a1a1aa |
-| Controls | 10px radius, navy primary | Pills, white primary button with dark text, hairline secondary |
-| Headings | Sora | Instrument Serif (one weight) |
-| Body and numbers | Manrope | Inter |
-| Logo wordmark | Sora Bold | Sora Bold (unchanged); mark is white and sky on dark, `onLight` tone for white pages |
-| Overlays | White with shadow | Glass: translucent zinc, blur, white hairline |
-| Accent | Navy | None for chrome. Sky is the data color, soft red (`wine` token, #f87171) is caution |
+Earlier looks are in git tag `backup-before-redesign-2026-11-12` and the earlier commits on branch `redesign`.
+

@@ -2,62 +2,70 @@
 
 ## Idea
 
-Speculara comes from *speculum*, Latin for mirror. The product holds up a mirror to your marketing numbers and says what it sees, how sure it is, and one thing to try. The visual identity is an **optical instrument**: two circles, the lens between them, thin precise lines, light that comes into focus.
+Speculara comes from *speculum*, Latin for mirror. The product holds a mirror up to your marketing numbers: the bars you measured, and the reflection that tells you what they mean. The identity is that one picture, kept plain and precise, in the dark, premium register of a system app.
 
 **Positioning.** The clear, honest instrument for marketing numbers.
 **Tagline.** Honest numbers. Plain words.
-**Personality.** Lucid, calm, precise, warm. A good optician or a friendly accountant, not a dashboard that shouts.
-**Principles.** Number first, then the plain meaning. Say what is measured and what is a guess. One primary action per screen. Structure from space and thin lines, not shadows. Motion explains cause and effect after something is real. Recognizable without the logo.
+**Principles.** Number first, then the plain meaning. Say what is measured and what is a guess. One primary action per screen. Structure from space and hairlines. Motion explains cause and effect after something is real.
 
 ## Logo
 
-**Mark.** Two equal circles, white and sky on dark (`onLight`: near-black and a deeper sky), offset on the diagonal. The lens where they overlap is cut away. It stands for a thing and its reflection, and the overlap is where insight happens. The cut is a mask, so the mark is transparent in the middle and works on any background.
+**Mark.** Three rising bars above a mirror line, and their reflection below. White bars and a sky-blue reflection on the dark interface (`onLight`: near-black bars and a blue reflection). It reads at 16px, works in one color (the reflection drops to 45% opacity), and animates naturally: the bars rise, then the reflection answers.
 
-**Wordmark.** "Speculara" in Sora Bold, tracking -0.02em. It is the original product typography, unchanged. In static files it is converted to outlines (kerned) so it renders identically without the font.
+**Wordmark.** "Speculara" in Sora Bold, tracking -0.02em. Live text in the app, kerned outlines in the static files.
 
-**Geometry.** Mark grid 48 x 48. Circles r 15 at (19,19) and (29,29). Below 20px the circles move 3 units further apart so the lens stays open. Horizontal lockup: mark, gap of 0.25 x mark width, wordmark centered on the mark. Stacked lockup: mark above wordmark, centered.
+**Geometry.** 48 x 48 grid. Bars 8 wide with 4 between them, heights 8, 14 and 20, bottoms at y = 21. Mirror axis at y = 24 with a 3 unit gap each side, reflections start at y = 27 with the same heights. Corner radius 3. Horizontal lockup: mark, gap of 0.25 x mark width, wordmark centered on the mark. Stacked lockup: mark above wordmark.
 
-**Clear space.** Half the mark width on every side. **Minimum size.** Mark 16px. Horizontal lockup 96px wide. Use the favicon file below 20px.
+**Clear space.** Half the mark width on every side. **Minimum size.** Mark 16px, horizontal lockup 96px wide.
 
-**Family** (`src/assets/branding/logos/`, each in color, `-mono-dark`, `-mono-light`, `-reversed`): `mark`, `wordmark`, `logo-horizontal`, `logo-stacked`, `logo-horizontal-tagline`. Plus `favicon.svg`, `app-icon.svg`. PNG exports: `public/favicon-32.png`, `public/apple-touch-icon.png`, `public/icon-512.png`, `deliverables/speculara-logo.png`.
+**Family** (`src/assets/branding/logos/`): `mark`, `wordmark`, `logo-horizontal`, `logo-stacked`, `logo-horizontal-tagline`, each as plain (for white pages), `-mono-dark`, `-mono-light` and `-reversed` (for the dark interface). Plus `favicon.svg` and `app-icon.svg`. PNG exports: `public/favicon-32.png`, `public/apple-touch-icon.png`, `public/icon-512.png`, `deliverables/speculara-logo.png`.
 
 | Background | Use |
 | --- | --- |
-| The dark interface (canvas, card, photo) | Default and reversed logo: white circle, sky circle, white wordmark |
-| White pages, print | `onLight` tone, or the static `logo-*` files without a suffix |
-| Any single-color context | Mono dark or mono light |
-| App icon | Near-black rounded square with the white and sky mark. The favicon switches between near-black and white by the browser theme |
+| The dark interface | `Logo tone="reversed"` (or the default tone, which follows the tokens): white bars, sky reflection, white wordmark |
+| White pages, print | `tone="onLight"`, or the plain `logo-*` files |
+| Any single color | Mono dark or mono light |
+| App icon | Near-black rounded square with the white and sky mark. The favicon switches between near-black and near-white by the browser theme |
 
-**Responsive behavior.** Header shows the horizontal lockup at 32px mark. Under 20px use the favicon mark. In-app code uses the `Logo`, `LogoMark` and `Wordmark` components in `src/design-system/Logo.tsx`.
-
-**Do not.** Stretch, rotate, recolor outside the palette, add shadows, outlines or gradients, close the lens, or place on busy imagery.
+**Do not.** Stretch, rotate, recolor outside the palette, add shadows, outlines or gradients, change the bar heights, or drop the reflection (use mono if one color is needed).
 
 ## Color
 
-Dark zinc, taken from the hero template (`tokens/speculara.json`). Surfaces: canvas `#09090b`, card `#18181b`, raised `#27272a`. Lines: `#2e2e33`, strong `#52525b`. Text: snow `#fafafa`, fog `#e4e4e7`, subtle `#d4d4d8`, mute `#a1a1aa`. Accent: sky `#38bdf8` for data only. Caution: `#f87171`. Primary action is a white pill with dark text. Contrast is tested: body and secondary text 7:1 or better, focus ring 3:1 or better.
+Apple-grade dark: layered near-black surfaces, system blue and system red, one cyan for data (`tokens/speculara.json`).
+
+| Role | Value |
+| --- | --- |
+| Canvas, card, raised | `#09090b`, `#141417`, `#1c1c1f` |
+| Hairline, strong hairline | `#2a2a2f`, `#48484f` |
+| Text: primary, secondary, tertiary | `#f5f5f7`, `#d2d2d7`, `#a1a1a6` |
+| Data accent (cyan) | `#64d2ff` |
+| Interactive blue | `#0a84ff` for text and highlights, `#0071e3` for filled controls (4.7:1 with white) |
+| Caution | `#ff453a` |
+| Chat sheet | Translucent `#1c1c1e` at 74%, 40px blur, 180% saturation |
+
+The primary action is a white pill with dark text. Contrast is tested in the browser: body and secondary text 7:1 or better, focus ring 3:1 or better, plus axe scans on every screen.
 
 ## Typography
 
 | Role | Typeface | Notes |
 | --- | --- | --- |
-| Headings and the hero headline | Instrument Serif | One weight (400). Never faux bold. Sizes run larger than sans because the face is condensed |
-| Text, interface, every number | Inter (variable) | Numbers are Inter because Instrument Serif digits read badly (a 1 looks like an l) |
-| Wordmark | Sora Bold | Unchanged logo typography |
-| Statistics (r, p, IDs) | JetBrains Mono | Only where exact characters matter |
+| Headings, hero headline | Bricolage Grotesque (variable) | Weight 700 to 800, tracking -0.03 to -0.04em, tight leading |
+| Text, interface, numbers | Inter (variable) | Close to the system face; numbers are tabular |
+| Labels, prizes, tags | JetBrains Mono | Uppercase with wide tracking, for the bracket labels `[ bucket 01 ]` and prize lines |
+| Wordmark | Sora Bold | Logo only |
 
 All faces are self-hosted through Fontsource.
 
-| Style | Size / line | Face and weight |
+| Style | Size | Face and weight |
 | --- | --- | --- |
-| Hero | 56 to 72 / tight | Instrument Serif 400 |
-| Section heading | 36 to 48 | Instrument Serif 400 |
-| Card heading | 30 | Instrument Serif 400 |
+| Hero headline | 42 to 70 | Bricolage 800 |
+| Section heading | 36 to 60 | Bricolage 800 |
+| Card heading | 30 | Bricolage 700 |
 | Key number | 30 to 36 | Inter 600 |
-| Data sentence, list titles | 18 to 30 | Inter 500 to 600 |
-| Body | 16 / 24 | Inter 400 |
-| Small, caption | 14, 12 | Inter 400 to 600 |
+| Body | 16 to 18 | Inter 400 |
+| Label | 12 | JetBrains Mono, uppercase |
 
-Hierarchy comes from size, face and contrast. Headings use `text-wrap: balance`. Prefer wrapping to truncation.
+The hero headline repeats its last word as a faint reflection below it (`-webkit-box-reflect`, where supported). It is the one place the mirror idea shows in type.
 
 ## Voice
 

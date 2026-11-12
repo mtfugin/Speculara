@@ -3,27 +3,14 @@
 export const prefersReducedMotion = () =>
   typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
 
-/** The splash plays once per browser session. It never plays for reduced motion, never in automated
- *  test browsers (unless ?splash=1 forces it) and never twice. */
+/** The loading screen plays on every load. It never plays for reduced motion, and never in automated
+ *  test browsers unless ?splash=1 forces it. */
 export function shouldPlaySplash(): boolean {
   if (typeof window === "undefined") return false;
   const forced = new URLSearchParams(window.location.search).get("splash") === "1";
   if (prefersReducedMotion()) return false; // never, even when forced
   if (!forced && navigator.webdriver) return false;
-  try {
-    if (!forced && sessionStorage.getItem("speculara-splash") === "1") return false;
-  } catch {
-    /* storage blocked: still fine to play once */
-  }
   return true;
-}
-
-export function markSplashSeen() {
-  try {
-    sessionStorage.setItem("speculara-splash", "1");
-  } catch {
-    /* ignore */
-  }
 }
 
 /** Start downloading the animation library early (only when the splash will actually play),

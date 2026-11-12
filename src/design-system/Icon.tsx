@@ -10,11 +10,11 @@ import type { ComponentType, SVGProps } from "react";
 
 type Glyph = ComponentType<{ size?: number; strokeWidth?: number; "aria-hidden"?: boolean } & SVGProps<SVGSVGElement>>;
 
-/* Brand glyph: two overlapping circles with the shared lens left open. Same drawing rules as the set. */
-const Lens: Glyph = ({ size = 24, strokeWidth = 1.75, ...rest }) => (
+/* Brand glyph: three bars and their reflection. Same drawing rules as the set. */
+const Reflect: Glyph = ({ size = 24, strokeWidth = 1.75, ...rest }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" {...rest}>
-    <circle cx="9.5" cy="9.5" r="6.5" />
-    <circle cx="14.5" cy="14.5" r="6.5" />
+    <path d="M5 10V8M12 10V5M19 10V3" />
+    <path d="M5 14v2M12 14v5M19 14v7" opacity="0.55" />
   </svg>
 );
 
@@ -44,7 +44,7 @@ export const ICONS = {
   lock: Lock,
   refresh: RefreshCw,
   next: ChevronRight,
-  lens: Lens,
+  reflect: Reflect,
   arrow: ArrowRight,
   play: Play,
   menu: Menu,
