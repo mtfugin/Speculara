@@ -38,3 +38,6 @@ backend/.env
 backend/.socialmonitor/
 .pytest_cache/
 integrations/socialmonitor/node_modules/
+
+# Real collected data stays on this computer, never in the repository (SENSE privacy plan)
+backend/data/real/

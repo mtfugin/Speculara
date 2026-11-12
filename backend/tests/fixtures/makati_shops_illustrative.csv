@@ -1,0 +1,5 @@
+shop_id,shop_name,barangay,hours,source,collected_at,method,data_label,confidence
+S01,Sample Kape Uno,Poblacion,07:00-22:00,invented for development,2026-11-12,manual,illustrative,
+S02,Sample Kape Dos,San Lorenzo,08:00-19:00,invented for development,2026-11-12,manual,illustrative,
+S03,Sample Kape Tres,Bel-Air,,invented for development,2026-11-12,inferred,illustrative,
+S04,Sample Kape Apat,Guadalupe Nuevo,06:30-20:00,invented for development,2026-11-12,observed,illustrative,

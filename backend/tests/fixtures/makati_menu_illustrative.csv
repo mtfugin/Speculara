@@ -1,0 +1,5 @@
+shop_id,item,price,source,collected_at,method,data_label
+S01,Iced latte,145,invented for development,2026-11-12,manual,illustrative
+S01,Pandesal and kesong puti,95.50,invented for development,2026-11-12,manual,illustrative
+S02,Brewed coffee,"₱1,100",invented for development,2026-11-12,manual,illustrative
+S04,Cold brew,,invented for development,2026-11-12,inferred,illustrative
