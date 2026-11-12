@@ -108,6 +108,7 @@ async def profile_analyze(body: ProfileUrl, request: Request):
         result = await run_in_threadpool(lambda: analyze(profile_import.posts_to_frame(posts)))
     except ValueError as exc:
         raise HTTPException(422,f'{exc} {profile.notes}'.strip()) from exc
+    result['provenance'] = profile_import.provenance(profile, posts)
     result['warnings'] = [f'Collected from a public {profile.platform} profile (@{profile.handle}). {profile.notes}'.strip(), *result.get('warnings',[])]
     return result
 

@@ -53,3 +53,30 @@ def posts_to_frame(posts) -> pd.DataFrame:
         raise ValueError("No posts could be collected from that profile.")
     frame = pd.DataFrame(rows).dropna(axis=1, how="all")
     return frame
+
+
+def provenance(profile, posts) -> dict:
+    """Where the numbers came from: source, time, method and how complete each metric is.
+
+    Every value here was observed on the public page by the browser; nothing is model inferred.
+    A blank metric means the page did not show it, which is different from zero.
+    """
+    n = len(posts)
+    metrics = {}
+    for field in ("likes", "comments", "shares", "views"):
+        seen = sum(1 for post in posts if field in post.observed_metrics)
+        metrics[field] = {"observed": seen, "blank": n - seen}
+    stamps = sorted(post.collected_at for post in posts if post.collected_at)
+    seen_comments = sum(post.comments_seen for post in posts)
+    kept_comments = sum(len(post.comment_evidence) or len(post.comments_sample) for post in posts)
+    return {
+        "source": profile.platform,
+        "handle": profile.handle,
+        "collector": profile.collector,
+        "method": next((post.method for post in posts if post.method), ""),
+        "collected_at": stamps[-1] if stamps else None,
+        "posts": n,
+        "metrics": metrics,
+        "comments": {"read": seen_comments, "kept": kept_comments},
+        "inferred": False,
+    }

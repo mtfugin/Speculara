@@ -77,3 +77,10 @@ Still untested: private profile, expired Instagram sign-in, rate limiting, TikTo
 - Cancel returns in at most 3 seconds with "Cancelling. The browser is closing." and then closes only this worker's browser if it has not stopped within about 7 more seconds. Live: cancel at 12 s ended the run at 22.7 s (before the first fix, a plain cancel took 90 s).
 - Still not covered: telling private from missing (the page looks the same signed out), an expired Instagram session, and a TikTok layout change. These need Instagram and Facebook runs and a recorded fixture (1.4).
 - Backend tests: 101 pass (3 new for error kinds, 404 on a missing profile, and fast cancel).
+
+## Phase 1.3: provenance (done)
+- Unknown metrics were already blank in the analysis table (`posts_to_frame`); a stale note said they use zero placeholders and was corrected. An observed zero stays a real zero.
+- Each collected post now records `collected_at`, `method` ("playwright browser, signed in or out"), `observed_metrics` and `comments_seen` (comment rows read before the cap of 8 per post).
+- `/api/profile/analyze` returns a `provenance` block: source, handle, collector, method, collected-at, post count, observed versus blank per metric, comments read versus kept, and `inferred: false`.
+- Collected values are only observed values. Nothing in this path is model inferred; any later inferred field must be marked as such.
+- Not done: showing the provenance in the screen (a small "Where this came from" panel) and the comment cap decision for SENSE. Both go to 1.6 and stage 2.

@@ -4,6 +4,7 @@ from __future__ import annotations
 import asyncio
 import json
 import os
+from datetime import datetime, timezone
 from pathlib import Path
 import re
 import shutil
@@ -249,7 +250,12 @@ async def start_login(network: str) -> dict:
     return {"opened": True, "message": "Sign in in the browser window, then click Done signing in here."}
 
 
+COMMENT_CAP = 8
+
+
 def normalize(data: dict, canonical_url: str, network: str, handle: str) -> tuple[ProfileInfo, list[Post]]:
+    collected_at = datetime.now(timezone.utc).isoformat(timespec="seconds")
+    method = "playwright browser, signed in" if data.get("signed_in") else "playwright browser, signed out"
     posts: list[Post] = []
     missing: set[str] = {"saves", "sales"}
     seen: set[str] = set()
@@ -263,7 +269,8 @@ def normalize(data: dict, canonical_url: str, network: str, handle: str) -> tupl
                 continue
             unavailable = [key for key, field in (("likes", "likes"), ("comments", "comments_count"), ("shares", "shares"), ("views", "views")) if raw.get(field) is None] + ["saves", "sales"]
             url = safe_url(raw.get("url"))
-            comment_rows = [c for c in (raw.get("comments") or []) if isinstance(c, dict) and c.get("text")][:8]
+            all_comments = [c for c in (raw.get("comments") or []) if isinstance(c, dict) and c.get("text")]
+            comment_rows = all_comments[:COMMENT_CAP]
             p = Post(id=pid, posted_at=raw["posted_at"], type=types.get(raw.get("kind"), "Photo"),
                      caption=raw.get("caption") or "", likes=max(0, int(raw.get("likes") or 0)),
                      comments=max(0, int(raw.get("comments_count") or 0)), shares=max(0, int(raw.get("shares") or 0)),
@@ -273,7 +280,9 @@ def normalize(data: dict, canonical_url: str, network: str, handle: str) -> tupl
                         author=str(c.get("author") or ""), posted_at=c.get("posted_at"),
                         source_url=safe_url(c.get("url")) or url,
                         source_kind="comment" if safe_url(c.get("url")) else "post" if url else "none") for c in comment_rows],
-                     unavailable_metrics=unavailable)
+                     unavailable_metrics=unavailable,
+                     collected_at=collected_at, method=method, comments_seen=len(all_comments),
+                     observed_metrics=[k for k in ("likes", "comments", "shares", "views") if k not in unavailable])
             posts.append(p)
             missing.update(unavailable)
             seen.add(pid)
@@ -281,7 +290,7 @@ def normalize(data: dict, canonical_url: str, network: str, handle: str) -> tupl
                 sources.append(ResearchSource(title=f"{network} post {pid}", url=url))
         except (KeyError, TypeError, ValueError, ValidationError):
             skipped += 1
-    notes = f"Collected {len(posts)} posts with SocialMonitor. Some metrics are unavailable: {', '.join(sorted(missing))}. Totals include only observed values; unavailable values use zero placeholders."
+    notes = f"Collected {len(posts)} posts with SocialMonitor. Some metrics are unavailable: {', '.join(sorted(missing))}. Totals include only observed values; unavailable values stay blank and are never counted as zero."
     if network == "Instagram" and not data.get("signed_in"):
         notes += " Sign in for comment text; public post counts can be available without signing in."
     if posts and not any(p.comments_sample for p in posts):

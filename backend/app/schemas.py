@@ -31,6 +31,11 @@ class Post(BaseModel):
     unavailable_metrics: list[str] = Field(default_factory=list)
     url: str = ""
     comment_evidence: list[CommentEvidence] = Field(default_factory=list)
+    # Provenance: where and how this row was observed. Collected values are observed, never model inferred.
+    collected_at: Optional[str] = None
+    method: str = ""
+    observed_metrics: list[str] = Field(default_factory=list)
+    comments_seen: int = 0  # comment rows the browser read, before the per-post cap
 
 
 class AnalyzeRequest(BaseModel):

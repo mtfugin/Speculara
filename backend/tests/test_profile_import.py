@@ -90,6 +90,45 @@ class ProfileRouteTests(unittest.TestCase):
         self.assertEqual(r.status_code, 401)
         self.assertIn("Sign in", r.json()["detail"])
 
+    def test_normalize_records_provenance_and_keeps_unknown_blank(self):
+        raw = {"posts": [
+            {"ext_id": "1", "posted_at": "2026-11-01T10:00:00Z", "kind": "video", "caption": "a", "likes": 5, "comments_count": None,
+             "shares": None, "views": 100, "url": "https://www.tiktok.com/@x/video/1",
+             "comments": [{"text": f"c{i}"} for i in range(12)]},
+            {"ext_id": "2", "posted_at": "2026-11-02T10:00:00Z", "kind": "photo", "caption": "b", "likes": 1, "comments_count": 0,
+             "shares": 0, "views": None, "comments": []},
+        ], "signed_in": False}
+        profile, posts = collector.normalize(raw, "https://www.tiktok.com/@x", "TikTok", "x")
+        self.assertEqual(posts[0].method, "playwright browser, signed out")
+        self.assertTrue(posts[0].collected_at)
+        self.assertEqual(posts[0].comments_seen, 12)
+        self.assertEqual(len(posts[0].comment_evidence), collector.COMMENT_CAP)
+        self.assertNotIn("comments", posts[0].observed_metrics)
+        self.assertIn("shares", posts[1].observed_metrics)  # an observed zero is a real value
+        info = profile_import.provenance(profile, posts)
+        self.assertFalse(info["inferred"])
+        self.assertEqual(info["metrics"]["views"], {"observed": 1, "blank": 1})
+        self.assertEqual(info["metrics"]["shares"], {"observed": 1, "blank": 1})
+        self.assertEqual(info["comments"], {"read": 12, "kept": 8})
+        frame = profile_import.posts_to_frame(posts)
+        self.assertTrue(frame.loc[frame["post_id"] == "1", "views"].notna().any())
+        self.assertNotIn("zero placeholders", profile.notes)
+
+    def test_analyze_returns_provenance(self):
+        posts = make_posts()
+        info = ProfileInfo(platform="Instagram", handle="x", collector="socialmonitor")
+
+        async def fake(url):
+            return info, posts
+
+        with patch.dict(os.environ, {"ENABLE_PROFILE_COLLECTOR": "1"}), patch.object(collector, "collect_profile", fake):
+            r = client.post("/api/profile/analyze", json={"url": "https://www.instagram.com/someone"})
+        self.assertEqual(r.status_code, 200)
+        prov = r.json()["provenance"]
+        self.assertEqual(prov["posts"], 16)
+        self.assertEqual(prov["source"], "Instagram")
+        self.assertFalse(prov["inferred"])
+
     def test_worker_errors_are_told_apart(self):
         cases = {
             "the profile @nobody did not load": (404, "not_found"),
@@ -133,7 +172,7 @@ class ProfileRouteTests(unittest.TestCase):
         collector._done.clear()
         try:
             started = time.time()
-            with patch.object(collector._done, "wait", lambda t=None: False):
+            with patch.object(collector._done, "wait", lambda t=None: False), patch.object(collector, "_terminate_owned_worker", lambda proc: None):
                 result = asyncio.run(collector.cancel_collection())
             self.assertLess(time.time() - started, 2)
             self.assertTrue(result["cancelled"])
