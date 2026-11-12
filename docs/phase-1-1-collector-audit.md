@@ -1,6 +1,6 @@
 # Phase 1.1: collector audit
 
-Status: offline audit done, live audit waiting for an account and consent.
+Status: offline audit done. Live TikTok run done (below). Instagram and Facebook not run yet.
 
 ## Offline findings (no network, no sign-in)
 - The collector is a Node worker (`integrations/socialmonitor/worker.mjs`, Playwright) started by `backend/app/collector.py`. Actions: `login`, `collect`, `smoke`, `cancel`, `finish_login`.
@@ -33,3 +33,23 @@ Use only an account the person owns or has permission to analyze.
 | Anything the platform's rules disallow | | | |
 
 Record results and screenshots here before starting phase 1.2. Do not rotate accounts, solve CAPTCHAs or work around blocks.
+
+## Live result: TikTok, public company account, signed out (run 1)
+Setup: `npm run collector:setup` and `collector:browser` installed; browser smoke test passed. One collection, limit 5, no sign-in.
+
+| Check | Result |
+| --- | --- |
+| Setup, `status().installed` | Pass |
+| Posts returned | 5 of 5 requested, in 36 seconds |
+| Dates, captions, type | Present. Types seen: video and photo. Dates look current |
+| Likes, comments, shares, views | Present on all 3 posts inspected (for example 836 likes, 134 comments, 25 shares, 24.6K views) |
+| Comment text | Returned: 35 to 44 comment rows per post on the 3 posts inspected, signed out |
+| Cancel mid-collection | Not tested |
+| Private or missing profile error | Not tested |
+| Blocks, challenges | None seen in this run |
+
+Notes:
+- The run printed a Unicode crash only in my test printout (Windows console encoding), not in the collector. Captions contain non-ASCII characters (a curly apostrophe), so the app must keep UTF-8 end to end; check in 1.4.
+- The worker returns up to about 44 comments per post, but `normalize()` keeps only 8 per post. Decide in 1.3 whether 8 is enough for friction mining in stage 2.
+- Thumbnail URLs carry signed, expiring tokens. Do not store them as long-lived data.
+- Only 3 of 5 posts were inspected in this printout; the rest were not logged. Re-run with a saved fixture in 1.4.
