@@ -66,7 +66,9 @@ export default function Explorer() {
   const [picked, setPicked] = useState<string | null>(null)
 
   useEffect(() => {
-    api<Payload>('/api/sense/demo')
+    // /sense.html?size=large shows the bigger invented dataset
+    const size = new URLSearchParams(window.location.search).get('size') === 'large' ? 'large' : 'small'
+    api<Payload>(`/api/sense/demo?size=${size}`)
       .then(setData)
       .catch((e: Error) => setError(e.message || 'The explorer could not load.'))
   }, [])

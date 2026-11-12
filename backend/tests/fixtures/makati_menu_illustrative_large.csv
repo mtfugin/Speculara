@@ -1,0 +1,16 @@
+shop_id,item,price,source,collected_at,method,data_label
+L01,Iced latte,145,invented for development,2026-11-12,manual,illustrative
+L01,Pandesal and kesong puti,95.50,invented for development,2026-11-12,manual,illustrative
+L02,Cold brew,160,invented for development,2026-11-12,manual,illustrative
+L03,Iced latte,180,invented for development,2026-11-12,observed,illustrative
+L03,Brewed coffee,150,invented for development,2026-11-12,observed,illustrative
+L04,Brewed coffee,70,invented for development,2026-11-12,manual,illustrative
+L05,Iced coffee,85,invented for development,2026-11-12,manual,illustrative
+L06,Espresso,120,invented for development,2026-11-12,observed,illustrative
+L07,Cold brew,130,invented for development,2026-11-12,manual,illustrative
+L08,Brewed coffee,140,invented for development,2026-11-12,manual,illustrative
+L09,Oat milk latte,190,invented for development,2026-11-12,observed,illustrative
+L10,Americano,130,invented for development,2026-11-12,manual,illustrative
+L11,Iced latte,165,invented for development,2026-11-12,manual,illustrative
+L12,Brewed coffee,110,invented for development,2026-11-12,inferred,illustrative
+L14,Brewed coffee,95,invented for development,2026-11-12,manual,illustrative

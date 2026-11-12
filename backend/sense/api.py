@@ -7,7 +7,7 @@ from dataclasses import asdict
 from datetime import date
 from pathlib import Path
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Query
 
 from backend import supply
 from backend.sense.demo_data import illustrative_comments
@@ -45,9 +45,10 @@ def barangay_map(run: SenseRun) -> list[dict]:
     return rows
 
 
-def sense_payload(today: date) -> dict:
-    data = supply.load_supply(FIXTURES / "makati_shops_illustrative.csv", FIXTURES / "makati_menu_illustrative.csv")
-    run = run_sense(illustrative_comments(today), data, data_label="illustrative", today=today)
+def sense_payload(today: date, size: str = "small") -> dict:
+    suffix = "_large" if size == "large" else ""
+    data = supply.load_supply(FIXTURES / f"makati_shops_illustrative{suffix}.csv", FIXTURES / f"makati_menu_illustrative{suffix}.csv")
+    run = run_sense(illustrative_comments(today, size), data, data_label="illustrative", today=today)
     dossier = run.dossier
     return {
         "label": "illustrative",
@@ -62,5 +63,6 @@ def sense_payload(today: date) -> dict:
 
 
 @router.get("/api/sense/demo")
-def sense_demo():
-    return sense_payload(date.today())
+def sense_demo(size: str = Query("small", pattern="^(small|large)$")):
+    """size=large serves the bigger invented dataset (12 barangays); the default is the small one."""
+    return sense_payload(date.today(), size)

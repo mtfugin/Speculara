@@ -7,7 +7,7 @@ import { readFileSync } from "node:fs";
 const payload = JSON.parse(readFileSync(new URL("./fixtures/sense-demo.json", import.meta.url), "utf8"));
 
 async function open(page: Page) {
-  await page.route("**/api/sense/demo", (route) => route.fulfill({ json: payload }));
+  await page.route("**/api/sense/demo**", (route) => route.fulfill({ json: payload }));
   await page.goto("/sense.html");
   await expect(page.getByRole("heading", { name: "Opportunity Explorer" })).toBeVisible();
 }
@@ -81,7 +81,23 @@ test("no sideways scrolling on a phone and no accessibility violations", async (
 });
 
 test("a failed load shows a clear message", async ({ page }) => {
-  await page.route("**/api/sense/demo", (route) => route.fulfill({ status: 500, json: { detail: "boom" } }));
+  await page.route("**/api/sense/demo**", (route) => route.fulfill({ status: 500, json: { detail: "boom" } }));
   await page.goto("/sense.html");
   await expect(page.getByRole("alert")).toContainText("Check that the analysis service is running");
+});
+
+test("the larger invented dataset (?size=large) loads from the real backend and shows every kind of result", async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await page.goto("/sense.html?size=large");
+  await expect(page.getByRole("heading", { name: "Opportunity Explorer" })).toBeVisible();
+  await expect(page.getByRole("note")).toContainText("Illustrative data");
+  // 12 of the 33 barangays have data; the rest say so instead of showing zero
+  await expect(page.locator("section[aria-labelledby=map-title] li button", { hasText: "No data" })).toHaveCount(21);
+  const cards = page.locator("section[aria-labelledby=ranked-title] > ol > li");
+  await expect(cards.first()).toContainText("Candidate gap");
+  await expect(cards.filter({ hasText: "Covered" }).first()).toBeVisible();
+  await expect(cards.filter({ hasText: "Supply unknown" }).first()).toBeVisible();
+  await expect(cards.filter({ hasText: "Demand only" }).first()).toBeVisible();
+  await expect(page.locator("section[aria-labelledby=insufficient-title] > ul > li")).toHaveCount(2);
+  await page.screenshot({ path: "docs/screenshots/sense-explorer-large.png", fullPage: true });
 });
